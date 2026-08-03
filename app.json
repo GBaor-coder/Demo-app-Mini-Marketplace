@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "UniLoop - Chợ xanh sinh viên",
+    "slug": "uniloop-student-marketplace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/uniloop-icon.png",
+    "scheme": "uniloop",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "vn.uniloop.marketplace",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "vn.uniloop.marketplace",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/uniloop-icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "UniLoop dùng vị trí của bạn để chọn điểm nhận và giao hàng chính xác."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "UniLoop cần truy cập thư viện ảnh để bạn đăng ảnh sản phẩm.",
+          "cameraPermission": "UniLoop cần dùng máy ảnh để bạn chụp sản phẩm.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/uniloop-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#F3FAF7",
+          "dark": {
+            "backgroundColor": "#F3FAF7"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

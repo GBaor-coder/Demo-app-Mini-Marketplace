@@ -1,0 +1,30 @@
+export const colors = {
+  ink: '#18352D',
+  inkMuted: '#61736D',
+  primary: '#147D64',
+  primaryDark: '#0D5B49',
+  primarySoft: '#E5F4EF',
+  accent: '#F06B4F',
+  accentSoft: '#FFF0EC',
+  warning: '#C07A16',
+  warningSoft: '#FFF4DE',
+  danger: '#C83D3D',
+  dangerSoft: '#FDECEC',
+  blue: '#2D6FB7',
+  blueSoft: '#EAF2FB',
+  background: '#F5F7F6',
+  surface: '#FFFFFF',
+  border: '#DDE6E2',
+  borderStrong: '#C7D5D0',
+  white: '#FFFFFF',
+  black: '#111A17',
+  overlay: 'rgba(17, 26, 23, 0.42)',
+};
+
+export const shadow = {
+  shadowColor: '#0E3328',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  elevation: 2,
+};
