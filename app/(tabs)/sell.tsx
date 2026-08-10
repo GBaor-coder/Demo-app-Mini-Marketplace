@@ -206,11 +206,11 @@ export default function SellScreen() {
               activeOpacity={0.85}
               onPress={() => router.push(`/product-form?id=${product.id}`)}
               style={styles.productMini}>
-              <Image
-                contentFit="cover"
-                source={{ uri: product.images[0] || product.image }}
-                style={styles.productMiniImage}
-              />
+               <Image
+                 contentFit="cover"
+                 source={{ uri: product.images?.[0] || product.image }}
+                 style={styles.productMiniImage}
+               />
               <View style={styles.productMiniBody}>
                 <Text numberOfLines={1} style={styles.productMiniTitle}>
                   {product.title}

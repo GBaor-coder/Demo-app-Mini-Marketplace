@@ -21,13 +21,13 @@ export const CATEGORIES: ProductCategory[] = [
 ];
 
 export const CATEGORY_ICONS: Record<ProductCategory, string> = {
-  'Giáo trình': 'menu_book',
-  'Đồ điện tử': 'devices',
-  'Đồ dùng học tập': 'architecture',
-  'Đồ ký túc xá': 'chair',
-  'Thời trang': 'checkroom',
+  'Giáo trình': 'book',
+  'Đồ điện tử': 'phone-portrait',
+  'Đồ dùng học tập': 'school',
+  'Đồ ký túc xá': 'home',
+  'Thời trang': 'people',
   Handmade: 'brush',
-  Khác: 'category',
+  Khác: 'apps',
 };
 
 export const DEFAULT_LOCATION: LocationPoint = {

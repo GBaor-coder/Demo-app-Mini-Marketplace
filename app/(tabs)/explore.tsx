@@ -27,7 +27,7 @@ export default function ExploreScreen() {
         <View style={styles.imageWrap}>
           <Image
             contentFit="cover"
-            source={{ uri: item.images[0] || item.image }}
+            source={{ uri: item.images?.[0] || item.image }}
             style={styles.image}
           />
           {item.stock <= 1 ? (
@@ -51,7 +51,7 @@ export default function ExploreScreen() {
             {item.title}
           </Text>
           <Text numberOfLines={1} style={styles.location}>
-            {item.location.address}
+            {item.location?.address ?? '---'}
           </Text>
           <Text style={styles.price}>{formatCurrency(item.price)}</Text>
         </View>

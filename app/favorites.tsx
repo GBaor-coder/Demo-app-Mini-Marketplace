@@ -26,7 +26,7 @@ function WishlistCard({
       <View style={styles.imageWrap}>
         <Image
           contentFit="cover"
-          source={{ uri: product.images[0] || product.image }}
+          source={{ uri: product.images?.[0] || product.image }}
           style={styles.image}
         />
         <TouchableOpacity
@@ -38,9 +38,11 @@ function WishlistCard({
         <View style={styles.distanceTag}>
           <Ionicons name="location" size={14} color={colors.primary} />
           <Text style={styles.distanceText}>
-            {distanceLabel(
-              distanceFromCenter(product.location.latitude, product.location.longitude)
-            )}
+            {product.location
+              ? distanceLabel(
+                  distanceFromCenter(product.location.latitude, product.location.longitude)
+                )
+              : '---'}
           </Text>
         </View>
       </View>

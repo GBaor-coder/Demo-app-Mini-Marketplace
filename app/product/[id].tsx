@@ -46,7 +46,7 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const images = product.images.length > 0 ? product.images : [product.image];
+  const images = product.images?.length ? product.images : [product.image];
   const favorite = favoriteIds.includes(product.id);
   const sold = product.status === 'sold';
 
@@ -153,7 +153,7 @@ export default function ProductDetailScreen() {
               <Ionicons name="location-outline" size={20} color={colors.primary} />
               <Text style={styles.sectionTitle}>Địa điểm giao dịch</Text>
             </View>
-            <Text style={styles.meetup}>{product.meetupPoint ?? product.location.address}</Text>
+            <Text style={styles.meetup}>{product.meetupPoint ?? product.location?.address ?? '---'}</Text>
             <Text style={styles.distance}>
               {product.location
                 ? `Cách bạn khoảng ${distanceLabel(

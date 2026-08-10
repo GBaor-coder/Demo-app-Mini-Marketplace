@@ -143,7 +143,7 @@ export default function CartScreen() {
                       activeOpacity={0.85}
                       onPress={() => router.push(`/product/${product.id}`)}
                       style={styles.imageWrap}>
-                      <Image source={{ uri: product.images[0] || product.image }} style={styles.image} />
+                       <Image source={{ uri: product.images?.[0] || product.image }} style={styles.image} />
                       <View style={[styles.conditionTag, conditionTagStyle(product.condition)]}>
                         <Text style={styles.conditionTagText}>{product.condition}</Text>
                       </View>

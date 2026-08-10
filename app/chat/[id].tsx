@@ -161,7 +161,7 @@ export default function ChatScreen() {
                 onPress={() => router.push(`/product/${product.id}`)}
                 style={styles.productCard}>
                 <Image
-                  source={{ uri: product.images[0] || product.image }}
+                  source={{ uri: product.images?.[0] || product.image }}
                   style={styles.productThumb}
                 />
                 <View style={styles.productInfo}>

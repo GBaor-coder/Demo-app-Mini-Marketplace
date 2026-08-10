@@ -167,10 +167,10 @@ export default function CheckoutScreen() {
 
                 {group.items.map(({ line, product }) => (
                   <View key={line.productId} style={styles.productRow}>
-                    <Image
-                      source={{ uri: product.images[0] || product.image }}
-                      style={styles.thumb}
-                    />
+                     <Image
+                       source={{ uri: product.images?.[0] || product.image }}
+                       style={styles.thumb}
+                     />
                     <View style={styles.productInfo}>
                       <Text style={styles.productTitle} numberOfLines={2}>
                         {product.title}

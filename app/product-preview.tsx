@@ -45,8 +45,8 @@ export default function ProductPreviewScreen() {
     );
   }
 
-  const image = product.images[0] || product.image;
-  const imageCount = Math.max(1, product.images.length);
+  const image = product.images?.[0] || product.image;
+  const imageCount = Math.max(1, product.images?.length ?? 0);
   const isSold = product.status === 'sold';
   const isSelf = seller?.id === currentUser?.id;
 
@@ -138,7 +138,7 @@ export default function ProductPreviewScreen() {
               <Text style={styles.cardHeading}>Khu vực giao dịch</Text>
             </View>
             <Text style={styles.mapAddress}>
-              {product.location.address}
+              {product.location?.address ?? '---'}
               {product.meetupPoint ? ` · ${product.meetupPoint}` : ''}
             </Text>
             <View style={styles.mapBox}>

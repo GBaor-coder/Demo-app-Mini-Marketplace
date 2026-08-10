@@ -31,7 +31,7 @@ export function ProductCard({
       <View style={styles.imageWrap}>
         <Image
           contentFit="cover"
-          source={{ uri: product.images[0] || product.image }}
+          source={{ uri: product.images?.[0] || product.image }}
           style={styles.image}
         />
         {seller?.verified && product.status !== 'sold' && (
@@ -79,7 +79,9 @@ export function ProductCard({
           <View style={styles.metaRow}>
             <Ionicons name="location-outline" size={14} color={colors.onSurfaceVariant} />
             <Text style={styles.metaText}>
-              {distanceLabel(distanceFromCenter(product.location.latitude, product.location.longitude))}
+              {product.location
+                ? distanceLabel(distanceFromCenter(product.location.latitude, product.location.longitude))
+                : '---'}
             </Text>
           </View>
         </View>

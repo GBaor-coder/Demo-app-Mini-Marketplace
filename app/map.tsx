@@ -94,7 +94,7 @@ export default function MapScreen() {
         {activeProducts.map((product) => (
           <Marker
             key={product.id}
-            coordinate={{ latitude: product.location.latitude, longitude: product.location.longitude }}
+            coordinate={{ latitude: product.location?.latitude ?? 0, longitude: product.location?.longitude ?? 0 }}
             onPress={() => setSelected(product)}
             tracksViewChanges={false}>
             <View
