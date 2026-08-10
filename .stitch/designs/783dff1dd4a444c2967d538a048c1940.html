@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Order Details - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed": "#002109",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c3c6d7",
+                        "on-surface-variant": "#434655",
+                        "tertiary": "#006229",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#00174b",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-secondary-container": "#fefcff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-primary": "#b4c5ff",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-container": "#c1ffc5",
+                        "surface-container": "#e5eeff",
+                        "outline": "#737686",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#0058be",
+                        "surface-tint": "#0053db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "2xl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "button": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm-mobile": ["Inter"],
+                        "headline-md-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm-mobile": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-md-mobile": ["22px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Hide scrollbar for clean UI but allow scrolling */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md antialiased pb-[100px]">
+<!-- TopAppBar (Semantic Intent: Specific Task/Detail view -> No global nav shell) -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-sm shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50 docked full-width top-0 sticky">
+<button class="text-on-surface-variant dark:text-outline-variant hover:brightness-90 transition-all p-2 -ml-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-sm-mobile font-headline-sm-mobile text-primary dark:text-inverse-primary">Order #UL-8492</h1>
+<button class="text-on-surface-variant dark:text-outline-variant hover:brightness-90 transition-all p-2 -mr-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<main class="px-margin-mobile pt-lg flex flex-col gap-lg">
+<!-- Status Timeline Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/20">
+<h2 class="text-label-md font-label-md text-on-surface-variant mb-md uppercase tracking-wider">Status</h2>
+<div class="flex flex-col gap-4 relative">
+<!-- Vertical Line -->
+<div class="absolute left-[11px] top-[14px] bottom-[14px] w-[2px] bg-outline-variant/30 z-0"></div>
+<!-- Step 1: Placed (Completed) -->
+<div class="flex items-start gap-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-on-primary icon-fill">check</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-medium text-on-surface">Order Placed</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Oct 24, 10:30 AM</p>
+</div>
+</div>
+<!-- Step 2: Pending Confirmation (Current) -->
+<div class="flex items-start gap-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shrink-0 shadow-sm mt-0.5 ring-4 ring-primary-container/20">
+<span class="material-symbols-outlined text-[14px] text-on-primary icon-fill">pending</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-medium text-primary-container">Pending Confirmation</p>
+<p class="text-body-sm font-body-sm text-primary-container/80">Waiting for your approval</p>
+</div>
+</div>
+<!-- Step 3: Meeting (Future) -->
+<div class="flex items-start gap-md relative z-10 opacity-50">
+<div class="w-6 h-6 rounded-full bg-surface-variant border border-outline-variant flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">handshake</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-medium text-on-surface">Transaction</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Buyer Info Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/20 flex items-center gap-md">
+<div class="w-14 h-14 rounded-full overflow-hidden shrink-0 bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Close up portrait photo of a cheerful university student in a bright modern campus setting, soft natural lighting highlighting their smile, clear focused face, shallow depth of field, high quality professional photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUHiks_1WdWoTgFJg3P3LBA42jz6hiZ26l_RRAFgg5sfzqOoAHzoDYSQNEpS3cL-I-VdWpccS-JUiHafYYyaQs2669_mpAfYNTTMw6wAYXDaJ5LWRFC-uOY4syFkgMAEE_OEXn9D_Vtc8BBlr_nmeu4EsEJjyPNxLgvXl9E5HOmOZ0CBBAamLaYRf5cfv2GYV-GCcvGi1iCKFrxJONBpRU5jJ2OSrgJWDjFZfKSJabT2jXZmeA338D"/>
+</div>
+<div class="flex-1">
+<h3 class="text-body-md font-body-md font-semibold text-on-surface">Minh Tran</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">school</span> Tech University
+                </p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px] text-[#F59E0B] icon-fill">star</span>
+<span class="text-label-md font-label-md text-on-surface">4.9</span>
+<span class="text-body-sm font-body-sm text-outline">(24 reviews)</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary-container hover:bg-secondary-container/20 transition-colors">
+<span class="material-symbols-outlined icon-fill">chat</span>
+</button>
+</section>
+<!-- Product List -->
+<section class="bg-surface-container-lowest rounded-2xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/20">
+<h2 class="text-label-md font-label-md text-on-surface-variant mb-md uppercase tracking-wider">Items</h2>
+<div class="flex gap-md pb-md border-b border-outline-variant/20">
+<div class="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Product photography of a clean, slightly used Calculus textbook lying on a modern wooden desk, well-lit studio lighting casting soft shadows, crisp details on the cover text, shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqJ0cyWrCO2JaN2sQs_CS71EnhAwbqG8UBqkLjKBVjs31bH_1uSugn95XAnNKVt-sNnmVK808dO2MsOvhiavbMwbQwZqViNWhjju7YZLR-8yJzIRYAUAWWuvnndlt6eAWXBuKsxWE1ZD_YEooEKAdaySN4k0XMJXTf5ZRTeXHa5ZB0wi43TqzhkD2aQ6j4lx4IxVIQe5Xe0MRQy30BHWe3u6Kc3KOf_Cmla8Hi5Wre03wUkP_LEV-n"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-1">
+<div>
+<h4 class="text-body-md font-body-md font-medium text-on-surface line-clamp-2">Calculus Early Transcendentals 8th Edition</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Condition: Like New</p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<span class="text-label-md font-label-md text-on-surface">x1</span>
+<span class="text-body-md font-body-md font-semibold text-primary">350,000 ₫</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center pt-md">
+<span class="text-body-md font-body-md text-on-surface-variant">Total Payment</span>
+<span class="text-headline-sm-mobile font-headline-sm-mobile text-on-surface">350,000 ₫</span>
+</div>
+</section>
+<!-- Meeting Point -->
+<section class="bg-surface-container-lowest rounded-2xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/20">
+<h2 class="text-label-md font-label-md text-on-surface-variant mb-sm uppercase tracking-wider">Meeting Point</h2>
+<div class="flex items-start gap-2 mb-md">
+<span class="material-symbols-outlined text-primary-container mt-0.5">location_on</span>
+<div>
+<p class="text-body-md font-body-md font-medium text-on-surface">Library Main Entrance</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Tech University Campus, Building A</p>
+<p class="text-body-sm font-body-sm text-primary mt-1 font-medium">Tomorrow, 14:00</p>
+</div>
+</div>
+<div class="w-full h-32 rounded-xl overflow-hidden bg-surface-variant relative">
+<!-- Placeholder for Map -->
+<div class="w-full h-full bg-surface-dim flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-4xl">map</span>
+</div>
+<div class="absolute inset-0 border border-outline-variant/10 rounded-xl pointer-events-none"></div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar (Fixed) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest/90 backdrop-blur-xl border-t border-outline-variant/20 p-md pb-safe flex gap-md shadow-[0px_-4px_24px_rgba(15,23,42,0.08)] z-50">
+<button class="flex-1 py-3 px-4 rounded-xl bg-surface-variant text-on-surface font-button text-button transition-all hover:brightness-95 active:scale-95">
+            Từ chối
+        </button>
+<button class="flex-1 py-3 px-4 rounded-xl bg-primary-container text-on-primary font-button text-button shadow-[0px_4px_12px_rgba(37,99,235,0.2)] transition-all hover:brightness-110 active:scale-95">
+            Xác nhận đơn
+        </button>
+</div>
+</body></html>

@@ -17,11 +17,33 @@ export default function RootLayout() {
         }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        <Stack.Screen name="register" options={{ animation: 'fade' }} />
+        <Stack.Screen name="role-select" options={{ animation: 'fade' }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="search" />
+        <Stack.Screen name="search-results" />
         <Stack.Screen name="product/[id]" />
-        <Stack.Screen name="product/edit/[id]" />
+        <Stack.Screen name="product-form" />
+        <Stack.Screen name="product-preview" />
         <Stack.Screen name="cart" />
         <Stack.Screen name="checkout" />
+        <Stack.Screen name="location-select" />
+        <Stack.Screen name="order-success" />
+        <Stack.Screen name="order/[id]" />
+        <Stack.Screen name="order-tracking" />
+        <Stack.Screen name="order-cancel" />
+        <Stack.Screen name="order-rate" />
+        <Stack.Screen name="seller-order/[id]" />
+        <Stack.Screen name="seller-orders" />
+        <Stack.Screen name="seller-products" />
+        <Stack.Screen name="favorites" />
+        <Stack.Screen name="addresses" />
+        <Stack.Screen name="address-form" />
+        <Stack.Screen name="chat/[id]" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="map" />
+        <Stack.Screen name="report" />
+        <Stack.Screen name="status" />
       </Stack>
     </StoreProvider>
   );

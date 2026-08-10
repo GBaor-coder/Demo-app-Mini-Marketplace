@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kết quả tìm kiếm - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#0053db",
+                        "secondary-container": "#2170e4",
+                        "secondary": "#0058be",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-surface-variant": "#434655",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "outline-variant": "#c3c6d7",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary": "#004ac6",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface": "#0b1c30",
+                        "tertiary": "#006229",
+                        "on-primary-fixed": "#00174b",
+                        "outline": "#737686",
+                        "on-tertiary-fixed": "#002109",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "2xl": "48px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "margin-mobile": "20px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col pb-safe">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-sm shadow-[0px_4px_12px_rgba(15,23,42,0.05)] z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<button aria-label="Go back" class="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="flex-1 mx-4">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input aria-label="Search box" class="w-full h-10 pl-10 pr-10 rounded-full bg-surface-container border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md font-body-md text-on-surface placeholder:text-outline outline-none transition-all" type="text" value="xyzabc123"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<button aria-label="Filters" class="p-2 -mr-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-[24px]">tune</span>
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+</button>
+</div>
+</header>
+<!-- Main Content - Empty State -->
+<main class="flex-1 flex flex-col items-center justify-center px-margin-mobile py-xl text-center">
+<!-- Illustration -->
+<div class="w-64 h-64 mb-lg relative">
+<img class="w-full h-full object-contain" data-alt="A cute, 3D style illustration of an empty cardboard box with a sad face drawn on it, sitting on a slightly reflective floor. A small, stylized magnifying glass rests next to it. The lighting is soft and bright, highlighting the light blue and white color palette typical of a modern SaaS application empty state. The mood is apologetic but friendly and approachable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbxcCIfNHJEwfQaL_yGV_lb0Z6Ra7lGOHQcVthbcp5tDfCSjxj-41bDnYlkaIe-xL1_Z0DM6Lds0AnZwrD9UibuHWRuc1GMbxc0BkVXTNADav1mCVKFVl1Gr8U39fCSvcbVNDh_vxOs3OcQRMxJR12Iqn4_5ftR-dw3gYPvn3QXj_kNWYUUVUtczHQLRImF_AGxdJBR6yhfBrB339a3BgLbxf2L_8AeXBSURqzcXnEKxtyId50PVVh"/>
+<!-- Decorative floating elements -->
+<div class="absolute top-4 right-8 w-6 h-6 bg-primary-container/20 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+<div class="absolute bottom-12 left-8 w-4 h-4 bg-secondary-container/30 rounded-full animate-bounce" style="animation-delay: 0.5s"></div>
+<div class="absolute top-1/2 right-4 w-3 h-3 bg-tertiary-container/20 rounded-full animate-bounce" style="animation-delay: 0.8s"></div>
+</div>
+<!-- Text Content -->
+<h2 class="text-headline-md font-headline-md text-on-surface mb-sm">
+            Rất tiếc, không tìm thấy sản phẩm phù hợp
+        </h2>
+<p class="text-body-md font-body-md text-on-surface-variant mb-xl max-w-sm">
+            Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem thêm kết quả nhé.
+        </p>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-md w-full max-w-xs sm:max-w-md">
+<button class="w-full bg-primary text-on-primary font-button text-button py-3 px-6 rounded-[16px] hover:brightness-90 active:scale-[0.98] transition-all shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+                Quay lại trang chủ
+            </button>
+<button class="w-full bg-surface-container text-on-surface font-button text-button py-3 px-6 rounded-[16px] hover:brightness-90 active:scale-[0.98] transition-all border border-outline-variant">
+                Xóa bộ lọc
+            </button>
+</div>
+<!-- Suggested Categories -->
+<div class="mt-2xl w-full max-w-md text-left">
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-md uppercase tracking-wide">Có thể bạn quan tâm</h3>
+<div class="flex flex-wrap gap-sm">
+<button class="px-4 py-2 bg-primary/10 text-primary font-label-md text-label-md rounded-full hover:bg-primary/20 transition-colors">Sách giáo trình</button>
+<button class="px-4 py-2 bg-primary/10 text-primary font-label-md text-label-md rounded-full hover:bg-primary/20 transition-colors">Đồ dùng học tập</button>
+<button class="px-4 py-2 bg-primary/10 text-primary font-label-md text-label-md rounded-full hover:bg-primary/20 transition-colors">Thiết bị điện tử</button>
+<button class="px-4 py-2 bg-primary/10 text-primary font-label-md text-label-md rounded-full hover:bg-primary/20 transition-colors">Nhà trọ</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden docked full-width bottom-0 rounded-t-3xl bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20">
+<!-- Inactive: Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">home</span>
+<span class="text-[12px] font-label-md leading-none">Home</span>
+</a>
+<!-- Active: Explore (Search) -->
+<a class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined fill text-[24px] mb-1">explore</span>
+<span class="text-[12px] font-label-md leading-none font-semibold">Explore</span>
+</a>
+<!-- Inactive: Sell -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">add_circle</span>
+<span class="text-[12px] font-label-md leading-none">Sell</span>
+</a>
+<!-- Inactive: Orders -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">receipt_long</span>
+<span class="text-[12px] font-label-md leading-none">Orders</span>
+</a>
+<!-- Inactive: Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+<span class="text-[12px] font-label-md leading-none">Profile</span>
+</a>
+</nav>
+</body></html>

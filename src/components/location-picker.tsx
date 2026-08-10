@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import MapView, { MapPressEvent, Marker, MarkerDragStartEndEvent } from 'react-native-maps';
 
-import { colors } from '@/src/theme/colors';
+import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
 
 type LocationPickerProps = {
@@ -141,13 +141,13 @@ export function LocationPicker({
             coordinate={{ latitude: value.latitude, longitude: value.longitude }}
             draggable
             onDragEnd={handleDragEnd}
-            pinColor={colors.accent}
+            pinColor={colors.primaryContainer}
           />
         </MapView>
       </View>
 
       <View style={styles.addressRow}>
-        <Ionicons name="location" size={19} color={colors.accent} />
+        <Ionicons name="location" size={19} color={colors.primaryContainer} />
         <Text style={styles.address}>{value.address}</Text>
       </View>
     </View>
@@ -168,26 +168,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.ink,
+    color: colors.onSurface,
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   hint: {
-    color: colors.inkMuted,
+    color: colors.onSurfaceVariant,
     fontSize: 12,
     marginTop: 2,
   },
   locateButton: {
     alignItems: 'center',
-    backgroundColor: colors.primarySoft,
-    borderRadius: 8,
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderRadius: radius.full,
     height: 40,
     justifyContent: 'center',
     width: 40,
+    ...shadow.level1,
   },
   mapFrame: {
-    borderColor: colors.borderStrong,
-    borderRadius: 8,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.xl,
     borderWidth: 1,
     height: 255,
     overflow: 'hidden',
@@ -198,15 +199,15 @@ const styles = StyleSheet.create({
   },
   addressRow: {
     alignItems: 'flex-start',
-    backgroundColor: colors.accentSoft,
-    borderRadius: 8,
+    backgroundColor: 'rgba(0,74,198,0.06)',
+    borderRadius: radius.xl,
     flexDirection: 'row',
     gap: 8,
     marginTop: 8,
     padding: 11,
   },
   address: {
-    color: colors.ink,
+    color: colors.onSurface,
     flex: 1,
     fontSize: 13,
     lineHeight: 19,

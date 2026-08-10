@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLoop - Order Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed": "#002109",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c3c6d7",
+                        "on-surface-variant": "#434655",
+                        "tertiary": "#006229",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#00174b",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-secondary-container": "#fefcff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-primary": "#b4c5ff",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-container": "#c1ffc5",
+                        "surface-container": "#e5eeff",
+                        "outline": "#737686",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#0058be",
+                        "surface-tint": "#0053db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "2xl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "button": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for horizontal scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar (Mobile & Desktop) -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] docked full-width top-0 sticky flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 duration-200 flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">UniLoop</h1>
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 duration-200 flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-screen-md mx-auto px-margin-mobile pt-lg flex flex-col gap-lg">
+<!-- Page Title & Tabs Section -->
+<section class="flex flex-col gap-md">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Order Management</h2>
+<!-- Horizontal Scrollable Tabs -->
+<div class="flex overflow-x-auto no-scrollbar gap-sm py-xs">
+<!-- Active Tab -->
+<button class="flex items-center justify-center px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md border border-primary/20 whitespace-nowrap active:scale-95 transition-transform duration-200">
+                    Chờ xác nhận
+                </button>
+<!-- Inactive Tabs -->
+<button class="flex items-center justify-center px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md border border-outline-variant/30 whitespace-nowrap active:scale-95 hover:bg-surface-variant/20 transition-transform duration-200">
+                    Đã xác nhận
+                </button>
+<button class="flex items-center justify-center px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md border border-outline-variant/30 whitespace-nowrap active:scale-95 hover:bg-surface-variant/20 transition-transform duration-200">
+                    Đang giao dịch
+                </button>
+<button class="flex items-center justify-center px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md border border-outline-variant/30 whitespace-nowrap active:scale-95 hover:bg-surface-variant/20 transition-transform duration-200">
+                    Hoàn tất
+                </button>
+<button class="flex items-center justify-center px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md border border-outline-variant/30 whitespace-nowrap active:scale-95 hover:bg-surface-variant/20 transition-transform duration-200">
+                    Đã hủy
+                </button>
+</div>
+</section>
+<!-- Orders List -->
+<section class="flex flex-col gap-md">
+<!-- Order Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md flex flex-col gap-md border border-outline-variant/10">
+<!-- Buyer Info Header -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close up portrait of a young college student smiling brightly against a blurred campus background. Soft, natural daylight illuminates the scene, reflecting a friendly, approachable, and modern aesthetic typical of a university networking app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfQr_Vahs6bZrKLcmRXKKjJwnnAERKVTt2rCL7otkFy1DxwtvVSjJqaMVhxPbea6qK8tPzA1_NJNHZCd-MRHRCdfDH5ew5EEZyleBntT1PhYjOk1n2xMaO2xN93QUlirTEHRBpvWusU5dCPML1CuqBXrUtT09QCK_TiwLPMWjz2Wg5Leza5nyM3p0CKGuLUaMWd4JnCdGRcvmAx0DfTk1ecPCobW9usi4uNGk7WaqHIjfmYi0oyO0y"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Alex Nguyen</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Requested 2h ago</span>
+</div>
+</div>
+<span class="text-primary font-label-md text-label-md px-2 py-1 bg-primary/10 rounded-md">New Request</span>
+</div>
+<!-- Product Details -->
+<div class="flex gap-md p-sm bg-surface-container rounded-lg border border-outline-variant/20">
+<img class="w-20 h-20 rounded-md object-cover" data-alt="A clean, minimalist product shot of a slightly used textbook titled 'Calculus 101' resting on a bright white desk. Soft studio lighting highlights the textbook's cover, creating a professional e-commerce feel suited for a student marketplace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjQYX7SbbVrNu1Eax39mn9VytF-t0lBflfzOT4qZW5KTC7DKcEf3tLpJvUQZzr6kFnr-Ot85ZbHFLE34qskxz1XQ9J2LPKRE4SL3q5XM2-dOvc9oYBOdpJj4AGPPMz2qdPBBYx5uIXK_VssUeQr4lxfFX6vbjvfSyb0xqqQesWxyfwEH84sAFII8lOsGpsaeQyzxKuZl20-lH_d19VAbsv3X6Mx25X_Nw02T2vbYtuwtjmN781VrYd"/>
+<div class="flex flex-col justify-center gap-xs flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2">Calculus 101 Textbook - Slightly Used</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Qty: 1</span>
+<span class="font-label-md text-label-md text-primary mt-1">250,000 VND</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-sm mt-xs">
+<button class="flex-1 bg-surface-variant text-on-surface-variant font-button text-button py-2 px-4 rounded-xl hover:brightness-90 active:scale-[0.98] transition-all duration-200">
+                        Từ chối
+                    </button>
+<button class="flex-1 bg-primary-container text-on-primary shadow-[0px_4px_12px_rgba(37,99,235,0.2)] font-button text-button py-2 px-4 rounded-xl hover:brightness-90 active:scale-[0.98] transition-all duration-200">
+                        Xác nhận
+                    </button>
+</div>
+</div>
+<!-- Order Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md flex flex-col gap-md border border-outline-variant/10">
+<!-- Buyer Info Header -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a female university student wearing glasses, standing in front of a modern glass building. The lighting is crisp and clear, conveying a sense of academic focus and reliability for an online marketplace profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5eTegtEOD52ZC_wquKF1iUpm_mN34VeCw2vWuDyJFZNvudMYFJDAzr5LqB-3YcLfwUgP29reP9lYprczRGBMHw8nRqOaTBGepeVizO9Y_7mcB0a31MAfO5JWcq_5Fp2BjzBLkvvdOI4g5j4zJO3vT7JgsgUv99plQfja6gZqEMLs6BVa1do1pzQ6vuSbxEutkTZAE8DOzFUkUSbViFm4kUggiSnQ2uR6krPF0lWL-xFauCZ73TWs_"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Minh Tran</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Requested 5h ago</span>
+</div>
+</div>
+<span class="text-primary font-label-md text-label-md px-2 py-1 bg-primary/10 rounded-md">New Request</span>
+</div>
+<!-- Product Details -->
+<div class="flex gap-md p-sm bg-surface-container rounded-lg border border-outline-variant/20">
+<img class="w-20 h-20 rounded-md object-cover" data-alt="A sleek, modern desk lamp photographed against a soft grey background. The lamp is turned off, showcasing its matte black finish and elegant design. The lighting setup is clean and even, perfect for a high-quality product listing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgbfK5NZwWVYQ37nKI27sD0aS6pvpo1bxCun78rhjlJ1-fmwNSUn9_H2oXz7IuOsVhV2J6m3obntOrZl0RRjoXYXAcPmMgtb8LrfFBH7AuL7_NOAWvthJCT2qLWPdJyDicrhKl93mqJVplpmuEo9atLMSESOYEV-mugFNIPThAKeLHD7eu_YyPd2Ef66xO1DsEBroKzBcI3DmkjaZ8RQV4A_rSA8td4GgW-ExcqATs3EQl_LfmpAqe"/>
+<div class="flex flex-col justify-center gap-xs flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2">Minimalist LED Desk Lamp</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Qty: 1</span>
+<span class="font-label-md text-label-md text-primary mt-1">150,000 VND</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-sm mt-xs">
+<button class="flex-1 bg-surface-variant text-on-surface-variant font-button text-button py-2 px-4 rounded-xl hover:brightness-90 active:scale-[0.98] transition-all duration-200">
+                        Từ chối
+                    </button>
+<button class="flex-1 bg-primary-container text-on-primary shadow-[0px_4px_12px_rgba(37,99,235,0.2)] font-button text-button py-2 px-4 rounded-xl hover:brightness-90 active:scale-[0.98] transition-all duration-200">
+                        Xác nhận
+                    </button>
+</div>
+</div>
+<!-- End of list marker -->
+<div class="text-center py-md text-on-surface-variant font-body-sm text-body-sm">
+                No more pending requests.
+            </div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] docked full-width bottom-0 rounded-t-3xl fixed left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 border-t-0">
+<!-- Inactive Tab: Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="text-label-md font-label-md mt-1">Home</span>
+</a>
+<!-- Inactive Tab: Explore -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">explore</span>
+<span class="text-label-md font-label-md mt-1">Explore</span>
+</a>
+<!-- Inactive Tab: Sell -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+<span class="text-label-md font-label-md mt-1">Sell</span>
+</a>
+<!-- Active Tab: Orders (Directly maps to the intent of Order Management) -->
+<a class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="text-label-md font-label-md mt-1 font-semibold">Orders</span>
+</a>
+<!-- Inactive Tab: Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="text-label-md font-label-md mt-1">Profile</span>
+</a>
+</nav>
+<!-- Desktop Navigation (Hidden on Mobile) -->
+<!-- Assuming the full nav cluster would sit in the TopAppBar on desktop as per rules, 
+         but for a mobile screen mockup, we primarily rely on the BottomNav. -->
+</body></html>

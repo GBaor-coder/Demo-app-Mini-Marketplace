@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
-import { colors } from '@/src/theme/colors';
+import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
 
 export function LocationPreview({ location }: { location: LocationPoint }) {
@@ -28,12 +28,12 @@ export function LocationPreview({ location }: { location: LocationPoint }) {
           zoomEnabled={false}>
           <Marker
             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-            pinColor={colors.accent}
+            pinColor={colors.primaryContainer}
           />
         </MapView>
       </View>
       <View style={styles.locationRow}>
-        <Ionicons name="location" size={19} color={colors.accent} />
+        <Ionicons name="location" size={19} color={colors.primaryContainer} />
         <Text style={styles.address}>{location.address}</Text>
         <TouchableOpacity accessibilityLabel="Mở bản đồ" onPress={openExternalMap} style={styles.openButton}>
           <Ionicons name="open-outline" size={18} color={colors.primary} />
@@ -45,11 +45,12 @@ export function LocationPreview({ location }: { location: LocationPoint }) {
 
 const styles = StyleSheet.create({
   mapFrame: {
-    borderColor: colors.border,
-    borderRadius: 8,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.xl,
     borderWidth: 1,
     height: 188,
     overflow: 'hidden',
+    ...shadow.level1,
   },
   map: {
     height: '100%',
@@ -62,15 +63,15 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   address: {
-    color: colors.ink,
+    color: colors.onSurface,
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
   },
   openButton: {
     alignItems: 'center',
-    backgroundColor: colors.primarySoft,
-    borderRadius: 6,
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderRadius: radius.full,
     height: 32,
     justifyContent: 'center',
     width: 32,

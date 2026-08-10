@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Báo cáo vi phạm</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434655",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-container": "#007e37",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#eeefff",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-container": "#2170e4",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#0053db",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "secondary": "#0058be",
+                        "inverse-surface": "#213145",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-primary-fixed": "#00174b",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-container": "#fefcff",
+                        "outline": "#737686",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-container-low": "#eff4ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#006229",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-tertiary-fixed": "#002109",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "outline-variant": "#c3c6d7",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-container": "#e5eeff",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#b4c5ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-primary-fixed-variant": "#003ea8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "xs": "4px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "button": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:bg-surface-container-low font-body-md">
+<!-- Top App Bar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50 sticky top-0 md:hidden">
+<button class="text-on-surface-variant hover:brightness-90 transition-all p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-sm-mobile font-headline-sm-mobile font-bold text-primary dark:text-inverse-primary truncate">Báo cáo vi phạm</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-grow w-full max-w-[600px] mx-auto pt-lg md:pt-xl pb-24 px-margin-mobile md:px-0">
+<!-- Desktop Header (Optional) -->
+<div class="hidden md:flex items-center mb-lg">
+<button class="text-on-surface-variant hover:bg-surface-variant/50 p-2 rounded-full transition-all mr-sm">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md text-on-surface font-semibold">Báo cáo vi phạm</h1>
+</div>
+<div class="bg-surface md:shadow-[0px_4px_12px_rgba(15,23,42,0.05)] md:rounded-2xl md:p-lg">
+<p class="text-body-md font-body-md text-on-surface-variant mb-lg">
+                Vui lòng chọn lý do chính xác để chúng tôi có thể xử lý báo cáo của bạn một cách nhanh chóng.
+            </p>
+<form class="space-y-lg">
+<!-- Radio Options Group -->
+<fieldset>
+<legend class="text-label-md font-label-md text-on-surface font-semibold mb-md">Lý do báo cáo</legend>
+<div class="space-y-xs">
+<label class="flex items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-variant/30 transition-colors">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface" name="report_reason" type="radio" value="fake"/>
+<span class="ml-sm text-body-md font-body-md text-on-surface">Sản phẩm giả mạo</span>
+</label>
+<label class="flex items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-variant/30 transition-colors">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface" name="report_reason" type="radio" value="scam"/>
+<span class="ml-sm text-body-md font-body-md text-on-surface">Lừa đảo</span>
+</label>
+<label class="flex items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-variant/30 transition-colors">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface" name="report_reason" type="radio" value="inappropriate"/>
+<span class="ml-sm text-body-md font-body-md text-on-surface">Ngôn từ không phù hợp</span>
+</label>
+<label class="flex items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-variant/30 transition-colors">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface" name="report_reason" type="radio" value="fake_price"/>
+<span class="ml-sm text-body-md font-body-md text-on-surface">Giá ảo</span>
+</label>
+<label class="flex items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-variant/30 transition-colors">
+<input checked="" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface" name="report_reason" type="radio" value="other"/>
+<span class="ml-sm text-body-md font-body-md text-on-surface">Khác</span>
+</label>
+</div>
+</fieldset>
+<!-- Detailed Description Textarea -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface font-semibold mb-sm" for="report_details">Chi tiết (Tùy chọn)</label>
+<textarea class="w-full bg-surface-container-lowest text-on-surface border border-outline-variant rounded-[16px] p-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none text-body-md font-body-md" id="report_details" name="report_details" placeholder="Cung cấp thêm thông tin chi tiết về vấn đề này..." rows="4"></textarea>
+</div>
+<!-- Notice -->
+<div class="bg-error-container/20 rounded-xl p-md flex items-start mt-md border border-error-container/30">
+<span class="material-symbols-outlined text-error mr-sm mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Báo cáo sai sự thật có thể dẫn đến việc tài khoản của bạn bị hạn chế các tính năng.</p>
+</div>
+<!-- Action Button -->
+<div class="pt-md mt-auto">
+<button class="w-full bg-error hover:brightness-90 active:scale-[0.98] transition-all text-on-error rounded-[16px] py-md px-lg text-button font-button flex items-center justify-center gap-sm" type="submit">
+<span class="material-symbols-outlined">flag</span>
+                        Gửi báo cáo
+                    </button>
+<button class="w-full mt-sm bg-transparent hover:bg-surface-variant/50 transition-all text-on-surface-variant rounded-[16px] py-md px-lg text-button font-button flex items-center justify-center" type="button">
+                        Hủy
+                    </button>
+</div>
+</form>
+</div>
+</main>
+</body></html>

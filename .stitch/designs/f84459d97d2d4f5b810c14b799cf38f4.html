@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đăng ký - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "on-primary-container": "#eeefff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#0053db",
+                      "secondary-container": "#2170e4",
+                      "secondary": "#0058be",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#b4c5ff",
+                      "error": "#ba1a1a",
+                      "surface-container-low": "#eff4ff",
+                      "on-background": "#0b1c30",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "surface-dim": "#cbdbf5",
+                      "on-secondary-fixed": "#001a42",
+                      "background": "#f8f9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "tertiary-fixed": "#6bff8f",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "surface-bright": "#f8f9ff",
+                      "on-tertiary-container": "#c1ffc5",
+                      "on-surface-variant": "#434655",
+                      "primary-fixed": "#dbe1ff",
+                      "surface-container-high": "#dce9ff",
+                      "on-error": "#ffffff",
+                      "primary-container": "#2563eb",
+                      "tertiary-container": "#007e37",
+                      "outline-variant": "#c3c6d7",
+                      "surface-variant": "#d3e4fe",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-secondary-container": "#fefcff",
+                      "inverse-surface": "#213145",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "surface-container": "#e5eeff",
+                      "primary": "#004ac6",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "on-surface": "#0b1c30",
+                      "tertiary": "#006229",
+                      "on-primary-fixed": "#00174b",
+                      "outline": "#737686",
+                      "on-tertiary-fixed": "#002109",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "2xl": "16px",
+                      "3xl": "20px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "2xl": "48px",
+                      "margin-desktop": "40px",
+                      "base": "4px",
+                      "margin-mobile": "20px",
+                      "md": "16px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "xs": "4px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "button": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop">
+<div class="w-full max-w-[480px] bg-surface-container-lowest rounded-3xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-lg md:p-xl relative overflow-hidden">
+<!-- Decorative Header -->
+<div class="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+<!-- Header -->
+<div class="text-center mb-xl">
+<h1 class="text-display-lg-mobile md:text-display-lg font-display-lg-mobile md:font-display-lg text-primary mb-sm">UniLoop</h1>
+<h2 class="text-headline-md font-headline-md text-on-surface">Tạo tài khoản mới</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-sm">Tham gia cộng đồng sinh viên ngay hôm nay.</p>
+</div>
+<!-- Registration Form -->
+<form class="space-y-md">
+<!-- Họ tên -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-xs" for="fullname">Họ và tên</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">person</span>
+<input class="w-full h-[48px] pl-[44px] pr-md bg-surface border border-outline-variant rounded-2xl text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="fullname" name="fullname" placeholder="Nguyễn Văn A" required="" type="text"/>
+</div>
+</div>
+<!-- Email Sinh Viên -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-xs" for="email">Email sinh viên (edu.vn)</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">mail</span>
+<input class="w-full h-[48px] pl-[44px] pr-md bg-surface border border-outline-variant rounded-2xl text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="email" name="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu\.vn$" placeholder="nguyenvana@student.edu.vn" required="" type="email"/>
+</div>
+<p class="text-body-sm font-body-sm text-outline mt-1 text-xs">* Vui lòng sử dụng email do trường cấp.</p>
+</div>
+<!-- Số điện thoại -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-xs" for="phone">Số điện thoại</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">phone</span>
+<input class="w-full h-[48px] pl-[44px] pr-md bg-surface border border-outline-variant rounded-2xl text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="phone" name="phone" placeholder="0912345678" required="" type="tel"/>
+</div>
+</div>
+<!-- Mật khẩu -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-xs" for="password">Mật khẩu</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">lock</span>
+<input class="w-full h-[48px] pl-[44px] pr-md bg-surface border border-outline-variant rounded-2xl text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Xác nhận mật khẩu -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-xs" for="confirm_password">Xác nhận mật khẩu</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">swipe_left_alt</span>
+<input class="w-full h-[48px] pl-[44px] pr-md bg-surface border border-outline-variant rounded-2xl text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="confirm_password" name="confirm_password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Terms -->
+<div class="flex items-start gap-sm mt-md">
+<input class="mt-1 w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary" id="terms" type="checkbox"/>
+<label class="text-body-sm font-body-sm text-on-surface-variant" for="terms">
+                    Tôi đồng ý với các <a class="text-primary hover:underline" href="#">Điều khoản sử dụng</a> và <a class="text-primary hover:underline" href="#">Chính sách bảo mật</a> của UniLoop.
+                </label>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-[48px] bg-primary text-on-primary rounded-2xl text-button font-button flex items-center justify-center gap-sm hover:brightness-90 active:scale-95 transition-all mt-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)]" type="submit">
+                Đăng ký tài khoản
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</form>
+<!-- Footer / Login Link -->
+<div class="mt-xl text-center text-body-sm font-body-sm text-on-surface-variant">
+            Đã có tài khoản? <a class="text-primary font-semibold hover:underline" href="#">Đăng nhập tại đây</a>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Giỏ hàng - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#00174b",
+                      "tertiary": "#006229",
+                      "on-secondary-fixed-variant": "#004395",
+                      "error": "#ba1a1a",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-fixed": "#d8e2ff",
+                      "surface-dim": "#cbdbf5",
+                      "primary-container": "#2563eb",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "background": "#f8f9ff",
+                      "surface-tint": "#0053db",
+                      "surface-container": "#e5eeff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "inverse-primary": "#b4c5ff",
+                      "on-secondary-container": "#fefcff",
+                      "secondary": "#0058be",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "outline-variant": "#c3c6d7",
+                      "surface": "#f8f9ff",
+                      "outline": "#737686",
+                      "tertiary-fixed": "#6bff8f",
+                      "inverse-surface": "#213145",
+                      "primary": "#004ac6",
+                      "on-surface": "#0b1c30",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#c1ffc5",
+                      "on-tertiary-fixed": "#002109",
+                      "tertiary-container": "#007e37",
+                      "surface-container-high": "#dce9ff",
+                      "primary-fixed": "#dbe1ff",
+                      "on-surface-variant": "#434655",
+                      "secondary-container": "#2170e4",
+                      "surface-variant": "#d3e4fe",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-secondary-fixed": "#001a42",
+                      "on-background": "#0b1c30",
+                      "on-primary-container": "#eeefff",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "lg": "24px",
+                      "margin-mobile": "20px",
+                      "margin-desktop": "40px",
+                      "xl": "32px",
+                      "base": "4px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "2xl": "48px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "button": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        /* Custom styles to handle specific checkbox appearance */
+        .custom-checkbox:checked {
+            background-color: #2563EB;
+            border-color: #2563EB;
+        }
+        .custom-checkbox:focus {
+            ring-color: #2563EB;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col pb-safe">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<button aria-label="Go back" class="flex items-center justify-center p-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-headline-sm-mobile font-headline-sm-mobile text-primary dark:text-inverse-primary font-bold">Giỏ hàng</h1>
+<button aria-label="Search" class="flex items-center justify-center p-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface">search</span>
+</button>
+</div>
+</header>
+<!-- Main Content: Cart List -->
+<main class="flex-grow px-margin-mobile pt-md pb-[120px] max-w-screen-md mx-auto w-full">
+<!-- Seller Group 1 -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md mb-lg">
+<!-- Seller Header -->
+<div class="flex items-center border-b border-outline-variant/30 pb-sm mb-md">
+<input aria-label="Chọn tất cả sản phẩm của Nguyễn Văn A" class="custom-checkbox w-5 h-5 rounded border-outline text-primary mr-sm" type="checkbox"/>
+<span class="material-symbols-outlined text-outline mr-sm text-[20px]">school</span>
+<span class="text-label-md font-label-md font-semibold text-on-surface">Nguyễn Văn A (ĐH Bách Khoa)</span>
+</div>
+<!-- Product Item 1 -->
+<div class="flex items-start gap-md mb-md relative">
+<div class="pt-1">
+<input aria-label="Chọn Máy tính Casio FX-580VN X" class="custom-checkbox w-5 h-5 rounded border-outline text-primary" type="checkbox"/>
+</div>
+<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant/30 relative">
+<img alt="Máy tính Casio" class="w-full h-full object-cover" data-alt="A clean, well-lit top-down photo of a slightly used Casio FX-580VN X scientific calculator resting on a pristine white desk surface. The lighting is soft and even, highlighting the keys and screen clearly. The style is modern product photography, suitable for an online marketplace, conveying trust and clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtkZw2gcxiclW8GwPQTV10b6drcFuQwOPQHNHv8nVJuYuPUQvJS6Lu4vjS4-ZKd1EMZDR6ubz4pFEPMA_A8pIRmdWtvtNkAebRtF5L-UYH8wJ95zHwGoSimHFO11fdanPoaV7Qbj5CXusfZE63TAhzdO4K-mD2LV3Rdr0hDjkiJGwboAJ95m4eUfGEnlJjPZsMbbWcZ-vsANQ7ni88cQb077roC9k2Vt9m5qofWlJZNCxXdIbIQ0av"/>
+<span class="absolute top-0 right-0 bg-secondary text-on-secondary text-[10px] px-1 py-0.5 rounded-bl-sm font-semibold">Cũ 99%</span>
+</div>
+<div class="flex-grow flex flex-col justify-between min-h-[80px]">
+<div>
+<h3 class="text-body-md font-body-md font-medium text-on-surface line-clamp-2 leading-tight">Máy tính Casio FX-580VN X chính hãng</h3>
+<p class="text-body-sm font-body-sm text-outline mt-xs">Màu: Đen</p>
+</div>
+<div class="flex items-end justify-between mt-sm">
+<span class="text-body-lg font-body-lg font-semibold text-primary">450.000đ</span>
+<div class="flex items-center border border-outline-variant rounded-md overflow-hidden bg-surface">
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<input aria-label="Số lượng" class="w-8 h-7 text-center border-none p-0 text-body-sm font-body-sm bg-surface text-on-surface focus:ring-0" min="1" type="number" value="1"/>
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Delete Icon -->
+<button aria-label="Xóa sản phẩm" class="absolute top-0 right-0 p-1 text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Separator if multiple items -->
+<hr class="border-outline-variant/20 my-md"/>
+<!-- Product Item 2 -->
+<div class="flex items-start gap-md relative">
+<div class="pt-1">
+<input aria-label="Chọn Sách Giáo trình Giải tích 1" class="custom-checkbox w-5 h-5 rounded border-outline text-primary" type="checkbox"/>
+</div>
+<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant/30 relative">
+<img alt="Sách Giải tích 1" class="w-full h-full object-cover" data-alt="A stack of gently used university textbooks, specifically a calculus textbook on top, resting on a light wooden table. The lighting is warm and inviting, suggesting a study environment. The cover shows minor wear at the corners, indicating it has been read. The aesthetic is clean, academic, and realistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjSTq0NRuud7-1ZKqEg7h12e0ZsEg8-tj52dJry0NpxNczNmMBn3pTZLWlGwObpYr_TDHuTkgl6PJtvMNaFEr_lzHF866BJwtmA7goQtpi4xK3aVLb0cbBR9a50NN_AzpnLt5K51BycY1A7IZN8kV14wZ1AVivKX-3p5xVuJvKhd28KxF8qOSprIintMhuhq-nW75TG84NVqypwRw2JPPFVhSxUyT5LsXn-FDfIBiclHj9sCtVn9pD"/>
+<span class="absolute top-0 right-0 bg-surface-variant text-on-surface-variant text-[10px] px-1 py-0.5 rounded-bl-sm font-semibold border border-outline-variant/50">Cũ 80%</span>
+</div>
+<div class="flex-grow flex flex-col justify-between min-h-[80px]">
+<div>
+<h3 class="text-body-md font-body-md font-medium text-on-surface line-clamp-2 leading-tight">Giáo trình Giải tích 1 - ĐHBK</h3>
+<p class="text-body-sm font-body-sm text-outline mt-xs">Bản in 2022</p>
+</div>
+<div class="flex items-end justify-between mt-sm">
+<span class="text-body-lg font-body-lg font-semibold text-primary">40.000đ</span>
+<div class="flex items-center border border-outline-variant rounded-md overflow-hidden bg-surface">
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<input aria-label="Số lượng" class="w-8 h-7 text-center border-none p-0 text-body-sm font-body-sm bg-surface text-on-surface focus:ring-0" min="1" type="number" value="1"/>
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Delete Icon -->
+<button aria-label="Xóa sản phẩm" class="absolute top-0 right-0 p-1 text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</section>
+<!-- Seller Group 2 -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md">
+<!-- Seller Header -->
+<div class="flex items-center border-b border-outline-variant/30 pb-sm mb-md">
+<input aria-label="Chọn tất cả sản phẩm của Trần Thị B" class="custom-checkbox w-5 h-5 rounded border-outline text-primary mr-sm" type="checkbox"/>
+<span class="material-symbols-outlined text-outline mr-sm text-[20px]">school</span>
+<span class="text-label-md font-label-md font-semibold text-on-surface">Trần Thị B (ĐH Kinh Tế)</span>
+</div>
+<!-- Product Item 3 -->
+<div class="flex items-start gap-md relative">
+<div class="pt-1">
+<input aria-label="Chọn Balo laptop sinh viên" class="custom-checkbox w-5 h-5 rounded border-outline text-primary" type="checkbox"/>
+</div>
+<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant/30 relative">
+<img alt="Balo laptop" class="w-full h-full object-cover" data-alt="A modern, minimalist grey laptop backpack displayed against a bright white background. The backpack looks brand new and features clean lines and subtle branding. Soft studio lighting highlights the texture of the fabric. The overall image feels premium and ready for e-commerce, fitting perfectly into a clean UI design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgrcA_1qtxMni_iUsxn-0b_5W4mjdV91YdAaDYdDiTwh4MGEj_ubbkTfvHX3Jpm1ofyGGp1qKjz1Ge8e0Fj9RQhxe6ToFeX-zv2tQFkYyGuvS4Ma_1vms1bPhDsjo-2BvPzRBy08Ml3ZoydDvj39g7HuRO7K7Eoctn6HXzmX1rGyo_Or8NAqwEDJk3RS0TQ3lpV9KZS3sWJwKdzT4IXO0A5PASMV0eWr3WI0nvXpN1z4pQJJjby6E4"/>
+<span class="absolute top-0 right-0 bg-tertiary text-on-tertiary text-[10px] px-1 py-0.5 rounded-bl-sm font-semibold">Mới 100%</span>
+</div>
+<div class="flex-grow flex flex-col justify-between min-h-[80px]">
+<div>
+<h3 class="text-body-md font-body-md font-medium text-on-surface line-clamp-2 leading-tight">Balo laptop sinh viên chống nước 15.6 inch</h3>
+<p class="text-body-sm font-body-sm text-outline mt-xs">Màu: Xám</p>
+</div>
+<div class="flex items-end justify-between mt-sm">
+<span class="text-body-lg font-body-lg font-semibold text-primary">250.000đ</span>
+<div class="flex items-center border border-outline-variant rounded-md overflow-hidden bg-surface">
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<input aria-label="Số lượng" class="w-8 h-7 text-center border-none p-0 text-body-sm font-body-sm bg-surface text-on-surface focus:ring-0" min="1" type="number" value="1"/>
+<button class="w-7 h-7 flex items-center justify-center bg-surface hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Delete Icon -->
+<button aria-label="Xóa sản phẩm" class="absolute top-0 right-0 p-1 text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Sticky Checkout Bar -->
+<div class="fixed bottom-[80px] md:bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant/20 shadow-[0px_-8px_24px_rgba(15,23,42,0.08)] z-40">
+<div class="max-w-screen-md mx-auto px-margin-mobile py-sm flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<input class="custom-checkbox w-5 h-5 rounded border-outline text-primary" id="selectAllBottom" type="checkbox"/>
+<label class="text-label-md font-label-md text-on-surface cursor-pointer" for="selectAllBottom">Tất cả</label>
+</div>
+<div class="flex items-center gap-md">
+<div class="text-right">
+<span class="text-body-sm font-body-sm text-outline block">Tạm tính</span>
+<span class="text-headline-sm font-headline-sm text-primary font-bold block">490.000đ</span>
+</div>
+<button class="bg-primary hover:brightness-90 active:scale-95 transition-all text-on-primary rounded-xl px-lg py-sm text-button font-button flex items-center justify-center min-w-[120px] shadow-[0px_4px_12px_rgba(37,99,235,0.2)]">
+                    Mua hàng (2)
+                </button>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Hidden on desktop, present as per ecosystem rules) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] rounded-t-3xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-md font-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-md font-label-md mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-label-md font-label-md mt-1">Sell</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="text-label-md font-label-md mt-1">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-md font-label-md mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

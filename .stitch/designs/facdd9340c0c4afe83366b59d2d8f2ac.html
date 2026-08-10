@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLoop - Xem trước bài đăng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "tertiary-fixed": "#6bff8f",
+                        "tertiary-container": "#007e37",
+                        "outline-variant": "#c3c6d7",
+                        "on-surface-variant": "#434655",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary-fixed": "#002109",
+                        "on-surface": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "secondary": "#0058be",
+                        "primary": "#004ac6",
+                        "surface-container": "#e5eeff",
+                        "inverse-primary": "#b4c5ff",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error": "#ba1a1a",
+                        "outline": "#737686",
+                        "surface-tint": "#0053db",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "secondary-container": "#2170e4",
+                        "on-primary-fixed": "#00174b",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "tertiary": "#006229",
+                        "surface-variant": "#d3e4fe",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-background": "#0b1c30",
+                        "surface": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#2563eb",
+                        "on-secondary-container": "#fefcff",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "2xl": "48px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "margin-mobile": "20px",
+                        "base": "4px",
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "button": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<button class="text-on-surface-variant hover:brightness-90 transition-all active:scale-95 duration-200 w-10 h-10 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">Xem trước bài đăng</h1>
+<button class="text-on-surface-variant hover:brightness-90 transition-all active:scale-95 duration-200 w-10 h-10 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</header>
+<main class="flex-grow pb-[100px]"> <!-- Padding for fixed bottom footer -->
+<!-- Image Carousel -->
+<section class="relative w-full h-[400px] md:h-[500px] bg-surface-variant overflow-hidden group">
+<img class="w-full h-full object-cover" data-alt="A high-quality, brightly lit photograph of a pristine, modern laptop sitting on a clean wooden desk. The lighting is soft and natural, creating a professional and inviting aesthetic typical of a premium university marketplace listing. The laptop is the focal point, reflecting the modern SaaS and clean UI design principles of the overarching app ecosystem. The background is slightly blurred to emphasize the product." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGC1XRU3jaGcEcIUUWLXh4mF1MGu0ueWu7ar7CgqOTYXaMUIq048X49e41jUOMeXMJVUr1CHL-zo71h4D1OYOKNBkqQm6KLrkMjNTXIHXFnY5jm1TimUxCCr2aVlWfFXpvoun1o20UZBZum_EKwq3pj6dh00Sg35UENEfJYWqxqDKGkreSsWr-gUTQ1Y-g56vUGRXLjcmQOdQBS75qqFyLVTef89di6hNfHn_DOB9iG7j3S-rtDsRA"/>
+<!-- Carousel Controls -->
+<div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+<div class="w-2 h-2 rounded-full bg-on-primary"></div>
+<div class="w-2 h-2 rounded-full bg-on-primary/50"></div>
+<div class="w-2 h-2 rounded-full bg-on-primary/50"></div>
+</div>
+<div class="absolute top-4 right-4 bg-surface/80 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
+<span class="text-label-md font-label-md text-on-surface font-medium">1 / 3</span>
+</div>
+</section>
+<div class="max-w-[1280px] mx-auto grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-gutter px-margin-mobile md:px-margin-desktop py-lg">
+<!-- Product Info Column -->
+<div class="col-span-4 md:col-span-8 lg:col-span-8 space-y-lg">
+<!-- Header Info -->
+<div class="space-y-sm">
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-high text-primary px-3 py-1 rounded-full text-label-md font-label-md border border-primary/20">Mới 99%</span>
+<span class="text-on-surface-variant text-body-sm font-body-sm">Đăng 5 phút trước</span>
+</div>
+<h2 class="text-display-lg-mobile md:text-display-lg font-display-lg-mobile md:font-display-lg text-on-surface">MacBook Pro M2 2022 - Sinh viên cần pass gấp</h2>
+<div class="text-primary text-[28px] font-bold leading-tight">
+                        18.500.000 ₫
+                    </div>
+</div>
+<!-- Description -->
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] space-y-md">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Mô tả chi tiết</h3>
+<p class="text-body-md font-body-md text-on-surface-variant whitespace-pre-line">
+                        Máy mình mua mới 100% tại thegioididong, còn bảo hành Apple Care đến tháng 12/2024.
+                        Do cần tiền đóng học phí nên pass lại cho bạn nào cần.
+                        
+                        Cấu hình:
+                        - Chip M2
+                        - RAM 8GB
+                        - SSD 256GB
+                        - Tình trạng pin: 98%
+                        
+                        Máy dùng giữ gìn, không trầy xước. Tặng kèm túi chống sốc và hub chuyển đổi.
+                        Có fix nhẹ xăng xe cho bạn nào sinh viên nhiệt tình qua xem máy trực tiếp tại KTX Khu B.
+                    </p>
+</div>
+</div>
+<!-- Sidebar / Additional Info -->
+<div class="col-span-4 md:col-span-8 lg:col-span-4 space-y-lg">
+<!-- Seller Info (Self) -->
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-primary/10">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Thông tin người bán</h3>
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-full object-cover shadow-sm" data-alt="A portrait photo of a cheerful university student, lit with bright, natural daylight. The student is smiling warmly, conveying trust and approachability for a marketplace profile. The background is a vibrant but slightly blurred modern campus setting, aligning with the clean, professional, yet energetic aesthetic of the application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxc2Kto7jsWoVx2k6MC5lviyDKmNHtXuj-p8_RiPWvvx1nuyO_-I0SuVIjCkuYUhkJpq7_8XBhiJBzIExF0mRWFGYmwv_rrvM6pFdkXPZsW12ymHxe0LYMSuzOp4vfSlflx9BPD0hNjjFYNBqYfNR8WzfhKslKh35wDyrD7Go0Wkt4WcochEnOgCOcH803QVx18cFTI7yZE3mZnxcqcq1Pr00sjMQSgeKVHtYOr3PrrbVtqwKJewBP"/>
+<div>
+<h4 class="text-headline-sm font-headline-sm text-on-surface">Nguyễn Văn A (Bạn)</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="school">school</span>
+                                Sinh viên năm 3 - ĐH Bách Khoa
+                            </p>
+</div>
+</div>
+</div>
+<!-- Map / Location -->
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+                        Khu vực giao dịch
+                    </h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-md">KTX Khu B, ĐHQG TP.HCM</p>
+<div class="relative w-full h-[200px] rounded-lg overflow-hidden bg-surface-variant border border-outline-variant/30">
+<!-- Simulated Map Image -->
+<img class="w-full h-full object-cover" data-alt="A clean, highly stylized, modern digital map interface centered on a university campus area. The map uses a light-mode color palette with soft blues and pristine whites, matching a premium SaaS UI aesthetic. There is a prominent, semi-transparent blue circle (glassmorphism effect) indicating an approximate location area for a marketplace transaction." data-location="Ho Chi Minh City" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6wUYG5U4xbRTSMtGruur3-kc-CmRP5xXhiwEwM0A_F31ABP7-pZigDrCaRo_ScAvJhvbDA_bCGWbJeGc9IbVgQdAvPVQXeom2DDaBACkR1X9BUuY__HbVPPdCk46JE_NNqwgsbWGwiKu3HEJ2urAJ2IQxXhB70k6o6ScTXLrekvUuiD5aBJW0U_fT0ar5wO4yEsDFrhH3eqZ4ItJL0CF7bXU1FREcvYfoc2dbn3tbtPZlqtmHHeC3"/>
+<!-- Map Overlay (Blurred Circle) -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-24 h-24 bg-primary/20 rounded-full border-2 border-primary/50 animate-pulse backdrop-blur-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar (Footer) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-8px_24px_rgba(15,23,42,0.08)] z-50 px-margin-mobile py-4 pb-safe">
+<div class="max-w-[1280px] mx-auto flex gap-4">
+<button class="flex-1 py-3 px-6 rounded-xl border border-primary text-primary text-button font-button hover:bg-primary/5 active:scale-95 transition-all flex items-center justify-center gap-2 bg-surface">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+                Chỉnh sửa
+            </button>
+<button class="flex-[2] py-3 px-6 rounded-xl bg-primary text-on-primary text-button font-button hover:brightness-110 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="publish">publish</span>
+                Xuất bản ngay
+            </button>
+</div>
+</div>
+</body></html>

@@ -1,14 +1,200 @@
-import { Redirect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { LoadingScreen } from '@/src/components/ui';
-import { useStore } from '@/src/context/store-context';
+import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
-export default function EntryScreen() {
-  const { currentUser, hydrated } = useStore();
+export default function WelcomeScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
-  if (!hydrated) {
-    return <LoadingScreen />;
-  }
+  return (
+    <View style={[styles.screen, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 24 }]}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        bounces={false}>
+        <View style={styles.hero}>
+          <Image
+            contentFit="cover"
+            source={{
+              uri: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=900',
+            }}
+            style={styles.heroImage}
+            transition={200}
+          />
+          <View style={[styles.badge, styles.badgeTop]}>
+            <Ionicons name="pricetag" size={14} color={colors.primary} />
+            <Text style={styles.badgeText}>Đồ cũ giá tốt</Text>
+          </View>
+          <View style={[styles.badge, styles.badgeBottom]}>
+            <Ionicons name="shield-checkmark" size={14} color={colors.tertiary} />
+            <Text style={styles.badgeText}>An toàn</Text>
+          </View>
+        </View>
 
-  return <Redirect href={currentUser ? '/(tabs)' : '/login'} />;
+        <View style={styles.panel}>
+          <View style={styles.logo}>
+            <Ionicons name="sync" size={32} color={colors.onPrimaryContainer} />
+          </View>
+          <Text style={styles.brand}>UniLoop</Text>
+          <Text style={styles.tagline}>Chợ sinh viên nội bộ</Text>
+          <Text style={styles.subtext}>
+            Mua bán an toàn, nhanh chóng ngay trong khuôn viên trường đại học của bạn.
+          </Text>
+
+          <View style={styles.actions}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push('/role-select')}
+              style={styles.primaryCta}>
+              <Text style={styles.primaryCtaText}>Bắt đầu ngay</Text>
+              <Ionicons name="arrow-forward" size={20} color={colors.onPrimaryContainer} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push('/login')}
+              style={styles.secondaryCta}>
+              <Text style={styles.secondaryCtaText}>Đăng nhập</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    backgroundColor: colors.surface,
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  scroll: {
+    alignItems: 'center',
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 24,
+  },
+  hero: {
+    aspectRatio: 1,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: radius['3xl'],
+    marginBottom: 32,
+    maxWidth: 448,
+    overflow: 'hidden',
+    position: 'relative',
+    width: '100%',
+    ...shadow.level2,
+  },
+  heroImage: {
+    height: '100%',
+    width: '100%',
+  },
+  badge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: radius.full,
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    position: 'absolute',
+    ...shadow.level1,
+  },
+  badgeTop: {
+    left: 16,
+    top: 16,
+  },
+  badgeBottom: {
+    bottom: 16,
+    right: 16,
+  },
+  badgeText: {
+    color: colors.onSurface,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  panel: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 32,
+    borderWidth: 1,
+    maxWidth: 448,
+    padding: 32,
+    width: '100%',
+    ...shadow.level3,
+  },
+  logo: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryContainer,
+    borderRadius: radius['2xl'],
+    height: 64,
+    justifyContent: 'center',
+    marginBottom: 24,
+    width: 64,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  brand: {
+    ...typography.displayLgMobile,
+    color: colors.onSurface,
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  tagline: {
+    ...typography.headlineSm,
+    color: colors.primary,
+    marginBottom: 16,
+  },
+  subtext: {
+    ...typography.bodyLg,
+    color: colors.onSurfaceVariant,
+    marginBottom: 32,
+    maxWidth: 280,
+    textAlign: 'center',
+  },
+  actions: {
+    gap: 16,
+    width: '100%',
+  },
+  primaryCta: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryContainer,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: 8,
+    height: 56,
+    justifyContent: 'center',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 3,
+    width: '100%',
+  },
+  primaryCtaText: {
+    ...typography.button,
+    color: colors.onPrimaryContainer,
+  },
+  secondaryCta: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainer,
+    borderColor: 'rgba(195,198,215,0.5)',
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    height: 56,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  secondaryCtaText: {
+    ...typography.button,
+    color: colors.onSurface,
+  },
+});

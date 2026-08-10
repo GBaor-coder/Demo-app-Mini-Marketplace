@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đăng sản phẩm - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#c1ffc5",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed": "#001a42",
+                    "tertiary-fixed": "#6bff8f",
+                    "tertiary-container": "#007e37",
+                    "outline-variant": "#c3c6d7",
+                    "on-surface-variant": "#434655",
+                    "on-primary-container": "#eeefff",
+                    "surface-container-high": "#dce9ff",
+                    "on-tertiary-fixed": "#002109",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-primary": "#ffffff",
+                    "background": "#f8f9ff",
+                    "secondary": "#0058be",
+                    "primary": "#004ac6",
+                    "surface-container": "#e5eeff",
+                    "inverse-primary": "#b4c5ff",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#dbe1ff",
+                    "on-secondary-fixed-variant": "#004395",
+                    "error": "#ba1a1a",
+                    "outline": "#737686",
+                    "surface-tint": "#0053db",
+                    "surface-container-low": "#eff4ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "secondary-container": "#2170e4",
+                    "on-primary-fixed": "#00174b",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "tertiary": "#006229",
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "surface-dim": "#cbdbf5",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-background": "#0b1c30",
+                    "surface": "#f8f9ff",
+                    "surface-bright": "#f8f9ff",
+                    "primary-container": "#2563eb",
+                    "on-secondary-container": "#fefcff",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "xl": "32px",
+                    "2xl": "48px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "margin-mobile": "20px",
+                    "base": "4px",
+                    "margin-desktop": "40px",
+                    "lg": "24px",
+                    "md": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "button": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "button": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: theme('borderRadius.full');
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen flex flex-col pb-safe">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl docked full-width top-0 sticky shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary flex-1 text-center">
+            UniLoop
+        </div>
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 invisible">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-lg">
+<div class="mb-lg">
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-on-surface mb-xs">Đăng bán sản phẩm mới</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Điền thông tin chi tiết để thu hút người mua trên UniLoop.</p>
+</div>
+<form class="grid grid-cols-1 lg:grid-cols-12 gap-lg" onsubmit="event.preventDefault();">
+<!-- Left Column: Media & Core Info -->
+<div class="lg:col-span-7 space-y-lg">
+<!-- 1. Tải lên hình ảnh -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md border border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md">Hình ảnh sản phẩm</h2>
+<p class="font-body-sm text-body-sm text-outline mb-md">Tải lên tối đa 6 hình ảnh. Hình đầu tiên sẽ là ảnh bìa.</p>
+<div class="grid grid-cols-3 md:grid-cols-4 gap-sm">
+<!-- Upload Area -->
+<div class="col-span-3 md:col-span-4 aspect-[21/9] bg-surface-container rounded-xl border-2 border-dashed border-outline-variant flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-surface-container-low transition-colors relative overflow-hidden group">
+<div class="absolute inset-0 bg-cover bg-center opacity-0 group-hover:opacity-10 transition-opacity" data-alt="A modern light-mode SaaS marketplace photo upload area background. Abstract soft blue and white gradients, minimalist style, hinting at a digital product listing interface." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB03Sb0saKQua7TWCqCMY4TDKwivzQG_mXIUF0uc1xmZQQykOGhV4i31OPjpOCCrWIRU_7UjZ2qGkU-KeLEgSuZkn03i5rRh2Hp_wOi4eOjuUDg-grXGWKoMnZyJoNIP-r4CDbBwnwwl7n38U_Ic7JjaSnL2HjJCRo-MGDYle6jG2OWF1MtgEYWRDrD9UQR4ib8dBbNzVWzanzzKrI4RwyUgOc1r6rRGn-nkueEEywfALjm5frGEtrt')"></div>
+<span class="material-symbols-outlined text-4xl text-primary mb-sm">add_photo_alternate</span>
+<span class="font-label-md text-label-md text-primary">Kéo thả hoặc chọn ảnh</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Định dạng JPG, PNG (Max 5MB)</span>
+</div>
+<!-- Preview Slots (Mock) -->
+<div class="aspect-square bg-surface-variant rounded-lg border border-outline-variant/50 relative group overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sample product photo for a marketplace listing. A pristine, lightly used university textbook resting on a clean wooden desk, illuminated by natural soft morning light. Modern, high-legibility aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7jdgEXVhD_NKawsfEcZ0wwrLSw-DvM8RERDKrQnJPsttYUU4cgKQjeyWyihrzI3KBJbEr5tggdjIFfiFxlS8bwNRrLB5WYL6H_GrLfdRVgis7fXBJ7HCnissp5x1wGXCgKIbTCZ1DNar-6zYd_ew5SYb2Pj3tGq1nK-ucdpyJ9_bviPvG5Xf5k8dZP3Nu9wjWM_BJNR5SRg-swiQQQ39OhZQcSFurXxa7pXtkUEUHMNr3TS7ETexr"/>
+<div class="absolute top-sm left-sm bg-primary text-on-primary font-label-md text-[10px] px-2 py-0.5 rounded-full z-10 shadow-sm">Ảnh bìa</div>
+<button class="absolute top-sm right-sm bg-surface-container-lowest/80 backdrop-blur-sm p-1 rounded-full text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+</button>
+</div>
+<div class="aspect-square bg-surface-container rounded-lg border-2 border-dashed border-outline-variant flex items-center justify-center text-outline-variant cursor-pointer hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</div>
+<div class="aspect-square bg-surface-container rounded-lg border-2 border-dashed border-outline-variant flex items-center justify-center text-outline-variant cursor-pointer hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+</section>
+<!-- 2. Thông tin cơ bản -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md border border-outline-variant/30 space-y-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Thông tin cơ bản</h2>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface block" for="product_name">Tên sản phẩm <span class="text-error">*</span></label>
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] px-md py-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md placeholder:text-outline" id="product_name" placeholder="Ví dụ: Giáo trình Kinh tế vĩ mô NEU" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface block" for="category">Danh mục <span class="text-error">*</span></label>
+<div class="relative">
+<select class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] px-md py-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" id="category">
+<option disabled="" selected="" value="">Chọn danh mục</option>
+<option value="sach">Sách &amp; Giáo trình</option>
+<option value="dientu">Đồ điện tử</option>
+<option value="dodung">Đồ dùng sinh hoạt</option>
+<option value="khac">Khác</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface block" for="condition">Tình trạng <span class="text-error">*</span></label>
+<div class="relative">
+<select class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] px-md py-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" id="condition">
+<option value="new">Mới 100%</option>
+<option value="like_new">Như mới (99%)</option>
+<option value="used">Đã sử dụng</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface block" for="price">Giá bán (VND) <span class="text-error">*</span></label>
+<div class="relative">
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] pl-md pr-12 py-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" id="price" placeholder="0" type="number"/>
+<span class="absolute right-md top-1/2 -translate-y-1/2 text-outline font-label-md text-label-md pointer-events-none">₫</span>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface block" for="quantity">Số lượng tồn kho</label>
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] px-md py-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" id="quantity" min="1" type="number" value="1"/>
+</div>
+</div>
+</section>
+<!-- 3. Mô tả -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md border border-outline-variant/30 space-y-sm">
+<label class="font-headline-sm text-headline-sm text-on-surface block" for="description">Mô tả chi tiết</label>
+<p class="font-body-sm text-body-sm text-outline mb-xs">Cung cấp thông tin rõ ràng về nguồn gốc, tình trạng hiện tại, và lý do bán.</p>
+<textarea class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] p-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md resize-y placeholder:text-outline" id="description" placeholder="Nhập mô tả chi tiết sản phẩm..." rows="5"></textarea>
+</section>
+</div>
+<!-- Right Column: Location & Delivery -->
+<div class="lg:col-span-5 space-y-lg">
+<!-- 4. Phương thức giao dịch -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md border border-outline-variant/30 space-y-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Phương thức giao dịch</h2>
+<div class="flex flex-col gap-sm">
+<label class="flex items-center gap-sm p-sm rounded-[12px] hover:bg-surface-container-low transition-colors cursor-pointer border border-transparent hover:border-outline-variant/30">
+<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant bg-surface" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Gặp trực tiếp</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Giao dịch tại khuôn viên trường hoặc khu vực lân cận</span>
+</div>
+</label>
+<label class="flex items-center gap-sm p-sm rounded-[12px] hover:bg-surface-container-low transition-colors cursor-pointer border border-transparent hover:border-outline-variant/30">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant bg-surface" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Ship COD (Thanh toán khi nhận hàng)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sử dụng đơn vị vận chuyển nội thành</span>
+</div>
+</label>
+</div>
+</section>
+<!-- 5 & 6. Địa điểm giao dịch & Bản đồ -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md border border-outline-variant/30 space-y-md flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Địa điểm hẹn giao dịch</h2>
+<!-- Bản đồ thông minh -->
+<div class="space-y-sm">
+<div class="flex gap-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-[16px] pl-10 pr-md py-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" placeholder="Tìm kiếm địa chỉ, tên đường, trường đại học..." type="text"/>
+</div>
+<button class="bg-secondary-container text-on-secondary-container hover:brightness-90 transition-all rounded-[16px] px-sm py-sm flex items-center justify-center gap-xs shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">my_location</span>
+</button>
+</div>
+<div class="w-full h-48 bg-surface-variant rounded-[16px] relative overflow-hidden border border-outline-variant/50">
+<img class="w-full h-full object-cover opacity-80" data-alt="A clean, minimalist UI map background showing a stylized city grid. Very light colors, soft blues and whites. A prominent vibrant blue location pin stands in the center. Modern SaaS application aesthetic." data-location="Hanoi, Vietnam" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaBY-WslKw07stl9PREpfztoTErPbngWzFMj0AmUKPAXuYa62zJ-jeSTzuFHk1_KqCnuJyh9bFOVCDRyU1L6XSAe_6nylLv27V8-RmDnXAwtGts9cpZazbAuMwKnsCSMcAac6UydL6yzgjBAqackUPe_Kl3Z4YID1_lfbaaStm2gGSVw8_amDGs-cRCzVGC3Ee4iDGGCjpeyLSNnWD8xreEvOFFmY7b99UpwZ0LymLNCqt0QeMnoBA"/>
+<!-- Draggable Pin Mock -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing pb-6">
+<span class="material-symbols-outlined text-[40px] text-error drop-shadow-md" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="w-4 h-1 bg-on-surface/20 rounded-full absolute bottom-1 left-1/2 -translate-x-1/2 blur-[2px]"></div>
+</div>
+<div class="absolute bottom-sm right-sm glass px-3 py-1 rounded-full shadow-sm font-label-md text-label-md text-[12px] text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span> Kéo ghim để tinh chỉnh
+                            </div>
+</div>
+</div>
+<!-- Các trường văn bản -->
+<div class="grid grid-cols-2 gap-sm">
+<div class="space-y-xs col-span-2">
+<label class="font-label-md text-label-md text-on-surface block text-[12px]">Tên điểm hẹn (Tùy chọn)</label>
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-sm text-body-sm" placeholder="VD: Cổng trường A, KTX B..." type="text"/>
+</div>
+<div class="space-y-xs">
+<select class="w-full bg-surface text-on-surface border border-outline-variant rounded-lg px-3 py-2 appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-sm text-body-sm text-outline">
+<option disabled="" selected="">Tỉnh/Thành phố</option>
+<option>Hà Nội</option>
+</select>
+</div>
+<div class="space-y-xs">
+<select class="w-full bg-surface text-on-surface border border-outline-variant rounded-lg px-3 py-2 appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-sm text-body-sm text-outline">
+<option disabled="" selected="">Quận/Huyện</option>
+</select>
+</div>
+<div class="space-y-xs">
+<select class="w-full bg-surface text-on-surface border border-outline-variant rounded-lg px-3 py-2 appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-sm text-body-sm text-outline">
+<option disabled="" selected="">Phường/Xã</option>
+</select>
+</div>
+<div class="space-y-xs">
+<input class="w-full bg-surface text-on-surface border border-outline-variant rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-sm text-body-sm" placeholder="Đường/Phố" type="text"/>
+</div>
+</div>
+</section>
+<!-- 7. Bảo mật -->
+<section class="bg-surface-container-low rounded-[16px] p-md border border-primary/20">
+<label class="flex items-start gap-sm cursor-pointer group">
+<input checked="" class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant bg-surface" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Bảo vệ quyền riêng tư vị trí</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Chỉ công khai vị trí gần đúng trên bản đồ tin đăng. Địa chỉ chính xác chỉ được chia sẻ cho người mua khi đơn hàng hoặc cuộc hẹn được bạn xác nhận.</span>
+</div>
+</label>
+</section>
+</div>
+</form>
+</main>
+<!-- Bottom Action Bar (Sticky Footer for Actions) -->
+<div class="sticky bottom-0 left-0 w-full bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 p-md z-40 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)]">
+<div class="max-w-[1280px] mx-auto flex justify-end gap-sm md:gap-md">
+<!-- Secondary Button -->
+<button class="bg-surface-variant text-on-surface px-lg py-sm rounded-[16px] font-button text-button hover:bg-surface-variant/80 hover:shadow-sm active:scale-95 transition-all flex items-center justify-center min-w-[120px]" type="button">
+                Xem trước
+            </button>
+<!-- Primary Button (Purple/Primary as requested) -->
+<button class="bg-primary text-on-primary px-xl py-sm rounded-[16px] font-button text-button hover:brightness-110 shadow-[0px_4px_12px_rgba(37,99,235,0.3)] active:scale-95 transition-all flex items-center justify-center gap-sm min-w-[160px]" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">publish</span>
+                Đăng bán
+            </button>
+</div>
+</div>
+</body></html>

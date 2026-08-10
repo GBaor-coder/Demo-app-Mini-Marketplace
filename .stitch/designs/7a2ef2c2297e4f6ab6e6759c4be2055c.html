@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Details - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#f8f9ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-primary-container": "#eeefff",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "secondary-container": "#2170e4",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-surface": "#0b1c30",
+                    "on-tertiary-fixed": "#002109",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "background": "#f8f9ff",
+                    "outline-variant": "#c3c6d7",
+                    "on-surface-variant": "#434655",
+                    "tertiary": "#006229",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#d8e2ff",
+                    "surface-dim": "#cbdbf5",
+                    "inverse-surface": "#213145",
+                    "on-primary-fixed": "#00174b",
+                    "primary": "#004ac6",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "primary-container": "#2563eb",
+                    "tertiary-container": "#007e37",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "primary-fixed": "#dbe1ff",
+                    "surface-container-high": "#dce9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#004395",
+                    "on-secondary-container": "#fefcff",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#eff4ff",
+                    "inverse-primary": "#b4c5ff",
+                    "on-background": "#0b1c30",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "tertiary-fixed": "#6bff8f",
+                    "on-tertiary-container": "#c1ffc5",
+                    "surface-container": "#e5eeff",
+                    "outline": "#737686",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#0058be",
+                    "surface-tint": "#0053db"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "gutter": "16px",
+                    "margin-mobile": "20px",
+                    "lg": "24px",
+                    "margin-desktop": "40px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px",
+                    "2xl": "48px"
+            },
+            "fontFamily": {
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "headline-sm": [
+                            "Inter"
+                    ],
+                    "headline-md": [
+                            "Inter"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "label-md": [
+                            "Inter"
+                    ],
+                    "display-lg-mobile": [
+                            "Inter"
+                    ],
+                    "display-lg": [
+                            "Inter"
+                    ],
+                    "button": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-sm": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "display-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "button": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<button class="text-on-surface-variant hover:brightness-90 transition-all flex items-center justify-center w-10 h-10 rounded-full active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">UniLoop</h1>
+<button class="text-on-surface-variant hover:brightness-90 transition-all flex items-center justify-center w-10 h-10 rounded-full active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary" data-icon="search">search</span>
+</button>
+</header>
+<main class="px-margin-mobile pt-lg flex flex-col gap-lg">
+<!-- Order Status -->
+<div class="bg-surface-container-lowest rounded-[20px] p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<div class="flex items-center justify-between mb-md">
+<h2 class="text-headline-sm font-headline-sm">Order Status</h2>
+<span class="bg-tertiary-container/20 text-tertiary font-label-md text-label-md px-3 py-1 rounded-full">In Progress</span>
+</div>
+<div class="relative pl-sm">
+<!-- Line -->
+<div class="absolute left-[15px] top-4 bottom-4 w-[2px] bg-outline-variant/30"></div>
+<!-- Steps -->
+<div class="flex gap-md mb-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px] fill">check_circle</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Order Placed</p>
+<p class="font-body-sm text-body-sm text-outline">Oct 24, 10:00 AM</p>
+</div>
+</div>
+<div class="flex gap-md mb-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-[0px_0px_0px_4px_rgba(37,99,235,0.2)]">
+<span class="material-symbols-outlined text-on-primary text-[14px] fill">location_on</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-bold">Meeting Scheduled</p>
+<p class="font-body-sm text-body-sm text-outline">Oct 25, 2:00 PM</p>
+</div>
+</div>
+<div class="flex gap-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center shrink-0 border-2 border-outline-variant">
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Completed</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Info -->
+<div class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] overflow-hidden">
+<div class="flex p-md gap-md border-b border-outline-variant/20">
+<img class="w-24 h-24 object-cover rounded-lg shrink-0" data-alt="A modern engineering textbook titled 'Calculus Early Transcendentals' sitting on a clean wooden desk with soft natural lighting, a coffee cup in the background, sharp focus, professional product photography style, vibrant colors, shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHfUMIHurxgRYBASMta2tWt7DglPfCIXrZdQDP-1VtaNY1sGf_5hceS8TAIpLxLybEwfrkCRJzp-W8EwsAoVrMz7PGAHITN8e9y08qodzYMA8VrSX_iTlvAb0pyAI8IL5wxNu7z7Y576rHPBxZCcqLEvuog7Nam4selnLjhxWukIgztpy9kafCv90N_L0uics30ygMnlJvJGpObVMeTg_PslgNNAIDDl55gR-X-md5_HMFpeMvbDv4"/>
+<div class="flex flex-col justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm leading-tight mb-xs">Calculus: Early Transcendentals, 9th Edition</h3>
+<p class="font-body-sm text-body-sm text-outline">Condition: Like New</p>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary">$45.00</p>
+</div>
+</div>
+<!-- Seller Info -->
+<div class="p-md flex items-center justify-between bg-surface-container-low/50">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-primary-container font-bold text-lg shrink-0">
+                        A
+                    </div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Alex Mercer</p>
+<p class="font-body-sm text-body-sm text-outline">Engineering Senior</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</div>
+<!-- Delivery & Meeting Point -->
+<div class="bg-surface-container-lowest rounded-[20px] p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-primary fill">handshake</span>
+<h2 class="text-headline-sm font-headline-sm">Delivery Method: Gặp trực tiếp</h2>
+</div>
+<div class="bg-surface-container-low rounded-xl p-sm mb-md">
+<p class="font-label-md text-label-md text-on-surface mb-xs">Meeting Point</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Campus Library, Main Entrance, Level 1</p>
+<div class="mt-sm flex gap-sm">
+<a class="text-primary font-label-md text-label-md flex items-center gap-xs hover:underline" href="#">
+                        Get Directions <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<div class="relative w-full h-32 rounded-xl overflow-hidden mb-sm border border-outline-variant/30">
+<div class="bg-cover bg-center w-full h-full" data-alt="A beautifully rendered minimalist digital map showing a university campus with a clear red marker pin dropped at a central library building. Soft pastel colors, clean UI aesthetic, subtle grid lines, bright day lighting, modern map design style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDisCIb-KiGizFXCwXMYTqHS2K90QcR3N0b-ErE1GeKzzYmehx3C9eR3F6MQeBbROJ2zdYC_NbLVycG9TD7PIFIBflbpI4Jg1HZ-_nyXPPzfMS0Cib4cThabG1GRBu3U1Kn2NeEuP0QHKHlYlXmFcEYydEkqAKaA6N1t9R75PylgJv4HQlaG31j4XZQ2pIGqg1Yt8KhlUNbyIg_kXUef88KUbHYHChswSnwiydAjJo_4vkRYbcpl9Gy')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/50 to-transparent pointer-events-none"></div>
+<button class="absolute bottom-sm right-sm bg-surface-container-lowest shadow-[0px_8px_24px_rgba(15,23,42,0.08)] px-3 py-1.5 rounded-full font-label-md text-label-md text-on-surface flex items-center gap-xs hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[16px]">map</span> Open Map
+                </button>
+</div>
+</div>
+<!-- Payment Summary -->
+<div class="bg-surface-container-lowest rounded-[20px] p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<h2 class="text-headline-sm font-headline-sm mb-md">Payment Summary</h2>
+<div class="space-y-sm mb-md">
+<div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Item Total</span>
+<span>$45.00</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Platform Fee</span>
+<span>$0.00</span>
+</div>
+</div>
+<div class="pt-sm border-t border-outline-variant/30 flex justify-between items-center">
+<span class="font-headline-sm text-headline-sm">Total Price</span>
+<span class="font-headline-sm text-headline-sm text-primary">$45.00</span>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Actions -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/20 p-md z-40 pb-safe shadow-[0px_-8px_24px_rgba(15,23,42,0.05)]">
+<button class="w-full bg-primary text-on-primary font-button text-button h-12 rounded-[16px] hover:brightness-90 active:scale-98 transition-all flex items-center justify-center gap-sm shadow-[0px_4px_12px_rgba(37,99,235,0.2)]">
+<span class="material-symbols-outlined">forum</span>
+            Liên hệ người bán
+        </button>
+</div>
+</body></html>

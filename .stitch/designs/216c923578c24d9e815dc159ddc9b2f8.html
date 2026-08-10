@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLoop - My Orders</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed": "#002109",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c3c6d7",
+                        "on-surface-variant": "#434655",
+                        "tertiary": "#006229",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#00174b",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-secondary-container": "#fefcff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-primary": "#b4c5ff",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-container": "#c1ffc5",
+                        "surface-container": "#e5eeff",
+                        "outline": "#737686",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#0058be",
+                        "surface-tint": "#0053db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "2xl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "button": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-[80px]">
+<!-- Top App Bar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer hover:brightness-90 transition-all active:scale-95 duration-200" data-icon="arrow_back">arrow_back</span>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">UniLoop</h1>
+</div>
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer hover:brightness-90 transition-all active:scale-95 duration-200" data-icon="search">search</span>
+</header>
+<!-- Tab Bar -->
+<nav class="sticky top-16 z-40 bg-surface border-b border-outline-variant/30 px-margin-mobile overflow-x-auto whitespace-nowrap scrollbar-hide">
+<ul class="flex gap-6 h-12 items-end pb-2">
+<li class="text-on-surface-variant font-label-md text-label-md cursor-pointer pb-2 hover:text-primary transition-colors">Chờ xác nhận</li>
+<li class="text-on-surface-variant font-label-md text-label-md cursor-pointer pb-2 hover:text-primary transition-colors">Đã xác nhận</li>
+<li class="text-primary font-label-md text-label-md cursor-pointer pb-2 border-b-2 border-primary">Đang giao dịch</li>
+<li class="text-on-surface-variant font-label-md text-label-md cursor-pointer pb-2 hover:text-primary transition-colors">Hoàn tất</li>
+<li class="text-on-surface-variant font-label-md text-label-md cursor-pointer pb-2 hover:text-primary transition-colors">Đã hủy</li>
+</ul>
+</nav>
+<!-- Content Area -->
+<main class="p-margin-mobile grid grid-cols-4 md:grid-cols-8 gap-gutter md:px-xl md:py-lg">
+<!-- Order Card 1 -->
+<article class="col-span-4 bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md flex flex-col gap-sm">
+<div class="flex justify-between items-center border-b border-outline-variant/20 pb-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="storefront" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Campus Tech Hub</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary">Đang giao dịch</span>
+</div>
+<div class="flex gap-md py-sm">
+<div class="w-[80px] h-[80px] rounded-lg overflow-hidden shrink-0 bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A sleek, modern laptop resting on a clean wooden desk in a well-lit student study room, surrounded by minimal tech accessories. High quality product photography with soft, natural daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvcbfk5rq81gVrdZZPKAeYueY6pNLJIPpmz1r4ROaB-fs5pXMckdqvtdeiER9u1rnF2Br0QXw2f9kRxPcrpL856sxJT7n2OaaMICFNyXuNWXtwzpsG85qeoR4FFshDv38tyzpPevIbyHNQkYxSn9K1Z6a74xbQWZZ-dLv8Khk15hWptwV0GdwZEhaDPFNAEVBqjDzuJco6XEzfHUHKDKdy9FBFzcuZdgpcAFiPsi0XE7RfVytP4r85"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<h2 class="font-body-md text-body-md text-on-surface line-clamp-2">MacBook Pro M1 2020 - Good Condition for Students</h2>
+<div class="flex justify-between items-end">
+<span class="font-body-sm text-body-sm text-on-surface-variant">x1</span>
+<span class="font-label-md text-label-md text-primary font-semibold">15,000,000 ₫</span>
+</div>
+</div>
+</div>
+<div class="flex justify-end pt-sm border-t border-outline-variant/20 gap-sm">
+<button class="px-4 py-2 rounded-[16px] bg-secondary-container/10 text-primary font-button text-button hover:bg-secondary-container/20 transition-colors">Liên hệ người bán</button>
+<button class="px-4 py-2 rounded-[16px] bg-primary text-on-primary font-button text-button hover:brightness-90 transition-colors">Xem chi tiết</button>
+</div>
+</article>
+<!-- Order Card 2 -->
+<article class="col-span-4 bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md flex flex-col gap-sm">
+<div class="flex justify-between items-center border-b border-outline-variant/20 pb-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="storefront" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Dorm Essentials</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary">Đang giao dịch</span>
+</div>
+<div class="flex gap-md py-sm">
+<div class="w-[80px] h-[80px] rounded-lg overflow-hidden shrink-0 bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A compact, stylish mini-fridge in a bright, modern university dorm room setting. The fridge is white with clean lines, sitting next to a small potted plant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy5Z_M3pHzwV_6dqTQWtvDa0KO3OXtZ6NYpgkASdk59YiWW1KmMV0tK_lcf1VM0juxzjCIO7fA0hk9lldJJNeUsBP82MNVjEKAAncpUA7OJ5dbxEVSpsB-7rkko1PgfqI4I-MMQCjaaiBqrrgekBioZgdtRxSRrkw5tmwc-lz35iT_l7Ezpd4ZzWkVbC9_C33N6HIUifKra5aMnS048iQFJnN9tatNRAPMMDTDPGi0lCGr1wE-Ey1N"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<h2 class="font-body-md text-body-md text-on-surface line-clamp-2">Mini Fridge 50L - Perfect for Dorms</h2>
+<div class="flex justify-between items-end">
+<span class="font-body-sm text-body-sm text-on-surface-variant">x1</span>
+<span class="font-label-md text-label-md text-primary font-semibold">1,200,000 ₫</span>
+</div>
+</div>
+</div>
+<div class="flex justify-end pt-sm border-t border-outline-variant/20 gap-sm">
+<button class="px-4 py-2 rounded-[16px] bg-secondary-container/10 text-primary font-button text-button hover:bg-secondary-container/20 transition-colors">Liên hệ người bán</button>
+<button class="px-4 py-2 rounded-[16px] bg-primary text-on-primary font-button text-button hover:brightness-90 transition-colors">Xem chi tiết</button>
+</div>
+</article>
+</main>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-md font-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-label-md font-label-md">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-label-md font-label-md">Sell</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="text-label-md font-label-md font-semibold">Orders</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-md font-label-md">Profile</span>
+</div>
+</nav>
+<style>
+        /* Utility to hide scrollbar but keep functionality */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

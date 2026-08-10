@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLoop - Hủy đơn hàng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-primary-container": "#eeefff",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "secondary-container": "#2170e4",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-surface": "#0b1c30",
+                      "on-tertiary-fixed": "#002109",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#001a42",
+                      "error": "#ba1a1a",
+                      "background": "#f8f9ff",
+                      "outline-variant": "#c3c6d7",
+                      "on-surface-variant": "#434655",
+                      "tertiary": "#006229",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#d8e2ff",
+                      "surface-dim": "#cbdbf5",
+                      "inverse-surface": "#213145",
+                      "on-primary-fixed": "#00174b",
+                      "primary": "#004ac6",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "primary-container": "#2563eb",
+                      "tertiary-container": "#007e37",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "primary-fixed": "#dbe1ff",
+                      "surface-container-high": "#dce9ff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "surface-bright": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-secondary-container": "#fefcff",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#eff4ff",
+                      "inverse-primary": "#b4c5ff",
+                      "on-background": "#0b1c30",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "tertiary-fixed": "#6bff8f",
+                      "on-tertiary-container": "#c1ffc5",
+                      "surface-container": "#e5eeff",
+                      "outline": "#737686",
+                      "on-tertiary": "#ffffff",
+                      "secondary": "#0058be",
+                      "surface-tint": "#0053db"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "gutter": "16px",
+                      "margin-mobile": "20px",
+                      "lg": "24px",
+                      "margin-desktop": "40px",
+                      "xl": "32px",
+                      "sm": "8px",
+                      "base": "4px",
+                      "xs": "4px",
+                      "2xl": "48px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "button": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased h-screen overflow-hidden flex flex-col relative">
+<!-- Background Layer (Order Detail Screen - blurred out) -->
+<div class="absolute inset-0 z-0 overflow-y-auto blur-sm brightness-75 pointer-events-none">
+<!-- TopAppBar (From JSON) -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] docked full-width top-0 sticky">
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">UniLoop</div>
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</header>
+<!-- Mock Order Content -->
+<main class="p-margin-mobile pb-2xl">
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] mb-lg">
+<div class="flex items-center justify-between border-b border-outline-variant/20 pb-sm mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Mã đơn: #UL-98234</span>
+<span class="font-label-md text-label-md text-primary font-semibold">Chờ xác nhận</span>
+</div>
+<div class="flex gap-md py-sm">
+<div class="w-20 h-20 bg-surface-variant rounded-lg overflow-hidden shrink-0">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A clean, high-quality product image of a modern university textbook or tech gadget suitable for a student marketplace. The lighting is bright and even, highlighting the object's details against a soft, neutral background. The style is professional e-commerce photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzZ0BteqEfM2qhc9HsJ85zb_CjqsxQxUW-ypMmlt51mXBc2gFvmjP9TVj0Qsga-tPcZ07fcaUa9l1pV3AUklAxykNOQhAGQ_x-fxJW_eLmXidXNFmMB6GhxnxiKHmu21_dmnsPStfPsZR0qoyRH75UCBtCehYyiERY2x9HmnQQO7FyEgog8c9BKLduZ2OK0FKzx_PTY5AizSseKT-pQ7jnUvyVPpCt5oG5Ghuaj4_XdQG31Bh_Zvox"/>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface line-clamp-2">Giáo trình Nhập môn Lập trình (Tái bản 2023)</h3>
+<p class="font-body-md text-body-md text-primary font-bold mt-sm">150,000 đ</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Thông tin thanh toán</h4>
+<div class="space-y-sm font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex justify-between"><span>Tạm tính</span><span>150,000 đ</span></div>
+<div class="flex justify-between"><span>Phí vận chuyển</span><span>15,000 đ</span></div>
+<div class="flex justify-between font-bold text-on-surface pt-sm border-t border-outline-variant/20"><span>Tổng cộng</span><span class="text-primary">165,000 đ</span></div>
+</div>
+</div>
+</main>
+</div>
+<!-- Modal Overlay (Active Interaction Layer) -->
+<div class="absolute inset-0 z-[100] flex items-center justify-center p-margin-mobile bg-on-surface/40 backdrop-blur-sm">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest rounded-[24px] shadow-[0px_12px_32px_rgba(15,23,42,0.12)] w-full max-w-[400px] flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+<!-- Modal Header -->
+<div class="px-lg pt-lg pb-md text-center">
+<h2 class="font-headline-md text-headline-md text-on-surface">Lý do hủy đơn</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Vui lòng cho chúng tôi biết lý do bạn muốn hủy đơn hàng này.</p>
+</div>
+<!-- Modal Content (Reasons List) -->
+<div class="px-lg pb-lg overflow-y-auto">
+<form class="space-y-md" id="cancel-reason-form">
+<!-- Radio Options -->
+<div class="space-y-sm">
+<!-- Option 1 -->
+<label class="flex items-center p-md bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="form-radio h-5 w-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface focus:ring-2" name="cancel_reason" type="radio" value="change_mind"/>
+<span class="ml-sm font-body-md text-body-md text-on-surface">Thay đổi ý định</span>
+</label>
+<!-- Option 2 -->
+<label class="flex items-center p-md bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="form-radio h-5 w-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface focus:ring-2" name="cancel_reason" type="radio" value="found_better_price"/>
+<span class="ml-sm font-body-md text-body-md text-on-surface">Tìm thấy giá tốt hơn</span>
+</label>
+<!-- Option 3 -->
+<label class="flex items-center p-md bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="form-radio h-5 w-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface focus:ring-2" name="cancel_reason" type="radio" value="seller_unresponsive"/>
+<span class="ml-sm font-body-md text-body-md text-on-surface">Người bán không phản hồi</span>
+</label>
+<!-- Option 4 (Other) -->
+<label class="flex items-center p-md bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="form-radio h-5 w-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface focus:ring-2" id="reason_other" name="cancel_reason" type="radio" value="other"/>
+<span class="ml-sm font-body-md text-body-md text-on-surface">Khác...</span>
+</label>
+</div>
+<!-- Text Area (Initially hidden, could be toggled by JS if 'Other' is selected, but shown here for layout completeness based on prompt) -->
+<div class="mt-md">
+<textarea class="w-full p-md bg-surface rounded-[16px] border border-outline-variant text-on-surface font-body-md text-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none placeholder:text-on-surface-variant/50" placeholder="Nhập chi tiết lý do của bạn..." rows="3"></textarea>
+</div>
+</form>
+</div>
+<!-- Modal Actions -->
+<div class="px-lg pb-lg pt-sm flex flex-col gap-sm mt-auto">
+<button class="w-full py-md bg-error text-on-error font-button text-button rounded-[16px] hover:brightness-90 active:scale-[0.98] transition-all shadow-[0px_4px_12px_rgba(15,23,42,0.05)]" type="button">
+                    Xác nhận hủy
+                </button>
+<button class="w-full py-md bg-surface-container-highest text-on-surface font-button text-button rounded-[16px] hover:brightness-90 active:scale-[0.98] transition-all" type="button">
+                    Quay lại
+                </button>
+</div>
+</div>
+</div>
+<style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+<script>
+        // Simple micro-interaction for the 'Other' text area focus
+        document.addEventListener('DOMContentLoaded', () => {
+            const radioOther = document.getElementById('reason_other');
+            const textarea = document.querySelector('textarea');
+            
+            const radios = document.querySelectorAll('input[name="cancel_reason"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if(e.target.value === 'other') {
+                        textarea.focus();
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

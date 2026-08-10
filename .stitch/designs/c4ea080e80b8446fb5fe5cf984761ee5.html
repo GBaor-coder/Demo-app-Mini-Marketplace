@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quản lý sản phẩm - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#c1ffc5",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed": "#001a42",
+                      "tertiary-fixed": "#6bff8f",
+                      "tertiary-container": "#007e37",
+                      "outline-variant": "#c3c6d7",
+                      "on-surface-variant": "#434655",
+                      "on-primary-container": "#eeefff",
+                      "surface-container-high": "#dce9ff",
+                      "on-tertiary-fixed": "#002109",
+                      "on-surface": "#0b1c30",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-primary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "secondary": "#0058be",
+                      "primary": "#004ac6",
+                      "surface-container": "#e5eeff",
+                      "inverse-primary": "#b4c5ff",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#dbe1ff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "error": "#ba1a1a",
+                      "outline": "#737686",
+                      "surface-tint": "#0053db",
+                      "surface-container-low": "#eff4ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "secondary-container": "#2170e4",
+                      "on-primary-fixed": "#00174b",
+                      "error-container": "#ffdad6",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#213145",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "tertiary": "#006229",
+                      "surface-variant": "#d3e4fe",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-background": "#0b1c30",
+                      "surface": "#f8f9ff",
+                      "surface-bright": "#f8f9ff",
+                      "primary-container": "#2563eb",
+                      "on-secondary-container": "#fefcff",
+                      "on-tertiary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "xl": "32px",
+                      "2xl": "48px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "margin-mobile": "20px",
+                      "base": "4px",
+                      "margin-desktop": "40px",
+                      "lg": "24px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "button": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "button": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pt-16 pb-24 md:pt-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] docked full-width top-0 sticky flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<div class="flex items-center gap-4">
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 duration-200 flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">UniLoop</h1>
+</div>
+<div class="hidden md:flex flex-1 justify-center max-w-lg mx-8 relative">
+<input class="w-full bg-surface-container rounded-full pl-12 pr-4 py-2 border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-on-surface" placeholder="Tìm kiếm sản phẩm..." type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+</div>
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 duration-200 md:hidden flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined">search</span>
+</button>
+</header>
+<main class="flex-1 w-full max-w-5xl mx-auto px-margin-mobile md:px-margin-desktop py-lg">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="text-display-lg-mobile md:text-display-lg font-display-lg-mobile md:font-display-lg text-on-surface">Quản lý sản phẩm</h2>
+</div>
+<!-- Tabs -->
+<div class="flex overflow-x-auto no-scrollbar gap-2 mb-lg pb-2 border-b border-outline-variant/30 relative">
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md transition-all hover:bg-primary/20">
+                Đang bán (3)
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-variant">
+                Chờ giao dịch (1)
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-variant">
+                Đã bán (12)
+            </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-variant">
+                Bản nháp (0)
+            </button>
+</div>
+<!-- Product List -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow duration-300 overflow-hidden flex flex-col group border border-outline-variant/20 relative">
+<div class="relative h-48 w-full">
+<img class="w-full h-full object-cover rounded-t-[20px]" data-alt="A clean, high-quality flat lay photo of a slightly used engineering graphics textbook and drafting tools (compass, T-square) on a light oak desk. Bright natural sunlight from the left, soft shadows. Modern student aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUmxty-jNQRFRYmXi7Gvr91l4Z1c8qTX_mJSApylp9BpSdTDnPb70sjmf2KQpj1mH0_uq1Gpk-rO9C37ngRNxrNYQFG-XO-gwvj7QhKArIV0plUbncQYMFDjmPZ-HK4iJesBmaajclbmzWs2g8OsdMWIz5pDMvbpSffHSTU6PcUHfWq9n3WkJIVPOLBWW3ezLmHLPPPAjla5AOiZ2lyG39okntkvo2daFaA2tzm3U_b8ZW7ygrW5pp"/>
+<div class="absolute top-3 left-3 bg-tertiary-container/90 backdrop-blur-sm text-on-tertiary-container px-3 py-1 rounded-full text-label-md font-label-md flex items-center gap-1 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span> Đang bán
+                    </div>
+<button aria-label="Menu hành động" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:bg-surface transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-1 line-clamp-2">Giáo trình Đồ hoạ Kỹ thuật (Bản gốc)</h3>
+<div class="flex items-baseline gap-2 mb-3 mt-auto">
+<span class="text-headline-md font-headline-md text-primary font-bold">120.000đ</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant border-t border-outline-variant/30 pt-3">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+<span>Tồn kho: 1</span>
+</div>
+<div class="flex gap-2">
+<button class="text-secondary hover:text-secondary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+<span class="sr-only">Sửa</span>
+</button>
+<button class="text-error hover:text-on-error-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span class="sr-only">Xóa</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow duration-300 overflow-hidden flex flex-col group border border-outline-variant/20 relative">
+<div class="relative h-48 w-full">
+<img class="w-full h-full object-cover rounded-t-[20px]" data-alt="A brightly lit, aesthetic product shot of a sleek white scientific calculator (Casio style) resting on a clean grid-patterned notebook. Minimalist composition, soft pastel blue background, conveying a productive university workspace vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBc2LqlWt7htt9f0KEzUbiAEzuHg3sn1yTdU4KF5U62ojHyWNYyhANBh-AQbZ_8FHyvifUqxbrc-NQAuJOUvfB00xJPQGJ_a7gejJJ3UnJLoBS7NnDRpWqmqqE0CW0pf7mMikkWcN5KCsMzOdEoe577qheN9SAKpPbYxZYxsy9ljyo8hgAh3YQ2gfqfNYKVF9IkvohsKPC3k3vzpDkAjatJQ6-IDsZbVWfOx1AX8NS2k7TR1S0VPLo"/>
+<div class="absolute top-3 left-3 bg-tertiary-container/90 backdrop-blur-sm text-on-tertiary-container px-3 py-1 rounded-full text-label-md font-label-md flex items-center gap-1 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span> Đang bán
+                    </div>
+<button aria-label="Menu hành động" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:bg-surface transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-1 line-clamp-2">Máy tính Casio FX-580VN X (Mới 99%)</h3>
+<div class="flex items-baseline gap-2 mb-3 mt-auto">
+<span class="text-headline-md font-headline-md text-primary font-bold">450.000đ</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant border-t border-outline-variant/30 pt-3">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+<span>Tồn kho: 2</span>
+</div>
+<div class="flex gap-2">
+<button class="text-secondary hover:text-secondary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-error hover:text-on-error-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow duration-300 overflow-hidden flex flex-col group border border-outline-variant/20 relative">
+<div class="relative h-48 w-full">
+<img class="w-full h-full object-cover rounded-t-[20px]" data-alt="A close-up shot of a dark grey adjustable laptop stand holding a sleek silver laptop. The setting is a cozy dorm room desk with warm string lights softly blurred in the background. Modern, tech-focused student lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwiqUiFMJ8vI5m0SIptSiYekOVZLrvamPcUDY9jkXx2u4EGxZePncVA__FeoCl7cgvdZe3QmGAYWXisbc7FcT4Q3tvpjBjLp31FkyRJVbpVxWiRooBjGePWZmBwL4CeaSVlPU_JYweFviEwLiooGJIEkik9EhTI7UP7_LX4b_c0xVtOUy0EIfuOJW5EEt8LZnCGOXxQCNZzYC6fOIclIPIcmahqo4sNhsVwbBCtZrLnulez6IAX9Gz"/>
+<div class="absolute top-3 left-3 bg-tertiary-container/90 backdrop-blur-sm text-on-tertiary-container px-3 py-1 rounded-full text-label-md font-label-md flex items-center gap-1 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span> Đang bán
+                    </div>
+<button aria-label="Menu hành động" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:bg-surface transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-1 line-clamp-2">Giá đỡ Laptop tản nhiệt nhôm gấp gọn</h3>
+<div class="flex items-baseline gap-2 mb-3 mt-auto">
+<span class="text-headline-md font-headline-md text-primary font-bold">150.000đ</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant border-t border-outline-variant/30 pt-3">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+<span>Tồn kho: 5</span>
+</div>
+<div class="flex gap-2">
+<button class="text-secondary hover:text-secondary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-error hover:text-on-error-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for New Post (Visible on Mobile & Desktop) -->
+<button class="fixed md:bottom-8 md:right-8 bottom-24 right-4 bg-primary text-on-primary w-14 h-14 rounded-[16px] shadow-[0px_8px_24px_rgba(15,23,42,0.15)] flex items-center justify-center hover:brightness-110 active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 md:hidden docked full-width rounded-t-3xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-md font-label-md mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-md font-label-md mt-1">Explore</span>
+</button>
+<button class="flex flex-col items-center justify-center flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="text-label-md font-label-md mt-1 font-semibold">Sell</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-label-md font-label-md mt-1">Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-md font-label-md mt-1">Profile</span>
+</button>
+</nav>
+</body></html>

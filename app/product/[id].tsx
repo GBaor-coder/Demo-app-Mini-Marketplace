@@ -1,313 +1,498 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { LocationPreview } from '@/src/components/location-preview';
-import { EmptyState, PrimaryButton, SectionHeading } from '@/src/components/ui';
+import { Avatar } from '@/src/components/Avatar';
+import { Button, EmptyState } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { colors, shadow } from '@/src/theme/colors';
-import { formatCurrency, formatDate } from '@/src/utils/format';
+import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { distanceFromCenter } from '@/src/utils/filter';
+import { distanceLabel, formatCurrency } from '@/src/utils/format';
 
 export default function ProductDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const {
-    currentUser,
     products,
-    cart,
-    favoriteIds,
-    addToCart,
-    toggleFavorite,
     getUserById,
+    favoriteIds,
+    toggleFavorite,
+    addToCart,
+    startChat,
+    currentUser,
   } = useStore();
-  const product = products.find((item) => item.id === id);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  const product = products.find((p) => p.id === id);
+  const seller = product ? getUserById(product.sellerId) : undefined;
 
   if (!product) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <EmptyState
-          description="Tin đăng này có thể đã được người bán xóa."
-          icon="cube-outline"
-          title="Không tìm thấy sản phẩm"
-        />
-      </SafeAreaView>
+      <View style={styles.screen}>
+        <EmptyState icon="cube-outline" title="Không tìm thấy sản phẩm" description="Sản phẩm này có thể đã bị xóa." />
+      </View>
     );
   }
 
-  const selectedProduct = product;
-  const seller = getUserById(product.sellerId);
-  const isBuyer = currentUser?.role === 'buyer';
-  const isOwner = currentUser?.id === product.sellerId;
-  const isFavorite = favoriteIds.includes(product.id);
-  const cartQuantity = cart.find((item) => item.productId === product.id)?.quantity ?? 0;
-  const unavailable = product.status === 'sold' || product.stock === 0;
+  const images = product.images.length > 0 ? product.images : [product.image];
+  const favorite = favoriteIds.includes(product.id);
+  const sold = product.status === 'sold';
 
-  function handleAddToCart() {
-    if (!addToCart(selectedProduct.id)) {
-      Alert.alert('Chưa thể thêm', 'Sản phẩm đã hết hàng hoặc tài khoản không phù hợp.');
+  const handleBuyNow = () => {
+    if (currentUser?.role !== 'buyer') {
       return;
     }
-    Alert.alert('Đã thêm vào giỏ', `${selectedProduct.title} đã có trong giỏ hàng.`, [
-      { text: 'Mua tiếp', style: 'cancel' },
-      { text: 'Xem giỏ', onPress: () => router.push('/cart') },
-    ]);
-  }
+    addToCart(product.id);
+    router.push('/cart');
+  };
+
+  const handleChat = () => {
+    const threadId = startChat(product.sellerId, product.id);
+    if (threadId) {
+      router.push(`/chat/${threadId}`);
+    }
+  };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-      <View style={styles.topBar}>
-        <TouchableOpacity accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.iconButton}>
-          <Ionicons name="arrow-back" size={22} color={colors.ink} />
-        </TouchableOpacity>
-        <Text style={styles.topTitle}>Chi tiết sản phẩm</Text>
-        <TouchableOpacity
-          accessibilityLabel="Yêu thích"
-          onPress={() => toggleFavorite(product.id)}
-          style={styles.iconButton}>
-          <Ionicons
-            name={isFavorite ? 'heart' : 'heart-outline'}
-            size={22}
-            color={isFavorite ? colors.accent : colors.ink}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.heroWrap}>
-          <Image contentFit="cover" source={{ uri: product.image }} style={styles.heroImage} />
-          {unavailable && (
-            <View style={styles.soldBanner}>
-              <Text style={styles.soldBannerText}>Sản phẩm đã bán</Text>
-            </View>
-          )}
+    <View style={styles.screen}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
+        <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.headerButton}>
+            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
+          <TouchableOpacity style={styles.headerButton}>
+            <Ionicons name="share-social-outline" size={22} color={colors.onSurface} />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.mainInfo}>
-          <View style={styles.badgeRow}>
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryBadgeText}>{product.category}</Text>
-            </View>
-            <View style={styles.conditionBadge}>
-              <Text style={styles.conditionBadgeText}>{product.condition}</Text>
-            </View>
-          </View>
-          <Text style={styles.productTitle}>{product.title}</Text>
-          <Text style={styles.price}>{formatCurrency(product.price)}</Text>
-          <View style={styles.inventoryRow}>
-            <Ionicons name="layers-outline" size={17} color={colors.inkMuted} />
-            <Text style={styles.inventoryText}>Còn {product.stock} sản phẩm</Text>
-            <Text style={styles.dot}>•</Text>
-            <Text style={styles.inventoryText}>Đăng ngày {formatDate(product.createdAt)}</Text>
+        <View style={styles.carousel}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) =>
+              setImageIndex(Math.round(e.nativeEvent.contentOffset.x / width))
+            }>
+            {images.map((uri) => (
+              <Image key={uri} contentFit="cover" source={{ uri }} style={{ width, height: 400 }} />
+            ))}
+          </ScrollView>
+          <View style={styles.pagination}>
+            {images.map((uri, index) => (
+              <View
+                key={uri}
+                style={[styles.dot, index === imageIndex && styles.dotActive]}
+              />
+            ))}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <SectionHeading title="Mô tả" />
-          <Text style={styles.description}>{product.description}</Text>
-        </View>
+        <View style={styles.content}>
+          <View style={styles.detailCard}>
+            <Text style={styles.title}>{product.title}</Text>
+            <Text style={styles.price}>{formatCurrency(product.price)}</Text>
+            <View style={styles.chips}>
+              <View style={styles.chipPrimary}>
+                <Text style={styles.chipPrimaryText}>Tình trạng: {product.condition}</Text>
+              </View>
+              <View style={styles.chipSecondary}>
+                <Ionicons name="pricetag-outline" size={14} color={colors.secondary} />
+                <Text style={styles.chipSecondaryText}>{product.category}</Text>
+              </View>
+            </View>
+          </View>
 
-        <View style={styles.section}>
-          <SectionHeading title="Người bán" />
-          <View style={styles.sellerCard}>
-            <Image
-              contentFit="cover"
-              source={{ uri: seller?.avatar ?? '' }}
-              style={styles.avatar}
-            />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleChat}
+            style={styles.sellerCard}>
+            <Avatar uri={seller?.avatar} name={seller?.name} size={56} />
             <View style={styles.sellerInfo}>
               <View style={styles.sellerNameRow}>
-                <Text style={styles.sellerName}>{seller?.name ?? 'Người bán UniLoop'}</Text>
-                {seller?.verified && (
-                  <Ionicons name="checkmark-circle" size={17} color={colors.primary} />
-                )}
+                <Text style={styles.sellerName}>{seller?.name ?? 'Người bán'}</Text>
+                {seller?.verified ? (
+                  <Ionicons name="shield-checkmark" size={18} color={colors.tertiaryFixedDim} />
+                ) : null}
               </View>
-              <Text style={styles.campus}>{seller?.campus}</Text>
-              <Text style={styles.phone}>{seller?.phone}</Text>
+              <Text style={styles.sellerUni}>{seller?.campus ?? ''}</Text>
+              <View style={styles.sellerTrust}>
+                <Ionicons name="star" size={13} color={colors.tertiary} />
+                <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={22} color={colors.outline} />
+          </TouchableOpacity>
+
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeading}>
+              <Ionicons name="document-text-outline" size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Mô tả sản phẩm</Text>
+            </View>
+            <Text style={styles.description}>{product.description}</Text>
+          </View>
+
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeading}>
+              <Ionicons name="location-outline" size={20} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Địa điểm giao dịch</Text>
+            </View>
+            <Text style={styles.meetup}>{product.meetupPoint ?? product.location.address}</Text>
+            <Text style={styles.distance}>
+              {product.location
+                ? `Cách bạn khoảng ${distanceLabel(
+                    distanceFromCenter(product.location.latitude, product.location.longitude)
+                  )}`
+                : 'Giao dịch trực tiếp tại khu vực trường'}
+            </Text>
+            <View style={styles.mapPlaceholder}>
+              <Ionicons name="map-outline" size={40} color={colors.outlineVariant} />
             </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <SectionHeading title="Điểm hẹn nhận hàng" />
-          <LocationPreview location={product.location} />
+          {product.allowsCod ? (
+            <View style={styles.codCard}>
+              <Ionicons name="cash-outline" size={20} color={colors.tertiary} />
+              <View style={styles.codInfo}>
+                <Text style={styles.codTitle}>Hỗ trợ giao hàng COD</Text>
+                <Text style={styles.codText}>Phí ship 15.000đ cho nội khu Làng Đại học</Text>
+              </View>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
-        {isBuyer ? (
-          <>
-            <TouchableOpacity
-              accessibilityLabel="Mở giỏ hàng"
-              onPress={() => router.push('/cart')}
-              style={styles.cartButton}>
-              <Ionicons name="bag-handle-outline" size={22} color={colors.primary} />
-              {cartQuantity > 0 && <Text style={styles.cartQuantity}>{cartQuantity}</Text>}
-            </TouchableOpacity>
-            <PrimaryButton
-              disabled={unavailable || cartQuantity >= product.stock}
-              icon="bag-add-outline"
-              onPress={handleAddToCart}
-              style={styles.flexButton}
-              title={unavailable ? 'Đã bán' : 'Thêm vào giỏ'}
+      {sold ? (
+        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
+          <Text style={styles.soldLabel}>Sản phẩm đã bán</Text>
+        </View>
+      ) : (
+        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
+          <TouchableOpacity
+            onPress={() => toggleFavorite(product.id)}
+            style={[styles.roundButton, favorite && styles.roundButtonActive]}>
+            <Ionicons
+              name={favorite ? 'heart' : 'heart-outline'}
+              size={22}
+              color={favorite ? '#e11d48' : colors.onSurface}
             />
-          </>
-        ) : isOwner ? (
-          <PrimaryButton
-            icon="create-outline"
-            onPress={() =>
-              router.push({ pathname: '/product/edit/[id]', params: { id: product.id } })
-            }
-            style={styles.flexButton}
-            title="Chỉnh sửa sản phẩm"
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleChat} style={styles.chatButton}>
+            <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
+          <Button
+            title="Thêm giỏ"
+            variant="secondary"
+            style={styles.addCartButton}
+            compact
+            onPress={() => {
+              if (currentUser?.role !== 'buyer') {
+                return;
+              }
+              addToCart(product.id);
+              router.push('/cart');
+            }}
           />
-        ) : (
-          <View style={styles.sellerNotice}>
-            <Ionicons name="information-circle" size={19} color={colors.primary} />
-            <Text style={styles.sellerNoticeText}>Bạn đang xem bằng tài khoản người bán.</Text>
-          </View>
-        )}
-      </View>
-    </SafeAreaView>
+          <Button
+            title="Mua ngay"
+            icon="arrow-forward"
+            style={styles.buyButton}
+            compact
+            onPress={handleBuyNow}
+          />
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.background, flex: 1 },
-  topBar: {
+  screen: {
+    backgroundColor: colors.surface,
+    flex: 1,
+  },
+  header: {
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: 'rgba(248,249,255,0.92)',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-  },
-  iconButton: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 42,
-    justifyContent: 'center',
-    width: 42,
-  },
-  topTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
-  content: { paddingBottom: 110 },
-  heroWrap: { backgroundColor: colors.primarySoft, height: 330, position: 'relative' },
-  heroImage: { height: '100%', width: '100%' },
-  soldBanner: {
-    backgroundColor: colors.ink,
-    bottom: 14,
-    left: 16,
+    paddingBottom: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    zIndex: 20,
+  },
+  headerButton: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.full,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  headerTitle: {
+    ...typography.headlineSm,
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  carousel: {
+    backgroundColor: colors.surfaceVariant,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    height: 400,
+    overflow: 'hidden',
+  },
+  pagination: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderRadius: radius.full,
+    bottom: 14,
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     position: 'absolute',
   },
-  soldBannerText: { color: colors.white, fontSize: 13, fontWeight: '900' },
-  mainInfo: {
+  dot: {
+    backgroundColor: 'rgba(11,28,48,0.3)',
+    borderRadius: 4,
+    height: 8,
+    width: 8,
+  },
+  dotActive: {
+    backgroundColor: colors.primary,
+  },
+  content: {
+    gap: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  detailCard: {
     backgroundColor: colors.surface,
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    padding: 18,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: 10,
+    padding: 16,
+    ...shadow.level1,
   },
-  badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 11 },
-  categoryBadge: {
-    backgroundColor: colors.primarySoft,
-    borderRadius: 6,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
+  title: {
+    ...typography.headlineMd,
+    color: colors.onSurface,
+    fontWeight: '700',
   },
-  categoryBadgeText: { color: colors.primaryDark, fontSize: 11, fontWeight: '800' },
-  conditionBadge: {
-    backgroundColor: colors.warningSoft,
-    borderRadius: 6,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
+  price: {
+    ...typography.displayLgMobile,
+    color: colors.primary,
+    fontWeight: '700',
   },
-  conditionBadgeText: { color: colors.warning, fontSize: 11, fontWeight: '800' },
-  productTitle: { color: colors.ink, fontSize: 23, fontWeight: '900', lineHeight: 29 },
-  price: { color: colors.accent, fontSize: 25, fontWeight: '900', marginTop: 10 },
-  inventoryRow: { alignItems: 'center', flexDirection: 'row', marginTop: 12 },
-  inventoryText: { color: colors.inkMuted, fontSize: 12 },
-  dot: { color: colors.borderStrong, marginHorizontal: 7 },
-  section: {
-    backgroundColor: colors.surface,
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    marginTop: 10,
-    padding: 18,
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  description: { color: colors.inkMuted, fontSize: 14, lineHeight: 22 },
+  chipPrimary: {
+    backgroundColor: 'rgba(0,74,198,0.1)',
+    borderRadius: radius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  chipPrimaryText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  chipSecondary: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,88,190,0.1)',
+    borderRadius: radius.full,
+    flexDirection: 'row',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  chipSecondaryText: {
+    color: colors.secondary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
   sellerCard: {
     alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: 8,
+    backgroundColor: colors.surface,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
     flexDirection: 'row',
-    padding: 12,
+    gap: 12,
+    padding: 16,
+    ...shadow.level1,
   },
-  avatar: { backgroundColor: colors.primarySoft, borderRadius: 8, height: 58, width: 58 },
-  sellerInfo: { flex: 1, marginLeft: 12 },
-  sellerNameRow: { alignItems: 'center', flexDirection: 'row', gap: 5 },
-  sellerName: { color: colors.ink, fontSize: 15, fontWeight: '800' },
-  campus: { color: colors.inkMuted, fontSize: 12, marginTop: 4 },
-  phone: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', marginTop: 3 },
+  sellerInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  sellerNameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 5,
+  },
+  sellerName: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    fontSize: 17,
+  },
+  sellerUni: {
+    color: colors.onSurfaceVariant,
+    fontSize: 14,
+  },
+  sellerTrust: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(0,98,41,0.1)',
+    borderRadius: 6,
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  sellerTrustText: {
+    color: colors.tertiary,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  sectionCard: {
+    backgroundColor: colors.surface,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: 10,
+    padding: 16,
+    ...shadow.level1,
+  },
+  sectionHeading: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  sectionTitle: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    fontSize: 17,
+  },
+  description: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    lineHeight: 24,
+  },
+  meetup: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+    fontWeight: '500',
+  },
+  distance: {
+    color: colors.onSurfaceVariant,
+    fontSize: 14,
+  },  mapPlaceholder: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceVariant,
+    borderColor: 'rgba(195,198,215,0.2)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    height: 160,
+    justifyContent: 'center',
+  },
+  codCard: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,98,41,0.06)',
+    borderColor: 'rgba(0,98,41,0.15)',
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 10,
+    padding: 14,
+  },
+  codInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  codTitle: {
+    color: colors.tertiary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  codText: {
+    color: colors.onSurfaceVariant,
+    fontSize: 13,
+  },
   bottomBar: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderTopColor: colors.border,
+    backgroundColor: 'rgba(248,249,255,0.94)',
+    borderTopColor: 'rgba(195,198,215,0.2)',
     borderTopWidth: 1,
     bottom: 0,
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     left: 0,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingTop: 10,
     position: 'absolute',
     right: 0,
-    ...shadow,
   },
-  cartButton: {
+  roundButton: {
     alignItems: 'center',
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primary,
-    borderRadius: 8,
+    backgroundColor: colors.surfaceVariant,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 48,
     justifyContent: 'center',
-    position: 'relative',
-    width: 52,
+    width: 48,
   },
-  cartQuantity: {
-    backgroundColor: colors.accent,
-    borderRadius: 7,
-    color: colors.white,
-    fontSize: 9,
-    fontWeight: '900',
-    minWidth: 15,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    position: 'absolute',
-    right: 5,
-    textAlign: 'center',
-    top: 4,
+  roundButtonActive: {
+    backgroundColor: colors.errorContainer,
   },
-  flexButton: { flex: 1 },
-  sellerNotice: {
+  chatButton: {
     alignItems: 'center',
-    backgroundColor: colors.primarySoft,
-    borderRadius: 8,
-    flex: 1,
-    flexDirection: 'row',
-    gap: 8,
-    minHeight: 48,
-    paddingHorizontal: 14,
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.2)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
   },
-  sellerNoticeText: { color: colors.primaryDark, flex: 1, fontSize: 13 },
+  addCartButton: {
+    flex: 1,
+  },
+  buyButton: {
+    flex: 1.5,
+  },
+  soldLabel: {
+    color: colors.onSurfaceVariant,
+    fontSize: 16,
+    fontWeight: '600',
+    paddingVertical: 14,
+    textAlign: 'center',
+    width: '100%',
+  },
 });

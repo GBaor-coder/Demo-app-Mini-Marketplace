@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLoop - Chọn Vai Trò</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#0053db",
+                        "secondary-container": "#2170e4",
+                        "secondary": "#0058be",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-surface-variant": "#434655",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "outline-variant": "#c3c6d7",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary": "#004ac6",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface": "#0b1c30",
+                        "tertiary": "#006229",
+                        "on-primary-fixed": "#00174b",
+                        "outline": "#737686",
+                        "on-tertiary-fixed": "#002109",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "2xl": "48px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "margin-mobile": "20px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .role-card-active {
+            border-color: #2563eb !important;
+            box-shadow: 0px 8px 24px rgba(37, 99, 235, 0.15) !important;
+        }
+        .role-card-active .icon-container {
+            background-color: #2563eb !important;
+            color: white !important;
+        }
+        .role-card-active .check-icon {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-md">
+<!-- Main Content -->
+<main class="flex-grow flex items-center justify-center p-margin-mobile md:p-margin-desktop relative">
+<!-- Abstract Background Shapes -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+<div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[100px]"></div>
+<div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-secondary-container/10 blur-[100px]"></div>
+</div>
+<div class="w-full max-w-2xl bg-surface-container-lowest rounded-[24px] shadow-[0px_12px_32px_rgba(15,23,42,0.08)] p-xl relative z-10 flex flex-col gap-lg">
+<!-- Header Section -->
+<div class="text-center space-y-sm">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-on-primary-container mb-md mx-auto">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">waving_hand</span>
+</div>
+<h1 class="text-headline-md font-headline-md text-on-surface md:text-display-lg md:font-display-lg">Chào mừng bạn đến với UniLoop!</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Bạn muốn bắt đầu với vai trò nào?</p>
+</div>
+<!-- Role Selection Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-sm">
+<!-- Buyer Card -->
+<button class="role-card text-left bg-surface-container-lowest border-2 border-outline-variant/30 rounded-[20px] p-md flex flex-col gap-sm transition-all duration-300 hover:border-primary/50 hover:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" onclick="selectRole(this, 'buyer')" type="button">
+<div class="flex justify-between items-start w-full">
+<div class="icon-container w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary transition-colors duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+</div>
+<div class="check-icon w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white opacity-0 scale-50 transition-all duration-300">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-xs">Người mua</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Tìm kiếm giáo trình, đồ dùng học tập dễ dàng từ sinh viên khác.</p>
+</div>
+</button>
+<!-- Seller Card -->
+<button class="role-card text-left bg-surface-container-lowest border-2 border-outline-variant/30 rounded-[20px] p-md flex flex-col gap-sm transition-all duration-300 hover:border-primary/50 hover:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" onclick="selectRole(this, 'seller')" type="button">
+<div class="flex justify-between items-start w-full">
+<div class="icon-container w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary transition-colors duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<div class="check-icon w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white opacity-0 scale-50 transition-all duration-300">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-xs">Người đăng bán</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Kiếm thêm thu nhập từ đồ cũ, giáo trình không còn sử dụng.</p>
+</div>
+</button>
+</div>
+<!-- Footer Note & Action -->
+<div class="mt-md space-y-lg text-center">
+<div class="flex items-center justify-center gap-2 text-body-sm font-body-sm text-on-surface-variant bg-surface-container-low py-2 px-4 rounded-full w-fit mx-auto">
+<span class="material-symbols-outlined text-[18px]">info</span>
+<span>Bạn có thể thay đổi vai trò bất cứ lúc nào trong trang cá nhân</span>
+</div>
+<button class="w-full md:w-auto md:min-w-[200px] bg-primary-container text-on-primary-container text-button font-button py-3 px-xl rounded-[16px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-90 active:scale-95 shadow-[0px_4px_12px_rgba(37,99,235,0.2)]" disabled="" id="start-btn">
+                    Bắt đầu ngay
+                </button>
+</div>
+</div>
+</main>
+<script>
+        let selectedRole = null;
+
+        function selectRole(element, role) {
+            // Remove active class from all cards
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('role-card-active');
+            });
+
+            // Add active class to clicked card
+            element.classList.add('role-card-active');
+            
+            selectedRole = role;
+
+            // Enable submit button
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = false;
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (selectedRole) {
+                // Handle submission (e.g., redirect or API call)
+                console.log('Selected role:', selectedRole);
+                // Simulation of loading state
+                const btn = document.getElementById('start-btn');
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-2 text-[20px]">sync</span> Đang xử lý...';
+                setTimeout(() => {
+                    alert(`Đã chọn vai trò: ${selectedRole}. Chuyển hướng đến Dashboard...`);
+                    btn.innerHTML = 'Bắt đầu ngay';
+                }, 1000);
+            }
+        });
+    </script>
+</body></html>

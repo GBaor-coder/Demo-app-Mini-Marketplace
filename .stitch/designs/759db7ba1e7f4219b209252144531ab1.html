@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bộ lọc - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#0053db",
+                        "secondary-container": "#2170e4",
+                        "secondary": "#0058be",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-surface-variant": "#434655",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "outline-variant": "#c3c6d7",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary": "#004ac6",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface": "#0b1c30",
+                        "tertiary": "#006229",
+                        "on-primary-fixed": "#00174b",
+                        "outline": "#737686",
+                        "on-tertiary-fixed": "#002109",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "2xl": "48px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "margin-mobile": "20px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c3c6d7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #737686;
+        }
+        
+        /* Smooth transitions */
+        .chip-transition {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* Range slider styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #dce9ff;
+            border-radius: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen font-body-md text-on-surface antialiased overflow-hidden">
+<!-- Mock Content Behind Scrim -->
+<div class="h-screen w-full relative z-0 opacity-40 grayscale-[20%] pointer-events-none">
+<!-- TopAppBar (Inactive context) -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 bg-surface/80 backdrop-blur-xl shadow-sm absolute top-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">arrow_back</span>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">UniLoop</h1>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</header>
+<!-- Dummy Content -->
+<main class="pt-24 px-margin-mobile grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<div class="h-48 bg-surface-container-low rounded-xl"></div>
+<div class="h-48 bg-surface-container-low rounded-xl"></div>
+<div class="h-48 bg-surface-container-low rounded-xl"></div>
+<div class="h-48 bg-surface-container-low rounded-xl"></div>
+</main>
+</div>
+<!-- Scrim / Backdrop Overlay -->
+<div aria-hidden="true" class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-[2px] z-40 transition-opacity duration-300"></div>
+<!-- Bottom Sheet Container -->
+<div class="fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out translate-y-0 h-[751px] max-h-[800px] flex flex-col md:max-w-md md:mx-auto md:rounded-t-[24px]">
+<!-- Sheet Surface -->
+<div class="bg-surface-container-lowest w-full h-full rounded-t-[24px] shadow-[0px_-8px_24px_rgba(15,23,42,0.12)] flex flex-col">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+<div class="w-10 h-1 bg-outline-variant rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="px-margin-mobile pb-4 flex justify-between items-center border-b border-outline-variant/30">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Bộ lọc</h2>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-margin-mobile py-lg space-y-lg">
+<!-- 1. Danh mục (Category) -->
+<section>
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-3 uppercase tracking-wider">Danh mục</h3>
+<div class="flex flex-wrap gap-2">
+<!-- Active Chip -->
+<button class="px-4 py-2 rounded-full bg-primary-container text-on-primary-container text-body-sm font-body-sm border border-transparent chip-transition hover:opacity-90">
+                            Giáo trình
+                        </button>
+<!-- Inactive Chips -->
+<button class="px-4 py-2 rounded-full bg-surface-container text-on-surface text-body-sm font-body-sm border border-outline-variant/50 chip-transition hover:bg-surface-container-high">
+                            Đồ điện tử
+                        </button>
+<button class="px-4 py-2 rounded-full bg-surface-container text-on-surface text-body-sm font-body-sm border border-outline-variant/50 chip-transition hover:bg-surface-container-high">
+                            Thời trang
+                        </button>
+<button class="px-4 py-2 rounded-full bg-surface-container text-on-surface text-body-sm font-body-sm border border-outline-variant/50 chip-transition hover:bg-surface-container-high">
+                            Phương tiện
+                        </button>
+<button class="px-4 py-2 rounded-full bg-surface-container text-on-surface text-body-sm font-body-sm border border-outline-variant/50 chip-transition hover:bg-surface-container-high">
+                            Dụng cụ học tập
+                        </button>
+</div>
+</section>
+<!-- 2. Khoảng giá (Price Range) -->
+<section>
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-3 uppercase tracking-wider">Khoảng giá (VND)</h3>
+<div class="flex items-center gap-4">
+<div class="relative flex-1">
+<input class="w-full bg-surface-container rounded-[12px] border-outline-variant/50 px-3 py-2 text-body-md font-body-md text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Tối thiểu" type="number" value="50000"/>
+</div>
+<span class="text-on-surface-variant font-bold">-</span>
+<div class="relative flex-1">
+<input class="w-full bg-surface-container rounded-[12px] border-outline-variant/50 px-3 py-2 text-body-md font-body-md text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Tối đa" type="number" value="500000"/>
+</div>
+</div>
+</section>
+<!-- 3. Tình trạng (Condition) -->
+<section>
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-3 uppercase tracking-wider">Tình trạng</h3>
+<div class="grid grid-cols-3 gap-3">
+<label class="relative flex flex-col items-center justify-center p-3 rounded-xl border border-outline-variant/50 cursor-pointer hover:bg-surface-container-high transition-colors bg-surface-container-lowest">
+<input class="peer sr-only" name="condition" type="checkbox" value="new"/>
+<div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-primary-container peer-checked:bg-primary-container/5 transition-all"></div>
+<span class="text-body-md font-body-md text-on-surface peer-checked:text-primary z-10">Mới</span>
+</label>
+<label class="relative flex flex-col items-center justify-center p-3 rounded-xl border border-outline-variant/50 cursor-pointer hover:bg-surface-container-high transition-colors bg-surface-container-lowest">
+<input checked="" class="peer sr-only" name="condition" type="checkbox" value="like-new"/>
+<div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-primary-container peer-checked:bg-primary-container/5 transition-all"></div>
+<span class="text-body-md font-body-md text-on-surface peer-checked:font-bold peer-checked:text-primary-container z-10">99%</span>
+<span class="material-symbols-outlined absolute top-1 right-1 text-[16px] text-primary-container opacity-0 peer-checked:opacity-100 transition-opacity z-10" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+<label class="relative flex flex-col items-center justify-center p-3 rounded-xl border border-outline-variant/50 cursor-pointer hover:bg-surface-container-high transition-colors bg-surface-container-lowest">
+<input class="peer sr-only" name="condition" type="checkbox" value="used"/>
+<div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-primary-container peer-checked:bg-primary-container/5 transition-all"></div>
+<span class="text-body-md font-body-md text-on-surface peer-checked:text-primary z-10">Cũ</span>
+</label>
+</div>
+</section>
+<!-- 4. Khoảng cách (Distance) -->
+<section>
+<div class="flex justify-between items-center mb-3">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Khoảng cách</h3>
+<span class="text-body-sm font-body-sm text-primary-container font-semibold">Dưới 5 km</span>
+</div>
+<div class="px-2">
+<input class="w-full h-1 bg-surface-container-high rounded-lg appearance-none cursor-pointer" max="20" min="1" type="range" value="5"/>
+<div class="flex justify-between text-[12px] text-outline mt-2">
+<span>1 km</span>
+<span>10 km</span>
+<span>20 km</span>
+</div>
+</div>
+</section>
+<!-- 5. Sắp xếp (Sort By) -->
+<section>
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-3 uppercase tracking-wider">Sắp xếp</h3>
+<div class="flex flex-col gap-2">
+<label class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest cursor-pointer transition-colors">
+<span class="text-body-md font-body-md text-on-surface">Mới nhất</span>
+<input checked="" class="w-5 h-5 text-primary-container focus:ring-primary-container border-outline-variant" name="sort" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest cursor-pointer transition-colors">
+<span class="text-body-md font-body-md text-on-surface">Giá thấp nhất</span>
+<input class="w-5 h-5 text-primary-container focus:ring-primary-container border-outline-variant" name="sort" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest cursor-pointer transition-colors">
+<span class="text-body-md font-body-md text-on-surface">Giá cao nhất</span>
+<input class="w-5 h-5 text-primary-container focus:ring-primary-container border-outline-variant" name="sort" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest cursor-pointer transition-colors">
+<span class="text-body-md font-body-md text-on-surface">Gần nhất</span>
+<input class="w-5 h-5 text-primary-container focus:ring-primary-container border-outline-variant" name="sort" type="radio"/>
+</label>
+</div>
+</section>
+<!-- Spacer for bottom sticky buttons -->
+<div class="h-4"></div>
+</div>
+<!-- Sticky Action Buttons -->
+<div class="p-4 border-t border-outline-variant/20 bg-surface-container-lowest">
+<div class="flex gap-4">
+<button class="flex-1 py-3 px-4 rounded-[16px] bg-surface-container-high text-on-surface text-button font-button hover:brightness-95 active:scale-[0.98] transition-all">
+                        Thiết lập lại
+                    </button>
+<button class="flex-[2] py-3 px-4 rounded-[16px] bg-primary-container text-on-primary font-button text-button hover:brightness-110 shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span>Áp dụng</span>
+<span class="text-body-sm bg-on-primary/20 px-2 py-0.5 rounded-full">124 kết quả</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

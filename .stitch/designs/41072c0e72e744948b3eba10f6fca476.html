@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434655",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-container": "#007e37",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#eeefff",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-container": "#2170e4",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#0053db",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "secondary": "#0058be",
+                        "inverse-surface": "#213145",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-primary-fixed": "#00174b",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-container": "#fefcff",
+                        "outline": "#737686",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-container-low": "#eff4ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#006229",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-tertiary-fixed": "#002109",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "outline-variant": "#c3c6d7",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-container": "#e5eeff",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#b4c5ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-primary-fixed-variant": "#003ea8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "xs": "4px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "button": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "button": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for chat area */
+        .chat-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background-color: #c3c6d7; /* outline-variant */
+            border-radius: 10px;
+        }
+        
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(248, 249, 255, 0.85); /* surface/85 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-hidden relative">
+<!-- Top App Bar (Chat Header) -->
+<header class="glass flex justify-between items-center w-full px-margin-mobile h-16 z-50 docked full-width top-0 sticky shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border-b border-outline-variant/20">
+<div class="flex items-center gap-sm">
+<button class="p-2 -ml-2 rounded-full hover:bg-surface-variant/50 transition-colors text-on-surface-variant focus:outline-none">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 shadow-sm border border-outline-variant/30">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A close up portrait of a friendly university student smiling in a campus setting. Natural sunlight illuminates their face. They are wearing casual modern clothing. The photo has a bright, modern SaaS aesthetic with clean lines and soft contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGrYLXt_h9kgbc-Go-PTjpQUMYDfE9wj5L_kINnBBx05q2bnOEF1Gikou5trDziGQ2cMpeSHZwav-zYFJY9eU4frNu-rTo-k2qFMog01H9YIbIWIJOGO7rQCPAP9hYkAO_IHpIS11GkEPC9TojOMuxFVcDy4G8sVN1xu96ws_wZRMYjYWFSuKehJn9QPLSWberTXU4b77Dca1Y5QpVq2W2rA2tsBSQWiR4VPtRGYDdA3TKxwM0oiGp"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm-mobile text-on-surface leading-tight">Minh Quân</span>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
+<span class="font-body-sm text-body-sm text-outline">Đang hoạt động</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-colors text-on-surface-variant focus:outline-none">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Area -->
+<main class="flex-1 overflow-y-auto chat-scroll px-margin-mobile py-lg flex flex-col gap-lg bg-surface">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="font-label-md text-label-md text-outline bg-surface-container px-3 py-1 rounded-full">Hôm nay, 14:30</span>
+</div>
+<!-- Product Context Card -->
+<div class="flex justify-center mb-2">
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 flex gap-3 w-full max-w-sm shadow-sm transition-transform hover:scale-[1.02] cursor-pointer">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A clean, well-lit product photo of a used academic textbook lying on a light wood desk. The textbook cover is visible and slightly worn at the edges, indicating use. The lighting is soft and neutral, typical of a modern e-commerce listing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPUzRY2nq_NsCPS-J7oDRFzxIqSkS3oWDutiLPGDvjQJHhIQ5ZGj-TQqCHB-j9Ee4naYwznAnyJCxHskAQNiGWLtHj_Id1cUdUrLy5V7TCFpeWqmGDGbEwaYMal6VMu8uuEsfaGhQUT4cmkS9EOWnVVhOhDnnYhJYUYc3n_CdbNA2PXfFMVgeT-otvYIS3_oOT_Wme_LxTEjKTZZYXHr7WsX9XdCaEgwy-0HMkD0GDjjWNU49ysLuw"/>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<span class="font-label-md text-label-md text-on-surface line-clamp-2">Giáo trình Nhập môn Lập trình Web - Bản in màu 2023</span>
+<span class="font-button text-button text-primary mt-1">120.000 đ</span>
+</div>
+<div class="flex items-center text-outline-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Message from other (Text) -->
+<div class="flex flex-col items-start gap-1 max-w-[85%]">
+<div class="bg-surface-container text-on-surface rounded-2xl rounded-tl-sm px-4 py-2 shadow-sm font-body-md text-body-md">
+                Chào bạn, cuốn giáo trình này bạn còn giữ không? Mình đang cần gấp cho kỳ tới.
+            </div>
+<span class="font-body-sm text-[11px] text-outline ml-1">14:32</span>
+</div>
+<!-- Message from user (Text) -->
+<div class="flex flex-col items-end gap-1 max-w-[85%] self-end">
+<div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm font-body-md text-body-md">
+                Chào Quân, sách vẫn còn nhé. Tình trạng còn khoảng 90%, không ghi chú rách nát gì đâu.
+            </div>
+<div class="flex items-center gap-1 mr-1">
+<span class="font-body-sm text-[11px] text-outline">14:35</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="done_all">done_all</span>
+</div>
+</div>
+<!-- Message from other (Text) -->
+<div class="flex flex-col items-start gap-1 max-w-[85%]">
+<div class="bg-surface-container text-on-surface rounded-2xl rounded-tl-sm px-4 py-2 shadow-sm font-body-md text-body-md">
+                Tuyệt quá. Bạn có thể giao dịch ở trường chiều nay không?
+            </div>
+<span class="font-body-sm text-[11px] text-outline ml-1">14:36</span>
+</div>
+<!-- Message from user (Location Proposal) -->
+<div class="flex flex-col items-end gap-1 max-w-[85%] self-end">
+<div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-sm p-3 shadow-sm flex flex-col gap-2 w-64">
+<span class="font-body-md text-body-md">Được nha, mình chốt lịch này nhé:</span>
+<div class="bg-surface-bright rounded-lg p-3 flex flex-col gap-2 border border-primary/20">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary mt-0.5" data-icon="location_on">location_on</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Cổng chính Tòa nhà A</span>
+<span class="font-body-sm text-body-sm text-outline">Khuôn viên trường Đại học</span>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant/30 my-1"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="schedule">schedule</span>
+<span class="font-label-md text-label-md text-on-surface">Hôm nay, 16:00</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1 mr-1">
+<span class="font-body-sm text-[11px] text-outline">14:40</span>
+<span class="material-symbols-outlined text-[14px] text-outline-variant" data-icon="done">done</span>
+</div>
+</div>
+<!-- Dummy space for bottom padding -->
+<div class="h-4"></div>
+</main>
+<!-- Input Area -->
+<footer class="bg-surface border-t border-outline-variant/20 px-margin-mobile py-3 flex items-end gap-2 shadow-[0px_-4px_12px_rgba(15,23,42,0.02)] z-10">
+<button class="p-2 text-primary hover:bg-surface-variant/50 rounded-full transition-colors shrink-0 focus:outline-none">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</button>
+<button class="p-2 text-primary hover:bg-surface-variant/50 rounded-full transition-colors shrink-0 focus:outline-none">
+<span class="material-symbols-outlined" data-icon="add_location">add_location</span>
+</button>
+<div class="flex-1 bg-surface-container-low border border-outline-variant rounded-2xl px-4 py-2 flex items-center min-h-[44px] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<textarea class="w-full bg-transparent border-none focus:ring-0 resize-none font-body-md text-body-md text-on-surface p-0 m-0 leading-[24px] max-h-24 chat-scroll" placeholder="Nhập tin nhắn..." rows="1" style="outline: none;"></textarea>
+</div>
+<button class="p-2 bg-primary text-on-primary rounded-full hover:brightness-90 transition-all shrink-0 w-11 h-11 flex items-center justify-center shadow-sm focus:outline-none active:scale-95">
+<span class="material-symbols-outlined ml-1" data-icon="send">send</span>
+</button>
+</footer>
+<script>
+        // Simple auto-resize textarea
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.scrollHeight > 96) { // max-h-24 approx
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+    </script>
+</body></html>

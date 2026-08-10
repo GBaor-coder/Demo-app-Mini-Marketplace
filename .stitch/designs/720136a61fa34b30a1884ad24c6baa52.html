@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bản đồ sản phẩm</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#0053db",
+                        "secondary-container": "#2170e4",
+                        "secondary": "#0058be",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-container": "#c1ffc5",
+                        "on-surface-variant": "#434655",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#007e37",
+                        "outline-variant": "#c3c6d7",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary": "#004ac6",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface": "#0b1c30",
+                        "tertiary": "#006229",
+                        "on-primary-fixed": "#00174b",
+                        "outline": "#737686",
+                        "on-tertiary-fixed": "#002109",
+                        "error-container": "#ffdad6"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "sm": "8px",
+                        "2xl": "48px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "margin-mobile": "20px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-md": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "display-lg-mobile": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "button": ["16px", { lineHeight: "24px", fontWeight: "500" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .map-bg {
+            background-color: #e5e5e5;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .pull-up-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen relative overflow-hidden flex flex-col font-body-md">
+<!-- Map Background Area -->
+<div aria-hidden="true" class="absolute inset-0 z-0 map-bg">
+<!-- Mock Map Markers -->
+<div class="absolute top-1/4 left-1/4 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform z-10">
+<div class="bg-surface-container-lowest text-primary font-label-md text-label-md px-3 py-1 rounded-full shadow-[0px_4px_12px_rgba(15,23,42,0.15)] border border-primary/20">150k</div>
+<div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-surface-container-lowest drop-shadow-sm -mt-1"></div>
+</div>
+<div class="absolute top-1/2 left-2/3 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform z-10">
+<div class="bg-primary text-on-primary font-label-md text-label-md px-3 py-1 rounded-full shadow-[0px_8px_24px_rgba(15,23,42,0.25)] border border-primary">300k</div>
+<div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary drop-shadow-sm -mt-1"></div>
+</div>
+<div class="absolute bottom-1/3 left-1/3 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform z-10">
+<div class="bg-surface-container-lowest text-primary font-label-md text-label-md px-3 py-1 rounded-full shadow-[0px_4px_12px_rgba(15,23,42,0.15)] border border-primary/20">220k</div>
+<div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-surface-container-lowest drop-shadow-sm -mt-1"></div>
+</div>
+</div>
+<!-- Top Navigation / Search Area -->
+<header class="relative z-40 w-full px-margin-mobile pt-safe-top mt-4 flex flex-col gap-3">
+<!-- Search Input -->
+<div class="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/30 flex items-center px-4 py-3">
+<span class="material-symbols-outlined text-on-surface-variant mr-3">search</span>
+<input class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant/70 p-0" placeholder="Tìm kiếm khu vực..." type="text"/>
+<button class="ml-2 p-1 rounded-full hover:bg-surface-variant/50 text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+<!-- Current Location Button -->
+<button class="self-start flex items-center gap-2 bg-surface-container-lowest/90 backdrop-blur-md px-4 py-2.5 rounded-[16px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant/30 hover:bg-surface-container-lowest transition-colors group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">my_location</span>
+<span class="text-label-md font-label-md text-primary">Sử dụng vị trí hiện tại</span>
+</button>
+</header>
+<!-- Main Content Spacer -->
+<main class="flex-1 relative z-10 w-full"></main>
+<!-- Pull-up Product Card -->
+<div class="relative z-40 w-full px-margin-mobile mb-[100px] pull-up-card" id="pullUpCard">
+<div class="bg-surface-container-lowest rounded-t-[24px] rounded-b-[20px] shadow-[0px_12px_32px_rgba(15,23,42,0.12)] border border-outline-variant/20 overflow-hidden flex flex-col">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center py-3 cursor-grab bg-surface-container-lowest" id="dragHandle">
+<div class="w-10 h-1 bg-outline-variant/40 rounded-full"></div>
+</div>
+<div class="p-md flex gap-4">
+<!-- Product Image -->
+<div class="w-[100px] h-[100px] rounded-[12px] overflow-hidden flex-shrink-0 bg-surface-variant relative">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A clean, modern product photography shot of a sleek textbook or study guide. High quality lighting, soft shadows, resting on a clean white desk surface, conveying a sense of academic focus. Bright, optimistic lighting typical of modern SaaS and e-commerce platforms." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnrW2DGZ-zjSZxeCCNz1l8J4irZoh6tyiX0yGFbQDNa9xCuXuUDMrguudeF6wpW2zsF4hwlNk2syQTy58ercQ8NYGpqNZDKmZIx5Xe5-24Ga-MQA6g_R0_AWpRytCg40mp97GNWQCg9-NGk7BAul5r0KiT4gzYDf-4Vx9gffFqWp_WVXFFhi8egopIrQlavow624XPsetdfRV-Rd8Nk3-rplEOppyXM-8aEhelG-6rbXvLQFv-gUlA"/>
+</div>
+<!-- Product Info -->
+<div class="flex flex-col flex-1 justify-between py-1">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="bg-primary/10 text-primary text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full inline-block mb-1">Tài liệu học tập</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface line-clamp-2 leading-tight mb-2">Giáo trình Giải tích 1 - Bản mới nhất</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Cách bạn 1.2km
+                        </p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<span class="text-headline-md font-headline-md text-primary">300.000đ</span>
+<button class="bg-primary text-on-primary text-button font-button px-4 py-2 rounded-[16px] hover:brightness-90 active:scale-95 transition-all shadow-sm">
+                            Xem chi tiết
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] rounded-t-3xl md:hidden">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-md font-label-md mt-1">Home</span>
+</a>
+<!-- Explore (Active based on intent) -->
+<a class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 transition-all scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-label-md font-label-md mt-1 font-semibold">Explore</span>
+</a>
+<!-- Sell -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-label-md font-label-md mt-1">Sell</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-label-md font-label-md mt-1">Orders</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-variant/50 dark:hover:bg-on-surface/10 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-md font-label-md mt-1">Profile</span>
+</a>
+</nav>
+<!-- Simple interaction script for card -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('pullUpCard');
+            const handle = document.getElementById('dragHandle');
+            let isExpanded = true;
+
+            handle.addEventListener('click', () => {
+                if (isExpanded) {
+                    card.style.transform = 'translateY(calc(100% - 40px))';
+                } else {
+                    card.style.transform = 'translateY(0)';
+                }
+                isExpanded = !isExpanded;
+            });
+        });
+    </script>
+</body></html>

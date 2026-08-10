@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,246 +11,338 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BrandMark, FormField, PrimaryButton } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { colors } from '@/src/theme/colors';
-import { UserRole } from '@/src/types';
-
-const DEMO_ACCOUNTS = {
-  buyer: {
-    email: 'buyer@uniloop.vn',
-    password: 'buyer123',
-    label: 'Người mua',
-    description: 'Khám phá, giỏ hàng và đặt mua',
-    icon: 'bag-handle-outline' as const,
-  },
-  seller: {
-    email: 'seller@uniloop.vn',
-    password: 'seller123',
-    label: 'Người đăng bán',
-    description: 'Đăng tin và quản lý gian hàng',
-    icon: 'storefront-outline' as const,
-  },
-};
+import { Input } from '@/src/components/ui';
+import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 export default function LoginScreen() {
-  const { login } = useStore();
-  const [role, setRole] = useState<UserRole>('buyer');
-  const [email, setEmail] = useState(DEMO_ACCOUNTS.buyer.email);
-  const [password, setPassword] = useState(DEMO_ACCOUNTS.buyer.password);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { login, loginGuest } = useStore();
 
-  function chooseRole(nextRole: UserRole) {
-    setRole(nextRole);
-    setEmail(DEMO_ACCOUNTS[nextRole].email);
-    setPassword(DEMO_ACCOUNTS[nextRole].password);
-  }
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin() {
-    if (!login(email, password)) {
-      Alert.alert(
-        'Đăng nhập chưa thành công',
-        'Email hoặc mật khẩu không đúng. Bạn có thể chọn tài khoản mẫu bên trên.'
-      );
+  const handleLogin = () => {
+    setError('');
+    if (!email.trim() || !password) {
+      setError('Vui lòng nhập đầy đủ email và mật khẩu.');
       return;
     }
+    setLoading(true);
+    setTimeout(() => {
+      const ok = login(email, password);
+      setLoading(false);
+      if (!ok) {
+        setError('Email hoặc mật khẩu không đúng.');
+        return;
+      }
+      router.replace('/(tabs)');
+    }, 500);
+  };
+
+  const handleGuest = () => {
+    loginGuest();
     router.replace('/(tabs)');
-  }
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.flex}>
+      <View style={[styles.screen, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }]}>
+        <View style={styles.blobTop} />
+        <View style={styles.blobBottom} />
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.brandBlock}>
-            <BrandMark />
-            <Text style={styles.headline}>Trao đồ cũ, nối vòng xanh</Text>
-            <Text style={styles.intro}>
-              Mua bán an toàn trong cộng đồng sinh viên và hẹn nhận ngay gần trường.
-            </Text>
-          </View>
+          bounces={false}>
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <View style={styles.logo}>
+                <Ionicons name="sync" size={32} color={colors.onPrimaryContainer} />
+              </View>
+              <Text style={styles.brand}>UniLoop</Text>
+              <Text style={styles.subtitle}>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</Text>
+            </View>
 
-          <View style={styles.roleSection}>
-            <Text style={styles.sectionLabel}>Chọn vai trò để trải nghiệm</Text>
-            <View style={styles.roleRow}>
-              {(Object.keys(DEMO_ACCOUNTS) as UserRole[]).map((item) => {
-                const account = DEMO_ACCOUNTS[item];
-                const active = role === item;
-                return (
+            <View style={styles.form}>
+              <Input
+                label="Email trường học"
+                icon="mail-outline"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="student@university.edu.vn"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+              <Input
+                label="Mật khẩu"
+                icon="lock-closed-outline"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+                secureTextEntry={!showPassword}
+                right={
                   <TouchableOpacity
-                    key={item}
-                    activeOpacity={0.86}
-                    onPress={() => chooseRole(item)}
-                    style={[styles.roleCard, active && styles.roleCardActive]}>
-                    <View style={[styles.roleIcon, active && styles.roleIconActive]}>
-                      <Ionicons
-                        name={account.icon}
-                        size={23}
-                        color={active ? colors.white : colors.primary}
-                      />
-                    </View>
-                    <Text style={[styles.roleTitle, active && styles.roleTitleActive]}>
-                      {account.label}
-                    </Text>
-                    <Text style={[styles.roleDescription, active && styles.roleDescriptionActive]}>
-                      {account.description}
-                    </Text>
+                    onPress={() => setShowPassword((v) => !v)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons
+                      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                      size={20}
+                      color={colors.onSurfaceVariant}
+                    />
                   </TouchableOpacity>
-                );
-              })}
+                }
+              />
+
+              <View style={styles.row}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setRemember((v) => !v)}
+                  style={styles.remember}>
+                  <View style={[styles.checkbox, remember && styles.checkboxChecked]}>
+                    {remember ? (
+                      <Ionicons name="checkmark" size={12} color={colors.onPrimary} />
+                    ) : null}
+                  </View>
+                  <Text style={styles.rememberText}>Nhớ tài khoản</Text>
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+                  <Text style={styles.forgot}>Quên mật khẩu?</Text>
+                </TouchableOpacity>
+              </View>
+
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={handleLogin}
+                style={styles.primaryBtn}>
+                {loading ? (
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
+                ) : (
+                  <>
+                    <Text style={styles.primaryBtnText}>Đăng nhập</Text>
+                    <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Hoặc</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handleGuest}
+              style={styles.guestBtn}>
+              <Ionicons name="compass-outline" size={20} color={colors.primary} />
+              <Text style={styles.guestBtnText}>Trải nghiệm Demo (Guest)</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Chưa có tài khoản? </Text>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/register')}>
+                <Text style={styles.footerLink}>Đăng ký ngay</Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.formTitle}>Đăng nhập UniLoop</Text>
-            <FormField
-              autoCapitalize="none"
-              autoComplete="email"
-              icon="mail-outline"
-              keyboardType="email-address"
-              label="Email"
-              onChangeText={setEmail}
-              placeholder="name@uniloop.vn"
-              value={email}
-            />
-            <FormField
-              autoCapitalize="none"
-              icon="lock-closed-outline"
-              label="Mật khẩu"
-              onChangeText={setPassword}
-              placeholder="Nhập mật khẩu"
-              secureTextEntry
-              value={password}
-            />
-            <PrimaryButton icon="log-in-outline" onPress={handleLogin} title="Đăng nhập" />
-          </View>
-
-          <View style={styles.demoNote}>
-            <Ionicons name="shield-checkmark" size={19} color={colors.primary} />
-            <Text style={styles.demoNoteText}>
-              Đây là tài khoản demo. Dữ liệu được lưu cục bộ trên thiết bị để tiện chấm bài.
-            </Text>
-          </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: colors.background,
-    flex: 1,
-  },
   flex: {
     flex: 1,
   },
-  content: {
-    padding: 22,
-    paddingBottom: 40,
-  },
-  brandBlock: {
-    paddingBottom: 28,
-    paddingTop: 18,
-  },
-  headline: {
-    color: colors.ink,
-    fontSize: 29,
-    fontWeight: '900',
-    lineHeight: 35,
-    marginTop: 26,
-  },
-  intro: {
-    color: colors.inkMuted,
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 9,
-    maxWidth: 410,
-  },
-  roleSection: {
-    marginBottom: 25,
-  },
-  sectionLabel: {
-    color: colors.ink,
-    fontSize: 14,
-    fontWeight: '800',
-    marginBottom: 10,
-  },
-  roleRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  roleCard: {
+  screen: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
     flex: 1,
-    minHeight: 145,
-    padding: 13,
+    overflow: 'hidden',
+    paddingHorizontal: 20,
   },
-  roleCardActive: {
+  blobTop: {
+    backgroundColor: 'rgba(0,74,198,0.05)',
+    borderRadius: 200,
+    height: 400,
+    left: -180,
+    position: 'absolute',
+    top: -200,
+    width: 400,
+  },
+  blobBottom: {
+    backgroundColor: 'rgba(0,88,190,0.05)',
+    borderRadius: 220,
+    bottom: -220,
+    height: 440,
+    position: 'absolute',
+    right: -220,
+    width: 440,
+  },
+  scroll: {
+    alignItems: 'center',
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius['3xl'],
+    borderWidth: 1,
+    gap: 24,
+    maxWidth: 440,
+    padding: 32,
+    width: '100%',
+    ...shadow.level2,
+  },
+  header: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  logo: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: colors.primaryContainer,
+    borderRadius: radius['2xl'],
+    height: 64,
+    justifyContent: 'center',
+    marginBottom: 8,
+    width: 64,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 5,
+  },
+  brand: {
+    ...typography.displayLgMobile,
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  subtitle: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  form: {
+    gap: 16,
+  },
+  row: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: -8,
+  },
+  remember: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  checkbox: {
+    alignItems: 'center',
+    borderColor: colors.outlineVariant,
+    borderRadius: 4,
+    borderWidth: 1,
+    height: 16,
+    justifyContent: 'center',
+    width: 16,
+  },
+  checkboxChecked: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  roleIcon: {
-    alignItems: 'center',
-    backgroundColor: colors.primarySoft,
-    borderRadius: 8,
-    height: 40,
-    justifyContent: 'center',
-    marginBottom: 12,
-    width: 40,
+  rememberText: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
   },
-  roleIconActive: {
-    backgroundColor: 'rgba(255,255,255,0.18)',
+  forgot: {
+    ...typography.labelMd,
+    color: colors.primary,
+    fontWeight: '500',
   },
-  roleTitle: {
-    color: colors.ink,
+  error: {
+    color: colors.error,
     fontSize: 14,
-    fontWeight: '800',
+    lineHeight: 20,
   },
-  roleTitleActive: {
-    color: colors.white,
-  },
-  roleDescription: {
-    color: colors.inkMuted,
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 5,
-  },
-  roleDescriptionActive: {
-    color: 'rgba(255,255,255,0.78)',
-  },
-  formSection: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    paddingTop: 23,
-  },
-  formTitle: {
-    color: colors.ink,
-    fontSize: 20,
-    fontWeight: '900',
-    marginBottom: 18,
-  },
-  demoNote: {
-    alignItems: 'flex-start',
-    backgroundColor: colors.primarySoft,
-    borderRadius: 8,
+  primaryBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryContainer,
+    borderRadius: radius.xl,
     flexDirection: 'row',
-    gap: 9,
-    marginTop: 16,
-    padding: 12,
+    gap: 8,
+    height: 48,
+    justifyContent: 'center',
+    marginTop: 8,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 3,
+    width: '100%',
   },
-  demoNoteText: {
-    color: colors.inkMuted,
+  primaryBtnText: {
+    ...typography.button,
+    color: colors.onPrimary,
+  },
+  divider: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+    marginVertical: 8,
+  },
+  dividerLine: {
+    backgroundColor: 'rgba(195,198,215,0.5)',
     flex: 1,
-    fontSize: 12,
-    lineHeight: 18,
+    height: 1,
+  },
+  dividerText: {
+    ...typography.labelMd,
+    color: colors.outline,
+  },
+  guestBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerHigh,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    height: 48,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  guestBtnText: {
+    ...typography.button,
+    color: colors.onSurface,
+  },
+  footer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  footerText: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  footerLink: {
+    ...typography.bodySm,
+    color: colors.primary,
+    fontWeight: '500',
   },
 });

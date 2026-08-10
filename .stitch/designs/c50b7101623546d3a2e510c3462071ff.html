@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Theo dõi đơn hàng - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c3c6d7",
+                      "on-tertiary-fixed": "#002109",
+                      "error": "#ba1a1a",
+                      "primary-container": "#2563eb",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "secondary-container": "#2170e4",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "tertiary-container": "#007e37",
+                      "tertiary-fixed": "#6bff8f",
+                      "surface-container-low": "#eff4ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface": "#f8f9ff",
+                      "surface-container-high": "#dce9ff",
+                      "surface-dim": "#cbdbf5",
+                      "surface-tint": "#0053db",
+                      "on-primary-container": "#eeefff",
+                      "on-secondary-fixed": "#001a42",
+                      "on-secondary-fixed-variant": "#004395",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed": "#dbe1ff",
+                      "error-container": "#ffdad6",
+                      "inverse-surface": "#213145",
+                      "secondary": "#0058be",
+                      "tertiary": "#006229",
+                      "background": "#f8f9ff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-secondary-container": "#fefcff",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-error": "#ffffff",
+                      "on-background": "#0b1c30",
+                      "on-primary-fixed": "#00174b",
+                      "on-surface": "#0b1c30",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "surface-bright": "#f8f9ff",
+                      "outline": "#737686",
+                      "on-tertiary-container": "#c1ffc5",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "inverse-primary": "#b4c5ff",
+                      "primary": "#004ac6",
+                      "surface-variant": "#d3e4fe",
+                      "surface-container": "#e5eeff",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#434655"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "xs": "4px",
+                      "base": "4px",
+                      "margin-desktop": "40px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "2xl": "48px",
+                      "xl": "32px",
+                      "margin-mobile": "20px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "button": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-safe antialiased flex justify-center">
+<div class="w-full max-w-[600px] bg-surface relative min-h-screen">
+<!-- TopAppBar (Customized for Detail View) -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-sm shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<button class="text-primary hover:brightness-90 transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm text-on-surface">Theo dõi đơn hàng</h1>
+<button class="text-on-surface-variant hover:brightness-90 transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="p-margin-mobile flex flex-col gap-lg">
+<!-- Order Summary Card -->
+<section class="bg-surface-container-lowest rounded-[20px] p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)] flex flex-col gap-sm">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-sm">
+<span class="text-body-sm font-body-sm text-on-surface-variant">Mã đơn: #UL-98245A</span>
+<span class="text-label-md font-label-md text-primary bg-primary-fixed px-sm py-xs rounded-full">Đang giao</span>
+</div>
+<div class="flex items-start gap-md pt-sm">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A modern hardcover textbook on Advanced Machine Learning, placed on a pristine white desk. The book has a minimalist cover design with geometric blue shapes. The lighting is soft and studio-quality, highlighting the texture of the cover. Modern, clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqHJg9EV3sPImMbrlkPJ0r4ozzh4mdvYvdswXGi7FvECfgPs7PxS0bNT8ThIF9Wiw6B5lN739GvlV7oeb6JvflTu2mXynQzi91aZpF1UcT4CfKOiwfBloKV7GymG9X2TSzt9SeMYW0yvhY6H1UC1nDOMe9Plee-3grqcDGqgQNTfjU42QYADpvChOYwiBhuIJviNPM_CvoG4RWHYhxcZE4qB2Od5IaJpw9Po84AlYkMluPygxIAlWc"/>
+</div>
+<div class="flex-1 flex flex-col">
+<h2 class="text-body-md font-body-md text-on-surface font-semibold line-clamp-2">Giáo trình Machine Learning Nâng cao (Bản cứng 2023)</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-xs">Người bán: Nguyễn Văn A</p>
+<p class="text-headline-sm font-headline-sm text-primary mt-sm">250.000 ₫</p>
+</div>
+</div>
+</section>
+<!-- Timeline Section -->
+<section class="bg-surface-container-lowest rounded-[20px] p-md shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<h3 class="text-body-lg font-body-lg text-on-surface font-semibold mb-md">Trạng thái giao hàng</h3>
+<div class="relative pl-sm">
+<!-- Timeline Line -->
+<div class="absolute left-[15px] top-4 bottom-4 w-[2px] bg-outline-variant/30"></div>
+<!-- Step 1: Hoàn tất (Future) -->
+<div class="flex gap-md mb-lg relative z-10 opacity-50">
+<div class="w-6 h-6 rounded-full bg-surface-container-high border-2 border-outline-variant flex items-center justify-center flex-shrink-0 mt-1">
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface font-medium">Hoàn tất giao dịch</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Chờ xác nhận nhận hàng</p>
+</div>
+</div>
+<!-- Step 2: Đang giao (Current) -->
+<div class="flex gap-md mb-lg relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1 shadow-[0px_0px_0px_4px_rgba(37,99,235,0.2)]">
+<span class="material-symbols-outlined text-[14px] text-on-primary icon-fill" data-icon="local_shipping">local_shipping</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-primary font-bold">Đang giao đến điểm hẹn</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Hôm nay, 14:30</p>
+<div class="mt-sm bg-surface-container-low p-sm rounded-lg flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="info">info</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Người bán đang trên đường đến điểm hẹn.</p>
+</div>
+</div>
+</div>
+<!-- Step 3: Đã xác nhận (Past) -->
+<div class="flex gap-md mb-lg relative z-10">
+<div class="w-6 h-6 rounded-full bg-tertiary flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-[14px] text-on-tertiary icon-fill" data-icon="check">check</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface font-medium">Đã xác nhận đơn hàng</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Hôm qua, 09:15</p>
+</div>
+</div>
+<!-- Step 4: Chờ xác nhận (Past) -->
+<div class="flex gap-md relative z-10">
+<div class="w-6 h-6 rounded-full bg-tertiary flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-[14px] text-on-tertiary icon-fill" data-icon="check">check</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface font-medium">Đặt hàng thành công</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Hôm qua, 08:30</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Meeting Point & Seller Info -->
+<section class="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] overflow-hidden">
+<div class="p-md border-b border-outline-variant/30">
+<h3 class="text-body-lg font-body-lg text-on-surface font-semibold mb-sm">Điểm hẹn giao dịch</h3>
+<div class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary mt-xs" data-icon="location_on">location_on</span>
+<div>
+<p class="text-body-md font-body-md text-on-surface font-medium">Cổng chính Thư viện Tạ Quang Bửu</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Đại học Bách Khoa Hà Nội</p>
+</div>
+</div>
+</div>
+<!-- Map Placeholder -->
+<div class="h-32 w-full relative bg-surface-dim">
+<img class="w-full h-full object-cover opacity-80" data-alt="A clean, modern top-down map UI showing a university campus. The map uses a soft, light mode color palette with light gray roads, pale green parks, and light blue water features. A distinct blue location pin marks a specific building. High clarity, professional digital interface style." data-location="Hanoi" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS8L9sT0x98_uDWdgFH_zyXKyuvSBgAB_HEE7-W_1Cnz4ZK_F0tbTp7RVyTTTsW1MjpZnGOELmGOp9-grrbgzUDa8po2pHyYWwg0vcpjjDAiQlEELVIKdtvnEyucZHBVeiEvQZMTILx17y5lNoxacTnAa12-0vD8CpQd834T0UqENuufgkJ27nfH2rMjSPmrLDfEgsn3f84p72I_FnUS_e68EqTMY35xsy0FXxIQbC2kE0M1kisXDq"/>
+</div>
+<div class="p-md flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-body-lg font-body-lg">
+                            A
+                        </div>
+<div>
+<p class="text-body-md font-body-md text-on-surface font-medium">Nguyễn Văn A</p>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-[#F59E0B]" data-icon="star">star</span>
+                                4.8 (120 đánh giá)
+                            </p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center hover:brightness-90 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</button>
+</div>
+</section>
+<!-- Actions -->
+<section class="flex gap-md pt-sm">
+<button class="flex-1 py-3 px-4 rounded-[16px] border border-outline-variant text-on-surface font-button text-button font-medium hover:bg-surface-variant/50 transition-all active:scale-[0.98]">
+                    Hủy đơn
+                </button>
+<button class="flex-1 py-3 px-4 rounded-[16px] bg-[#2563EB] text-white font-button text-button font-medium hover:brightness-90 transition-all active:scale-[0.98] shadow-sm">
+                    Liên hệ người bán
+                </button>
+</section>
+<!-- Bottom spacing for mobile safe area if needed -->
+<div class="h-8"></div>
+</main>
+</div>
+</body></html>

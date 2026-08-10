@@ -1,219 +1,380 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState, PrimaryButton } from '@/src/components/ui';
+import { QuantityStepper } from '@/src/components/QuantityStepper';
+import { Button, EmptyState } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { colors, shadow } from '@/src/theme/colors';
+import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { CartLine, Product } from '@/src/types';
 import { formatCurrency } from '@/src/utils/format';
 
-export default function CartScreen() {
-  const { cart, products, changeCartQuantity, removeFromCart } = useStore();
-  const lines = cart.flatMap((line) => {
-    const product = products.find((item) => item.id === line.productId);
-    return product ? [{ ...line, product }] : [];
-  });
-  const total = lines.reduce(
-    (sum, line) => sum + line.product.price * line.quantity,
-    0
-  );
+type SellerGroup = {
+  sellerId: string;
+  sellerName: string;
+  sellerCampus: string;
+  items: { line: CartLine; product: Product }[];
+};
 
+function Checkbox({
+  checked,
+  onPress,
+  label,
+}: {
+  checked: boolean;
+  onPress: () => void;
+  label?: string;
+}) {
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={22} color={colors.ink} />
-        </TouchableOpacity>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Giỏ hàng</Text>
-          <Text style={styles.subtitle}>{lines.length} sản phẩm đã chọn</Text>
-        </View>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      style={[styles.checkboxRow, label && styles.checkboxRowLabeled]}>
+      <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
+        {checked ? <Ionicons name="checkmark" size={12} color={colors.onPrimary} /> : null}
       </View>
-
-      {lines.length === 0 ? (
-        <View style={styles.emptyWrap}>
-          <EmptyState
-            description="Khám phá các món đồ tốt quanh trường và thêm vào đây."
-            icon="bag-handle-outline"
-            title="Giỏ hàng đang trống"
-          />
-          <PrimaryButton
-            onPress={() => router.replace('/(tabs)')}
-            style={styles.exploreButton}
-            title="Tiếp tục khám phá"
-          />
-        </View>
-      ) : (
-        <>
-          <FlatList
-            contentContainerStyle={styles.list}
-            data={lines}
-            keyExtractor={(item) => item.productId}
-            renderItem={({ item }) => (
-              <View style={styles.cartItem}>
-                <Image contentFit="cover" source={{ uri: item.product.image }} style={styles.image} />
-                <View style={styles.itemBody}>
-                  <View style={styles.itemTop}>
-                    <Text numberOfLines={2} style={styles.itemTitle}>
-                      {item.product.title}
-                    </Text>
-                    <TouchableOpacity
-                      accessibilityLabel="Xóa khỏi giỏ"
-                      onPress={() => removeFromCart(item.productId)}
-                      style={styles.deleteButton}>
-                      <Ionicons name="trash-outline" size={17} color={colors.danger} />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.itemPrice}>{formatCurrency(item.product.price)}</Text>
-                  <View style={styles.quantityRow}>
-                    <Text style={styles.stock}>Kho: {item.product.stock}</Text>
-                    <View style={styles.stepper}>
-                      <TouchableOpacity
-                        accessibilityLabel="Giảm số lượng"
-                        onPress={() => changeCartQuantity(item.productId, item.quantity - 1)}
-                        style={styles.stepperButton}>
-                        <Ionicons name="remove" size={17} color={colors.ink} />
-                      </TouchableOpacity>
-                      <Text style={styles.quantity}>{item.quantity}</Text>
-                      <TouchableOpacity
-                        accessibilityLabel="Tăng số lượng"
-                        disabled={item.quantity >= item.product.stock}
-                        onPress={() => changeCartQuantity(item.productId, item.quantity + 1)}
-                        style={[
-                          styles.stepperButton,
-                          item.quantity >= item.product.stock && styles.stepperDisabled,
-                        ]}>
-                        <Ionicons name="add" size={17} color={colors.ink} />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            )}
-            showsVerticalScrollIndicator={false}
-          />
-
-          <View style={styles.summaryBar}>
-            <View style={styles.summaryText}>
-              <Text style={styles.summaryLabel}>Tạm tính</Text>
-              <Text style={styles.summaryTotal}>{formatCurrency(total)}</Text>
-            </View>
-            <PrimaryButton
-              icon="arrow-forward"
-              onPress={() => router.push('/checkout')}
-              style={styles.checkoutButton}
-              title="Thanh toán"
-            />
-          </View>
-        </>
-      )}
-    </SafeAreaView>
+      {label ? <Text style={styles.checkboxLabel}>{label}</Text> : null}
+    </TouchableOpacity>
   );
 }
 
+export default function CartScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const {
+    cart,
+    products,
+    getUserById,
+    selectAllCart,
+    toggleCartSelected,
+    changeCartQuantity,
+    removeFromCart,
+  } = useStore();
+
+  const groups = useMemo<SellerGroup[]>(() => {
+    const map = new Map<string, SellerGroup>();
+    cart.forEach((line) => {
+      const product = products.find((p) => p.id === line.productId);
+      if (!product) return;
+      const seller = getUserById(product.sellerId);
+      const key = product.sellerId;
+      const existing = map.get(key);
+      const item = { line, product };
+      if (existing) {
+        existing.items.push(item);
+      } else {
+        map.set(key, {
+          sellerId: key,
+          sellerName: seller?.name ?? 'Người bán',
+          sellerCampus: seller?.campus ?? '',
+          items: [item],
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [cart, products, getUserById]);
+
+  const selectedLines = groups.flatMap((g) => g.items.filter(({ line }) => line.selected));
+  const selectedCount = selectedLines.length;
+  const total = selectedLines.reduce((sum, { line, product }) => sum + line.quantity * product.price, 0);
+  const allSelected = selectedLines.length > 0 && selectedLines.length === cart.length;
+
+  const checkout = () => {
+    if (selectedCount === 0) {
+      Alert.alert('Chưa chọn sản phẩm', 'Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
+      return;
+    }
+    router.push('/checkout');
+  };
+
+  return (
+    <View style={styles.screen}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
+          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Giỏ hàng</Text>
+        <View style={styles.headerBtn} />
+      </View>
+
+      <FlatList
+        data={groups}
+        keyExtractor={(group) => group.sellerId}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <EmptyState
+            icon="cart-outline"
+            title="Giỏ hàng của bạn còn trống"
+            description="Thêm ngay những món đồ bạn thích vào giỏ để mua chúng nhé."
+          >
+            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/explore')} />
+          </EmptyState>
+        }
+        renderItem={({ item: group }) => {
+            const groupAll = group.items.length > 0 && group.items.every(({ line }) => line.selected);
+            return (
+              <View style={styles.sellerCard}>
+                <View style={styles.sellerHeader}>
+                  <Checkbox
+                    checked={groupAll}
+                    onPress={() =>
+                      group.items.forEach(({ line }) => {
+                        if (groupAll !== line.selected) toggleCartSelected(line.productId);
+                      })
+                    }
+                  />
+                  <Ionicons name="school-outline" size={20} color={colors.outline} />
+                  <Text numberOfLines={1} style={styles.sellerName}>
+                    {group.sellerName} {group.sellerCampus ? `(${group.sellerCampus})` : ''}
+                  </Text>
+                </View>
+                {group.items.map(({ line, product }, idx) => (
+                  <View
+                    key={line.productId}
+                    style={[styles.item, idx > 0 && styles.itemDivider]}>
+                    <Checkbox
+                      checked={line.selected}
+                      onPress={() => toggleCartSelected(line.productId)}
+                    />
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      onPress={() => router.push(`/product/${product.id}`)}
+                      style={styles.imageWrap}>
+                      <Image source={{ uri: product.images[0] || product.image }} style={styles.image} />
+                      <View style={[styles.conditionTag, conditionTagStyle(product.condition)]}>
+                        <Text style={styles.conditionTagText}>{product.condition}</Text>
+                      </View>
+                    </TouchableOpacity>
+                    <View style={styles.info}>
+                      <TouchableOpacity activeOpacity={0.85} onPress={() => router.push(`/product/${product.id}`)}>
+                        <Text style={styles.name} numberOfLines={2}>
+                          {product.title}
+                        </Text>
+                      </TouchableOpacity>
+                      <View style={styles.bottomRow}>
+                        <Text style={styles.price}>{formatCurrency(product.price)}</Text>
+                        <QuantityStepper
+                          value={line.quantity}
+                          onChange={(next) => changeCartQuantity(line.productId, next - line.quantity)}
+                        />
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Alert.alert('Xóa sản phẩm', 'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?', [
+                          { text: 'Hủy', style: 'cancel' },
+                          { text: 'Xóa', style: 'destructive', onPress: () => removeFromCart(line.productId) },
+                        ])
+                      }
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      style={styles.deleteBtn}>
+                      <Ionicons name="trash-outline" size={20} color={colors.outline} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            );
+          }}
+      />
+
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
+        <Checkbox checked={allSelected} onPress={() => selectAllCart(!allSelected)} label="Tất cả" />
+        <View style={styles.footerTotal}>
+          <Text style={styles.footerTotalLabel}>Tạm tính</Text>
+          <Text style={styles.footerTotalValue}>{formatCurrency(total)}</Text>
+        </View>
+        <Button
+          title={`Mua hàng (${selectedCount})`}
+          disabled={selectedCount === 0}
+          onPress={checkout}
+          style={styles.checkoutBtn}
+        />
+      </View>
+    </View>
+  );
+}
+
+function conditionTagStyle(condition: string) {
+  if (condition === 'Mới') {
+    return { backgroundColor: colors.tertiary, borderColor: colors.tertiary };
+  }
+  if (condition === 'Như mới') {
+    return { backgroundColor: colors.surfaceVariant, borderColor: colors.outlineVariant };
+  }
+  return { backgroundColor: colors.secondary, borderColor: colors.secondary };
+}
+
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.background, flex: 1 },
+  screen: {
+    backgroundColor: colors.surface,
+    flex: 1,
+  },
   header: {
     alignItems: 'center',
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
+    backgroundColor: 'rgba(248,249,255,0.94)',
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 10,
+    paddingHorizontal: 12,
+    ...shadow.level1,
   },
-  backButton: {
+  headerBtn: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 42,
+    height: 40,
     justifyContent: 'center',
-    width: 42,
+    width: 36,
   },
-  headerText: { flex: 1 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: '900' },
-  subtitle: { color: colors.inkMuted, fontSize: 12, marginTop: 2 },
-  emptyWrap: { flex: 1, justifyContent: 'center', padding: 22 },
-  exploreButton: { alignSelf: 'center', minWidth: 210 },
-  list: { padding: 16, paddingBottom: 126 },
-  cartItem: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: 'row',
-    marginBottom: 11,
-    overflow: 'hidden',
-    ...shadow,
-  },
-  image: { backgroundColor: colors.primarySoft, height: 132, width: 116 },
-  itemBody: { flex: 1, padding: 11 },
-  itemTop: { alignItems: 'flex-start', flexDirection: 'row', gap: 5 },
-  itemTitle: { color: colors.ink, flex: 1, fontSize: 14, fontWeight: '800', lineHeight: 19 },
-  deleteButton: {
-    alignItems: 'center',
-    backgroundColor: colors.dangerSoft,
-    borderRadius: 6,
-    height: 31,
-    justifyContent: 'center',
-    width: 31,
-  },
-  itemPrice: { color: colors.accent, fontSize: 15, fontWeight: '900', marginTop: 7 },
-  quantityRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  stock: { color: colors.inkMuted, fontSize: 11 },
-  stepper: {
-    alignItems: 'center',
-    borderColor: colors.borderStrong,
-    borderRadius: 6,
-    borderWidth: 1,
-    flexDirection: 'row',
-    height: 34,
-  },
-  stepperButton: { alignItems: 'center', height: 32, justifyContent: 'center', width: 34 },
-  stepperDisabled: { opacity: 0.35 },
-  quantity: {
-    borderLeftColor: colors.borderStrong,
-    borderLeftWidth: 1,
-    borderRightColor: colors.borderStrong,
-    borderRightWidth: 1,
-    color: colors.ink,
-    fontSize: 13,
-    fontWeight: '800',
-    minWidth: 34,
-    paddingVertical: 7,
+  title: {
+    ...typography.headlineSm,
+    color: colors.primary,
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
     textAlign: 'center',
   },
-  summaryBar: {
+  checkboxRow: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    bottom: 0,
     flexDirection: 'row',
-    gap: 14,
-    left: 0,
-    padding: 14,
+    gap: 8,
+  },
+  checkboxRowLabeled: {
+    paddingVertical: 4,
+  },
+  checkbox: {
+    alignItems: 'center',
+    borderColor: colors.outline,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    height: 20,
+    justifyContent: 'center',
+    width: 20,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primaryContainer,
+    borderColor: colors.primaryContainer,
+  },
+  checkboxLabel: {
+    color: colors.onSurface,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  list: {
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+  },
+  sellerCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.lg,
+    marginTop: 16,
+    padding: 16,
+    ...shadow.level1,
+  },
+  sellerHeader: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(195,198,215,0.3)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+    paddingBottom: 8,
+  },
+  sellerName: {
+    color: colors.onSurface,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  item: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  itemDivider: {
+    borderTopColor: 'rgba(195,198,215,0.2)',
+    borderTopWidth: 1,
+    paddingTop: 16,
+  },
+  imageWrap: {
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    height: 80,
+    overflow: 'hidden',
+    position: 'relative',
+    width: 80,
+  },
+  image: {
+    height: '100%',
+    width: '100%',
+  },
+  conditionTag: {
+    borderTopLeftRadius: radius.lg,
+    bottom: 0,
+    borderWidth: 0,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
     position: 'absolute',
     right: 0,
-    ...shadow,
   },
-  summaryText: { minWidth: 118 },
-  summaryLabel: { color: colors.inkMuted, fontSize: 12 },
-  summaryTotal: { color: colors.accent, fontSize: 19, fontWeight: '900', marginTop: 3 },
-  checkoutButton: { flex: 1 },
+  conditionTagText: {
+    color: colors.onSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  info: {
+    flex: 1,
+    gap: 4,
+    justifyContent: 'space-between',
+    minHeight: 80,
+    paddingTop: 2,
+  },
+  name: {
+    color: colors.onSurface,
+    fontSize: 15,
+    fontWeight: '500',
+    lineHeight: 20,
+  },
+  bottomRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  price: {
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  deleteBtn: {
+    padding: 2,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  footer: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopColor: 'rgba(195,198,215,0.2)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    ...shadow.level3,
+  },
+  footerTotal: {
+    flex: 1,
+  },
+  footerTotalLabel: {
+    color: colors.outline,
+    fontSize: 13,
+  },
+  footerTotalValue: {
+    color: colors.primary,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  checkoutBtn: {
+    minWidth: 120,
+  },
 });

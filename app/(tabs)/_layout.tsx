@@ -1,79 +1,94 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
+import { StyleSheet } from 'react-native';
 
-import { LoadingScreen } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { colors } from '@/src/theme/colors';
+import { colors, radius, shadow } from '@/src/theme/colors';
+
+type TabIconProps = {
+  color: string;
+  focused: boolean;
+};
+
+function tabIcon(name: keyof typeof Ionicons.glyphMap, active: keyof typeof Ionicons.glyphMap) {
+  const TabIcon = ({ color, focused }: TabIconProps) => (
+    <Ionicons name={focused ? active : name} size={24} color={color} />
+  );
+  TabIcon.displayName = 'TabIcon';
+  return TabIcon;
+}
 
 export default function TabLayout() {
   const { currentUser, hydrated } = useStore();
 
   if (!hydrated) {
-    return <LoadingScreen />;
+    return null;
   }
   if (!currentUser) {
     return <Redirect href="/login" />;
   }
-
-  const seller = currentUser.role === 'seller';
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#82908B',
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
+        tabBarActiveBackgroundColor: 'rgba(0,74,198,0.10)',
+        tabBarInactiveBackgroundColor: 'transparent',
         tabBarHideOnKeyboard: true,
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-          marginTop: 2,
-        },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          height: 70,
-          paddingBottom: 8,
-          paddingTop: 7,
-        },
+        tabBarLabelStyle: styles.label,
+        tabBarItemStyle: styles.item,
+        tabBarStyle: styles.bar,
       }}>
       <Tabs.Screen
         name="index"
-        options={{
-          title: seller ? 'Kênh bán' : 'Khám phá',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name={seller ? 'storefront-outline' : 'compass-outline'} size={size} color={color} />
-          ),
-        }}
+        options={{ title: 'Home', tabBarIcon: tabIcon('home-outline', 'home') }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{ title: 'Explore', tabBarIcon: tabIcon('compass-outline', 'compass') }}
       />
       <Tabs.Screen
         name="sell"
         options={{
-          href: seller ? undefined : null,
-          title: 'Đăng bán',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="add-circle-outline" size={size + 2} color={color} />
-          ),
+          title: 'Sell',
+          tabBarIcon: () => <Ionicons name="add-circle" size={28} color={colors.primary} />,
         }}
       />
       <Tabs.Screen
         name="orders"
-        options={{
-          title: seller ? 'Đơn bán' : 'Đơn mua',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="receipt-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ title: 'Orders', tabBarIcon: tabIcon('receipt-outline', 'receipt') }}
       />
       <Tabs.Screen
-        name="account"
-        options={{
-          title: 'Tài khoản',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-        }}
+        name="profile"
+        options={{ title: 'Profile', tabBarIcon: tabIcon('person-outline', 'person') }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  bar: {
+    backgroundColor: 'rgba(248,249,255,0.92)',
+    borderTopColor: 'rgba(195,198,215,0.2)',
+    borderTopLeftRadius: radius['3xl'],
+    borderTopRightRadius: radius['3xl'],
+    borderTopWidth: 1,
+    height: 80,
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    ...shadow.level1,
+  },
+  item: {
+    borderRadius: radius.xl,
+    marginHorizontal: 2,
+    marginVertical: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+});

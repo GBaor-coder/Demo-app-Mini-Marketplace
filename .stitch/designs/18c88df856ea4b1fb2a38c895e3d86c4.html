@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chọn địa chỉ nhận hàng - UniLoop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#00174b",
+                      "tertiary": "#006229",
+                      "on-secondary-fixed-variant": "#004395",
+                      "error": "#ba1a1a",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-fixed": "#d8e2ff",
+                      "surface-dim": "#cbdbf5",
+                      "primary-container": "#2563eb",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "background": "#f8f9ff",
+                      "surface-tint": "#0053db",
+                      "surface-container": "#e5eeff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "inverse-primary": "#b4c5ff",
+                      "on-secondary-container": "#fefcff",
+                      "secondary": "#0058be",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "outline-variant": "#c3c6d7",
+                      "surface": "#f8f9ff",
+                      "outline": "#737686",
+                      "tertiary-fixed": "#6bff8f",
+                      "inverse-surface": "#213145",
+                      "primary": "#004ac6",
+                      "on-surface": "#0b1c30",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#c1ffc5",
+                      "on-tertiary-fixed": "#002109",
+                      "tertiary-container": "#007e37",
+                      "surface-container-high": "#dce9ff",
+                      "primary-fixed": "#dbe1ff",
+                      "on-surface-variant": "#434655",
+                      "secondary-container": "#2170e4",
+                      "surface-variant": "#d3e4fe",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-secondary-fixed": "#001a42",
+                      "on-background": "#0b1c30",
+                      "on-primary-container": "#eeefff",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "lg": "24px",
+                      "margin-mobile": "20px",
+                      "margin-desktop": "40px",
+                      "xl": "32px",
+                      "base": "4px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "2xl": "48px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "button": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-sm-mobile": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "button": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-sm-mobile": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* Level 0 Background */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-[0px_4px_12px_rgba(15,23,42,0.05)] z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16 z-50">
+<button class="text-primary dark:text-inverse-primary hover:brightness-90 transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-sm-mobile font-headline-sm-mobile text-on-surface">Chọn địa chỉ nhận hàng</h1>
+<div class="w-6"></div> <!-- Spacer for alignment -->
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow px-margin-mobile pt-lg pb-32">
+<div class="space-y-md">
+<!-- Address Card 1 (Default) -->
+<div class="bg-surface rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md relative overflow-hidden active:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer border border-primary/20 bg-primary/5">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center gap-sm">
+<h2 class="text-body-md font-body-md font-semibold text-on-surface">Nguyễn Văn A</h2>
+<span class="text-outline">|</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">0901234567</p>
+</div>
+<button class="text-primary text-label-md font-label-md hover:brightness-90 transition-all">Sửa</button>
+</div>
+<div class="space-y-xs mb-sm">
+<p class="text-body-sm font-body-sm text-on-surface">Phòng 405, Tòa nhà A1</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Ký túc xá Đại học Quốc gia, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</p>
+</div>
+<div class="flex gap-sm mt-sm">
+<span class="bg-[#3B82F6]/10 text-primary-container px-3 py-1 rounded-full text-label-md font-label-md">Ký túc xá</span>
+<span class="border border-error text-error px-3 py-1 rounded-full text-label-md font-label-md">Mặc định</span>
+</div>
+</div>
+<!-- Address Card 2 -->
+<div class="bg-surface rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md relative overflow-hidden active:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center gap-sm">
+<h2 class="text-body-md font-body-md font-semibold text-on-surface">Nguyễn Văn A</h2>
+<span class="text-outline">|</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">0901234567</p>
+</div>
+<button class="text-primary text-label-md font-label-md hover:brightness-90 transition-all">Sửa</button>
+</div>
+<div class="space-y-xs mb-sm">
+<p class="text-body-sm font-body-sm text-on-surface">123 Đường Tự Do</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Phường Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh</p>
+</div>
+<div class="flex gap-sm mt-sm">
+<span class="bg-[#3B82F6]/10 text-primary-container px-3 py-1 rounded-full text-label-md font-label-md">Nhà riêng</span>
+</div>
+</div>
+<!-- Address Card 3 -->
+<div class="bg-surface rounded-[20px] shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-md relative overflow-hidden active:shadow-[0px_8px_24px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center gap-sm">
+<h2 class="text-body-md font-body-md font-semibold text-on-surface">Nguyễn Văn A</h2>
+<span class="text-outline">|</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">0901234567</p>
+</div>
+<button class="text-primary text-label-md font-label-md hover:brightness-90 transition-all">Sửa</button>
+</div>
+<div class="space-y-xs mb-sm">
+<p class="text-body-sm font-body-sm text-on-surface">Tòa nhà Thư viện Trung tâm</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Khu đô thị ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</p>
+</div>
+<div class="flex gap-sm mt-sm">
+<span class="bg-[#3B82F6]/10 text-primary-container px-3 py-1 rounded-full text-label-md font-label-md">Văn phòng</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Fixed Button -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/80 backdrop-blur-xl border-t border-outline-variant/20 p-margin-mobile z-50 pb-safe">
+<button class="w-full bg-primary-container text-on-primary flex items-center justify-center gap-sm py-3 rounded-[16px] text-button font-button hover:brightness-90 active:scale-[0.98] transition-all shadow-[0px_4px_12px_rgba(15,23,42,0.05)]">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+            Thêm địa chỉ mới
+        </button>
+</div>
+</body></html>
