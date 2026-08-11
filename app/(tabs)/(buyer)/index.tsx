@@ -23,8 +23,10 @@ const HOME_CATEGORIES = CATEGORIES.slice(0, 4);
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { products, favoriteIds, toggleFavorite } = useStore();
+  const { products, favoriteIds, toggleFavorite, cart } = useStore();
   const [refreshing, setRefreshing] = useState(false);
+
+  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
   const activeProducts = products.filter((p) => p.status === 'active');
 
@@ -55,6 +57,19 @@ export default function HomeScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View style={styles.headerRow}>
           <Text style={styles.brand}>UniLoop</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/cart')}
+              style={styles.cartBtn}>
+              <Ionicons name="cart-outline" size={24} color={colors.onSurfaceVariant} />
+              {cartCount > 0 ? (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          </View>
         </View>
         <TouchableOpacity
           activeOpacity={0.85}
@@ -98,7 +113,7 @@ export default function HomeScreen() {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Danh mục</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/(buyer)/explore')}>
                 <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
@@ -124,9 +139,9 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Sản phẩm gần bạn</Text>
-              <TouchableOpacity onPress={() => router.push('/map')}>
-                <Text style={styles.sectionLink}>Xem bản đồ</Text>
+              <Text style={styles.sectionTitle}>Gợi ý hôm nay</Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/(buyer)/explore')}>
+                <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -160,6 +175,36 @@ const styles = StyleSheet.create({
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  cartBtn: {
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    position: 'relative',
+    width: 40,
+  },
+  cartBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
+    borderRadius: radius.full,
+    justifyContent: 'center',
+    minWidth: 16,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    position: 'absolute',
+    right: 2,
+    top: 2,
+  },
+  cartBadgeText: {
+    color: colors.onError,
+    fontSize: 10,
+    fontWeight: '700',
   },
   brand: {
     ...typography.headlineMd,

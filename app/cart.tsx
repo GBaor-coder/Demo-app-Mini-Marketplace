@@ -110,7 +110,7 @@ export default function CartScreen() {
             title="Giỏ hàng của bạn còn trống"
             description="Thêm ngay những món đồ bạn thích vào giỏ để mua chúng nhé."
           >
-            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/explore')} />
+            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/(buyer)/explore')} />
           </EmptyState>
         }
         renderItem={({ item: group }) => {

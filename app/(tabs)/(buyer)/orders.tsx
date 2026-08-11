@@ -29,36 +29,22 @@ const BUYER_TABS: { key: TabFilter; label: string }[] = [
   { key: 'cancelled', label: 'Đã hủy' },
 ];
 
-const SELLER_TABS: { key: TabFilter; label: string }[] = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'pending', label: 'Chờ xác nhận' },
-  { key: 'confirmed', label: 'Đã xác nhận' },
-  { key: 'in_transaction', label: 'Đang giao dịch' },
-  { key: 'completed', label: 'Hoàn tất' },
-  { key: 'rejected', label: 'Đã từ chối' },
-];
-
-export default function OrdersScreen() {
+export default function BuyerOrdersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentUser, orders, getUserById, startChat } = useStore();
   const [tab, setTab] = useState<TabFilter>('all');
 
-  const isSeller = currentUser?.role === 'seller';
-  const tabs = isSeller ? SELLER_TABS : BUYER_TABS;
-
   const myOrders = useMemo(() => {
     if (!currentUser) {
       return [];
     }
-    const mine = orders.filter((order) =>
-      isSeller ? order.sellerId === currentUser.id : order.buyerId === currentUser.id
-    );
+    const mine = orders.filter((order) => order.buyerId === currentUser.id);
     if (tab === 'all') {
       return mine;
     }
     return mine.filter((order) => order.status === tab);
-  }, [currentUser, isSeller, orders, tab]);
+  }, [currentUser, orders, tab]);
 
   const renderOrder = ({ item }: { item: Order }) => {
     const seller = getUserById(item.sellerId);
@@ -75,11 +61,7 @@ export default function OrdersScreen() {
     return (
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() =>
-          router.push(
-            isSeller ? `/seller-order/${item.id}` : `/order/${item.id}`
-          )
-        }
+        onPress={() => router.push(`/order/${item.id}`)}
         style={styles.orderCard}>
         <View style={styles.orderHeader}>
           <View style={styles.sellerRow}>
@@ -112,14 +94,13 @@ export default function OrdersScreen() {
         </View>
         <View style={styles.actions}>
           <Button
-            title={isSeller ? 'Liên hệ người mua' : 'Liên hệ người bán'}
+            title="Liên hệ người bán"
             variant="ghost"
             size="sm"
             compact
             style={styles.contactBtn}
             onPress={() => {
-              const otherId = isSeller ? item.buyerId : item.sellerId;
-              const threadId = startChatOrFallback(otherId, firstItem?.productId ?? '');
+              const threadId = startChat(item.sellerId, firstItem?.productId ?? '');
               if (threadId) {
                 router.push(`/chat/${threadId}`);
               }
@@ -130,33 +111,18 @@ export default function OrdersScreen() {
             size="sm"
             compact
             style={styles.detailBtn}
-            onPress={() =>
-              router.push(
-                isSeller ? `/seller-order/${item.id}` : `/order/${item.id}`
-              )
-            }
+            onPress={() => router.push(`/order/${item.id}`)}
           />
         </View>
       </TouchableOpacity>
     );
   };
 
-  function startChatOrFallback(sellerId: string, productId: string) {
-    if (!sellerId) {
-      return '';
-    }
-    try {
-      return startChat(sellerId, productId);
-    } catch {
-      return '';
-    }
-  }
-
   return (
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <View style={styles.headerTop}>
-          <Text style={styles.brand}>UniLoop</Text>
+          <Text style={styles.brand}>Đơn mua</Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => router.push('/search')}
@@ -168,7 +134,7 @@ export default function OrdersScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabs}>
-          {tabs.map((item) => {
+          {BUYER_TABS.map((item) => {
             const active = tab === item.key;
             return (
               <TouchableOpacity
@@ -204,7 +170,7 @@ export default function OrdersScreen() {
             <Button
               title="Tiếp tục khám phá"
               icon="compass-outline"
-              onPress={() => router.push('/(tabs)')}
+              onPress={() => router.push('/(tabs)/(buyer)/explore')}
               style={styles.exploreBtn}
             />
           </View>

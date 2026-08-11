@@ -61,13 +61,12 @@ type StoreContextValue = {
   notifications: AppNotification[];
   chats: ChatThread[];
   reviews: Review[];
-  login: (email: string, password: string) => boolean;
-  loginGuest: () => User;
+  login: (email: string, password: string, role?: UserRole) => boolean;
+  loginGuest: (role?: UserRole) => User;
   register: (
     input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>,
     role: UserRole
   ) => User;
-  switchRole: () => void;
   logout: () => void;
   getUserById: (id: string) => User | undefined;
   addToCart: (productId: string) => boolean;
@@ -103,7 +102,6 @@ const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 export function StoreProvider({ children }: PropsWithChildren) {
   const [hydrated, setHydrated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [roleOverride, setRoleOverride] = useState<UserRole | null>(null);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
@@ -172,13 +170,10 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const currentUser = useMemo(() => {
     const user = DEMO_USERS.find((item) => item.id === currentUserId) ?? null;
-    if (user && roleOverride) {
-      return { ...user, role: roleOverride };
-    }
     return user;
-  }, [currentUserId, roleOverride]);
+  }, [currentUserId]);
 
-  const login = useCallback((email: string, password: string) => {
+  const login = useCallback((email: string, password: string, role?: UserRole) => {
     const normalizedEmail = email.trim().toLowerCase();
     const user = DEMO_USERS.find(
       (item) => item.email.toLowerCase() === normalizedEmail && item.password === password
@@ -188,13 +183,18 @@ export function StoreProvider({ children }: PropsWithChildren) {
       return false;
     }
 
+    if (role && user.role !== role) {
+      return false;
+    }
+
     setCurrentUserId(user.id);
     setCart([]);
     return true;
   }, []);
 
-  const loginGuest = useCallback(() => {
-    const guest = DEMO_USERS.find((user) => user.id === 'buyer-1') ?? DEMO_USERS[0];
+  const loginGuest = useCallback((role: UserRole = 'buyer') => {
+    const guest =
+      DEMO_USERS.find((user) => user.role === role) ?? DEMO_USERS.find((user) => user.id === 'buyer-1') ?? DEMO_USERS[0];
     setCurrentUserId(guest.id);
     setCart([]);
     return guest;
@@ -230,14 +230,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
     },
     []
   );
-
-  const switchRole = useCallback(() => {
-    if (!currentUser) {
-      return;
-    }
-    const next: UserRole = currentUser.role === 'buyer' ? 'seller' : 'buyer';
-    setRoleOverride(next);
-  }, [currentUser]);
 
   const logout = useCallback(() => {
     setCurrentUserId(null);
@@ -622,7 +614,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
       login,
       loginGuest,
       register,
-      switchRole,
       logout,
       getUserById,
       addToCart,
@@ -678,7 +669,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
       selectAllCart,
       sendMessage,
       startChat,
-      switchRole,
       toggleCartSelected,
       toggleFavorite,
       unreadCount,

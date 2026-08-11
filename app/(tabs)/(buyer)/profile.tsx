@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
@@ -12,19 +13,17 @@ type MenuItem = {
   label: string;
   route?: string;
   badge?: number;
-  onPress?: () => void;
 };
 
-export default function ProfileScreen() {
+export default function BuyerProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentUser, switchRole, logout, unreadCount } = useStore();
+  const { currentUser, logout, unreadCount } = useStore();
+  const [showLogout, setShowLogout] = useState(false);
 
   if (!currentUser) {
     return null;
   }
-
-  const isSeller = currentUser.role === 'seller';
 
   const group1: MenuItem[] = [
     {
@@ -33,14 +32,18 @@ export default function ProfileScreen() {
       route: '/favorites',
     },
     { icon: 'location-outline', label: 'Địa chỉ đã lưu', route: '/addresses' },
-    { icon: 'time-outline', label: 'Lịch sử giao dịch', route: '/(tabs)/orders' },
+    {
+      icon: 'bag-handle-outline',
+      label: 'Lịch sử mua hàng',
+      route: '/(tabs)/(buyer)/orders',
+    },
   ];
 
   const group2: MenuItem[] = [
     {
       icon: 'notifications-outline',
-      label: 'Trung tâm thông báo',
-      route: '/notifications',
+      label: 'Thông báo',
+      route: '/(tabs)/(buyer)/notifications',
       badge: unreadCount,
     },
     { icon: 'settings-outline', label: 'Cài đặt', route: '/status' },
@@ -53,14 +56,11 @@ export default function ProfileScreen() {
         <TouchableOpacity
           key={item.label}
           activeOpacity={0.7}
-          onPress={() => {
-            if (item.route) {
-              router.push(item.route as any);
-            }
-            item.onPress?.();
-          }}
+          onPress={() => item.route && router.push(item.route as any)}
           style={[styles.menuRow, index > 0 && styles.menuRowBorder]}>
-          <Ionicons name={item.icon} size={24} color={colors.outline} />
+          <View style={styles.menuIcon}>
+            <Ionicons name={item.icon} size={22} color={colors.primary} />
+          </View>
           <Text style={styles.menuLabel}>{item.label}</Text>
           {item.badge ? (
             <View style={styles.badge}>
@@ -82,7 +82,6 @@ export default function ProfileScreen() {
 
         <View style={styles.profileCard}>
           <View style={styles.avatarWrap}>
-            <View style={styles.avatarRing} />
             <Avatar uri={currentUser.avatar} name={currentUser.name} size={96} />
             <View style={styles.verified}>
               <Ionicons name="shield-checkmark" size={16} color={colors.onSecondaryContainer} />
@@ -95,54 +94,47 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.ratingChip}>
             <Ionicons name="star" size={18} color={colors.tertiaryContainer} />
-            <Text style={styles.ratingValue}>
-              {currentUser.rating?.toFixed(1) ?? '5.0'}/5
-            </Text>
+            <Text style={styles.ratingValue}>{currentUser.rating?.toFixed(1) ?? '5.0'}/5</Text>
             <Text style={styles.ratingSep}>•</Text>
-            <Text style={styles.ratingCount}>
-              {currentUser.reviewCount ?? 0} Đánh giá
-            </Text>
+            <Text style={styles.ratingCount}>{currentUser.reviewCount ?? 0} Đánh giá</Text>
           </View>
-        </View>
-
-        <View style={styles.toggle}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (isSeller) {
-                switchRole();
-              }
-            }}
-            style={[styles.toggleItem, !isSeller && styles.toggleItemActive]}>
-            <Text style={[styles.toggleText, !isSeller && styles.toggleTextActive]}>
-              Chế độ Mua
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (!isSeller) {
-                switchRole();
-              }
-            }}
-            style={[styles.toggleItem, isSeller && styles.toggleItemActive]}>
-            <Text style={[styles.toggleText, isSeller && styles.toggleTextActive]}>
-              Chế độ Bán
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {renderGroup(group1)}
         {renderGroup(group2)}
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={logout}
-          style={styles.logout}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowLogout(true)} style={styles.logout}>
           <Ionicons name="log-out-outline" size={20} color={colors.error} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showLogout}
+        onRequestClose={() => setShowLogout(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Đăng xuất?</Text>
+            <Text style={styles.modalBody}>Bạn có chắc chắn muốn đăng xuất khỏi UniLoop?</Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setShowLogout(false)} style={styles.modalCancel}>
+                <Text style={styles.modalCancelText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowLogout(false);
+                  logout();
+                  router.replace('/login');
+                }}
+                style={styles.modalConfirm}>
+                <Text style={styles.modalConfirmText}>Đăng xuất</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -174,12 +166,6 @@ const styles = StyleSheet.create({
   },
   avatarWrap: {
     position: 'relative',
-  },
-  avatarRing: {
-    ...StyleSheet.absoluteFillObject,
-    borderColor: 'rgba(0,74,198,0.1)',
-    borderRadius: 52,
-    borderWidth: 4,
   },
   verified: {
     alignItems: 'center',
@@ -230,32 +216,6 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontSize: 14,
   },
-  toggle: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    marginBottom: 32,
-    padding: 4,
-  },
-  toggleItem: {
-    alignItems: 'center',
-    borderRadius: 8,
-    flex: 1,
-    paddingVertical: 8,
-  },
-  toggleItemActive: {
-    backgroundColor: colors.primary,
-    ...shadow.level1,
-  },
-  toggleText: {
-    color: colors.onSurfaceVariant,
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 24,
-  },
-  toggleTextActive: {
-    color: colors.onPrimary,
-  },
   menuCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius['2xl'],
@@ -273,6 +233,14 @@ const styles = StyleSheet.create({
   menuRowBorder: {
     borderTopColor: 'rgba(195,198,215,0.2)',
     borderTopWidth: 1,
+  },
+  menuIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderRadius: radius.full,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
   menuLabel: {
     ...typography.bodyMd,
@@ -299,11 +267,66 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   logoutText: {
     color: colors.error,
     fontSize: 16,
     fontWeight: '500',
+  },
+  modalOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(11,28,48,0.42)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modal: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 28,
+    gap: 8,
+    maxWidth: 340,
+    padding: 24,
+    width: '100%',
+    ...shadow.level3,
+  },
+  modalTitle: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    marginBottom: 4,
+  },
+  modalBody: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    marginBottom: 8,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  modalCancel: {
+    alignItems: 'center',
+    borderRadius: radius.full,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    ...typography.button,
+    color: colors.primary,
+  },
+  modalConfirm: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
+    borderRadius: radius.full,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  modalConfirmText: {
+    ...typography.button,
+    color: colors.onError,
   },
 });

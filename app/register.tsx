@@ -23,7 +23,7 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const { register } = useStore();
   const { role } = useLocalSearchParams<{ role?: string }>();
-  const defaultRole: UserRole = role === 'seller' ? 'seller' : 'buyer';
+  const [defaultRole, setDefaultRole] = useState<UserRole>(role === 'seller' ? 'seller' : 'buyer');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -64,7 +64,7 @@ export default function RegisterScreen() {
           { name, email, phone, password, campus: 'Đại học Bách Khoa TP.HCM' },
           defaultRole
         );
-        router.replace('/(tabs)');
+        router.replace(defaultRole === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Đăng ký thất bại.');
       } finally {
@@ -125,12 +125,68 @@ export default function RegisterScreen() {
               />
               <Input
                 label="Xác nhận mật khẩu"
-                icon="arrow-back"
+                icon="key-outline"
                 value={confirm}
                 onChangeText={setConfirm}
                 placeholder="••••••••"
                 secureTextEntry
               />
+
+              <View style={styles.roleSection}>
+                <Text style={styles.roleLabel}>Mục đích sử dụng chính</Text>
+                <View style={styles.roleGrid}>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => setDefaultRole('buyer')}
+                    style={[
+                      styles.roleCard,
+                      defaultRole === 'buyer' && styles.roleCardActive,
+                    ]}>
+                    <Ionicons
+                      name="bag-handle-outline"
+                      size={32}
+                      color={defaultRole === 'buyer' ? colors.primary : colors.onSurfaceVariant}
+                    />
+                    <Text
+                      style={[
+                        styles.roleCardText,
+                        defaultRole === 'buyer' && styles.roleCardTextActive,
+                      ]}>
+                      Tôi muốn là{'\n'}Người mua
+                    </Text>
+                    {defaultRole === 'buyer' ? (
+                      <View style={styles.roleCheck}>
+                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                      </View>
+                    ) : null}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => setDefaultRole('seller')}
+                    style={[
+                      styles.roleCard,
+                      defaultRole === 'seller' && styles.roleCardActive,
+                    ]}>
+                    <Ionicons
+                      name="storefront-outline"
+                      size={32}
+                      color={defaultRole === 'seller' ? colors.primary : colors.onSurfaceVariant}
+                    />
+                    <Text
+                      style={[
+                        styles.roleCardText,
+                        defaultRole === 'seller' && styles.roleCardTextActive,
+                      ]}>
+                      Tôi muốn là{'\n'}Người bán
+                    </Text>
+                    {defaultRole === 'seller' ? (
+                      <View style={styles.roleCheck}>
+                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                      </View>
+                    ) : null}
+                  </TouchableOpacity>
+                </View>
+              </View>
 
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -259,6 +315,46 @@ const styles = StyleSheet.create({
   termsLink: {
     color: colors.primary,
     fontWeight: '400',
+  },
+  roleSection: {
+    gap: 8,
+  },
+  roleLabel: {
+    ...typography.labelMd,
+    color: colors.onSurface,
+  },
+  roleGrid: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  roleCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceBright,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.xl,
+    borderWidth: 2,
+    flex: 1,
+    gap: 8,
+    padding: 16,
+    position: 'relative',
+  },
+  roleCardActive: {
+    backgroundColor: 'rgba(0,74,198,0.05)',
+    borderColor: colors.primary,
+  },
+  roleCardText: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  roleCardTextActive: {
+    color: colors.primary,
+  },
+  roleCheck: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
   },
   error: {
     color: colors.error,

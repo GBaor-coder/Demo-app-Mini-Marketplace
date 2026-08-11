@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -29,7 +28,7 @@ const TABS: { key: TabFilter; label: string }[] = [
   { key: 'cancelled', label: 'Đã hủy' },
 ];
 
-export default function SellerOrdersScreen() {
+export default function SellerOrdersTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentUser, orders, getUserById, updateOrderStatus } = useStore();
@@ -119,15 +118,11 @@ export default function SellerOrdersScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>UniLoop</Text>
-        <View style={styles.headerBtn} />
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <Text style={styles.brand}>UniLoop</Text>
       </View>
 
-      <Text style={styles.pageTitle}>Quản lý đơn hàng</Text>
+      <Text style={styles.pageTitle}>Đơn bán</Text>
 
       <View style={styles.tabs}>
         <FlatList
@@ -163,7 +158,7 @@ export default function SellerOrdersScreen() {
             title="Chưa có đơn hàng"
             description="Khi có người mua đặt hàng, đơn hàng sẽ xuất hiện ở đây."
           >
-            <Button title="Về trang chủ" onPress={() => router.push('/(tabs)')} />
+            <Button title="Về trang chủ" onPress={() => router.push('/(tabs)/(seller)')} />
           </EmptyState>
         }
       />
@@ -177,31 +172,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
+    backgroundColor: 'rgba(248,249,255,0.92)',
     paddingBottom: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     ...shadow.level1,
   },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  title: {
+  brand: {
     ...typography.headlineMd,
     color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
+    fontSize: 22,
   },
   pageTitle: {
     ...typography.headlineSm,
     color: colors.onSurface,
+    fontSize: 20,
     marginBottom: 16,
     marginHorizontal: 20,
-    marginTop: 24,
+    marginTop: 20,
   },
   tabs: {
     paddingTop: 4,
@@ -236,7 +223,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 24,
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 12,
   },
   orderCard: {
     backgroundColor: colors.surfaceContainerLowest,

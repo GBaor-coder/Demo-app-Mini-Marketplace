@@ -196,7 +196,7 @@ export default function ProductFormScreen() {
       } else {
         addProduct(input);
         Alert.alert('Đăng tin thành công!', 'Sản phẩm của bạn đang được hiển thị cho người mua.', [
-          { text: 'Xem ngay', onPress: () => router.replace('/(tabs)') },
+          { text: 'Xem ngay', onPress: () => router.replace('/(tabs)/(seller)') },
         ]);
       }
       setSubmitting(false);

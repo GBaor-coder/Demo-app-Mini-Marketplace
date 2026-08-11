@@ -19,45 +19,13 @@ const STATUS_BADGE: Record<OrderStatus, { background: string; color: string }> =
   rejected: { background: colors.errorContainer, color: colors.onErrorContainer },
 };
 
-export default function SellScreen() {
+export default function SellerOverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentUser, products, orders, getUserById, switchRole } = useStore();
+  const { currentUser, products, orders, getUserById } = useStore();
 
   if (!currentUser) {
     return null;
-  }
-
-  if (currentUser.role !== 'seller') {
-    return (
-      <View style={styles.screen}>
-        <View style={styles.scroll}>
-          <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-            <Text style={styles.brand}>UniLoop</Text>
-          </View>
-          <View style={styles.buyerCard}>
-            <View style={styles.buyerIcon}>
-              <Ionicons name="storefront" size={44} color={colors.primary} />
-            </View>
-            <Text style={styles.buyerTitle}>Kênh người bán</Text>
-            <Text style={styles.buyerText}>
-              Đăng bán đồ cũ, giáo trình đã qua sử dụng và kiếm thêm thu nhập từ
-              cộng đồng sinh viên.
-            </Text>
-            <Button
-              title="Bắt đầu bán ngay"
-              icon="arrow-forward"
-              size="lg"
-              fullWidth
-              onPress={() => {
-                switchRole();
-                router.push('/product-form');
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    );
   }
 
   const myProducts = products.filter((p) => p.sellerId === currentUser.id);
@@ -125,14 +93,14 @@ export default function SellScreen() {
           <View style={styles.quickGrid}>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/seller-orders')}
+              onPress={() => router.push('/(tabs)/(seller)/orders')}
               style={styles.quickItem}>
               <Ionicons name="cube" size={26} color={colors.primary} />
               <Text style={styles.quickText}>Quản lý đơn</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/seller-products')}
+              onPress={() => router.push('/(tabs)/(seller)/products')}
               style={styles.quickItem}>
               <Ionicons name="albums-outline" size={26} color={colors.secondary} />
               <Text style={styles.quickText}>Kho hàng</Text>
@@ -143,7 +111,7 @@ export default function SellScreen() {
         <View style={styles.orderCard}>
           <View style={styles.orderCardHeader}>
             <Text style={styles.orderCardTitle}>Đơn hàng gần đây</Text>
-            <TouchableOpacity onPress={() => router.push('/seller-orders')}>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/(seller)/orders')}>
               <Text style={styles.sectionLink}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
@@ -195,7 +163,7 @@ export default function SellScreen() {
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Sản phẩm của bạn</Text>
-          <TouchableOpacity onPress={() => router.push('/seller-products')}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/(seller)/products')}>
             <Text style={styles.sectionLink}>Quản lý</Text>
           </TouchableOpacity>
         </View>
@@ -454,35 +422,6 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontSize: 12,
     marginTop: 2,
-  },
-  buyerCard: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
-    marginTop: 32,
-    padding: 28,
-    ...shadow.level1,
-  },
-  buyerIcon: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.08)',
-    borderRadius: radius.full,
-    height: 88,
-    justifyContent: 'center',
-    marginBottom: 16,
-    width: 88,
-  },
-  buyerTitle: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
-  },
-  buyerText: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    lineHeight: 22,
-    marginBottom: 24,
-    marginTop: 8,
-    textAlign: 'center',
   },
   noOrders: {
     alignItems: 'center',

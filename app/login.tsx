@@ -16,18 +16,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore } from '@/src/context/store-context';
 import { Input } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { UserRole } from '@/src/types';
+
+type AuthRole = 'buyer' | 'seller';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { login, loginGuest } = useStore();
 
+  const [role, setRole] = useState<AuthRole>('buyer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<AuthRole | null>(null);
 
   const handleLogin = () => {
     setError('');
@@ -37,19 +42,24 @@ export default function LoginScreen() {
     }
     setLoading(true);
     setTimeout(() => {
-      const ok = login(email, password);
+      const ok = login(email, password, role);
       setLoading(false);
       if (!ok) {
         setError('Email hoặc mật khẩu không đúng.');
         return;
       }
-      router.replace('/(tabs)');
+      router.replace(role === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
     }, 500);
   };
 
-  const handleGuest = () => {
-    loginGuest();
-    router.replace('/(tabs)');
+  const handleGuest = (guestRole: AuthRole) => {
+    setError('');
+    setDemoLoading(guestRole);
+    setTimeout(() => {
+      loginGuest(guestRole as UserRole);
+      setDemoLoading(null);
+      router.replace(guestRole === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
+    }, 400);
   };
 
   return (
@@ -71,6 +81,26 @@ export default function LoginScreen() {
               </View>
               <Text style={styles.brand}>UniLoop</Text>
               <Text style={styles.subtitle}>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</Text>
+            </View>
+
+            <View style={styles.segment}>
+              {(['buyer', 'seller'] as const).map((item) => {
+                const active = role === item;
+                return (
+                  <TouchableOpacity
+                    key={item}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      setRole(item);
+                      setError('');
+                    }}
+                    style={[styles.segmentItem, active && styles.segmentItemActive]}>
+                    <Text style={[styles.segmentText, active && styles.segmentTextActive]}>
+                      {item === 'buyer' ? 'Người mua' : 'Người bán'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             <View style={styles.form}>
@@ -116,7 +146,9 @@ export default function LoginScreen() {
                   </View>
                   <Text style={styles.rememberText}>Nhớ tài khoản</Text>
                 </TouchableOpacity>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => router.push('/forgot-password')}>
                   <Text style={styles.forgot}>Quên mật khẩu?</Text>
                 </TouchableOpacity>
               </View>
@@ -144,13 +176,36 @@ export default function LoginScreen() {
               <View style={styles.dividerLine} />
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleGuest}
-              style={styles.guestBtn}>
-              <Ionicons name="compass-outline" size={20} color={colors.primary} />
-              <Text style={styles.guestBtnText}>Trải nghiệm Demo (Guest)</Text>
-            </TouchableOpacity>
+            <View style={styles.demoGroup}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                disabled={demoLoading !== null}
+                onPress={() => handleGuest('buyer')}
+                style={styles.guestBtn}>
+                {demoLoading === 'buyer' ? (
+                  <ActivityIndicator color={colors.primary} size="small" />
+                ) : (
+                  <>
+                    <Ionicons name="bag-outline" size={20} color={colors.primary} />
+                    <Text style={styles.guestBtnText}>Dùng thử vai trò Người mua</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                disabled={demoLoading !== null}
+                onPress={() => handleGuest('seller')}
+                style={styles.guestBtn}>
+                {demoLoading === 'seller' ? (
+                  <ActivityIndicator color={colors.primary} size="small" />
+                ) : (
+                  <>
+                    <Ionicons name="storefront-outline" size={20} color={colors.primary} />
+                    <Text style={styles.guestBtnText}>Dùng thử vai trò Người bán</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Chưa có tài khoản? </Text>
@@ -238,6 +293,31 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     textAlign: 'center',
   },
+  segment: {
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 16,
+    flexDirection: 'row',
+    padding: 4,
+  },
+  segmentItem: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  segmentItemActive: {
+    backgroundColor: colors.surfaceContainerLowest,
+    ...shadow.level1,
+  },
+  segmentText: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
+  },
+  segmentTextActive: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
   form: {
     gap: 16,
   },
@@ -303,7 +383,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 16,
-    marginVertical: 8,
+    marginVertical: 4,
   },
   dividerLine: {
     backgroundColor: 'rgba(195,198,215,0.5)',
@@ -314,10 +394,13 @@ const styles = StyleSheet.create({
     ...typography.labelMd,
     color: colors.outline,
   },
+  demoGroup: {
+    gap: 8,
+  },
   guestBtn: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerHigh,
-    borderColor: 'rgba(195,198,215,0.3)',
+    backgroundColor: 'transparent',
+    borderColor: colors.primary,
     borderRadius: radius.xl,
     borderWidth: 1,
     flexDirection: 'row',
@@ -328,13 +411,13 @@ const styles = StyleSheet.create({
   },
   guestBtnText: {
     ...typography.button,
-    color: colors.onSurface,
+    color: colors.primary,
   },
   footer: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   footerText: {
     ...typography.bodySm,

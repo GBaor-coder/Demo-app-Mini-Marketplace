@@ -20,7 +20,7 @@ import { formatCurrency } from '@/src/utils/format';
 
 type Tab = 'active' | 'transaction' | 'sold' | 'draft';
 
-export default function SellerProductsScreen() {
+export default function SellerProductsTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentUser, products, orders, deleteProduct } = useStore();
@@ -142,15 +142,11 @@ export default function SellerProductsScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>UniLoop</Text>
-        <View style={styles.headerBtn} />
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <Text style={styles.brand}>UniLoop</Text>
       </View>
 
-      <Text style={styles.pageTitle}>Quản lý sản phẩm</Text>
+      <Text style={styles.pageTitle}>Sản phẩm</Text>
 
       <View style={styles.tabs}>
         <FlatList
@@ -191,7 +187,7 @@ export default function SellerProductsScreen() {
         }
       />
 
-      <View style={[styles.fab, { bottom: insets.bottom + 20 }]}>
+      <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => router.push('/product-form')}
@@ -233,36 +229,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
+    backgroundColor: 'rgba(248,249,255,0.92)',
     paddingBottom: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     ...shadow.level1,
   },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  title: {
+  brand: {
     ...typography.headlineMd,
     color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
+    fontSize: 22,
   },
   pageTitle: {
     ...typography.displayLgMobile,
     color: colors.onSurface,
-    marginBottom: 24,
+    fontSize: 24,
+    marginBottom: 20,
     marginHorizontal: 20,
-    marginTop: 24,
+    marginTop: 20,
   },
   tabs: {
     borderBottomColor: 'rgba(195,198,215,0.3)',
     borderBottomWidth: 1,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   tabsContent: {
     gap: 8,

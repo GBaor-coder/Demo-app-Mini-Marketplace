@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,13 +21,13 @@ const TABS: { key: NotificationType; label: string }[] = [
   { key: 'other', label: 'Khác' },
 ];
 
-export default function NotificationsScreen() {
-  const router = useRouter();
+export default function BuyerNotificationsScreen() {
   const insets = useSafeAreaInsets();
   const { notifications, markNotificationsRead } = useStore();
   const [tab, setTab] = useState<NotificationType>('order');
 
-  const list = tab === 'order' ? notifications : notifications.filter((n) => n.type === tab);
+  const list =
+    tab === 'order' ? notifications : notifications.filter((n) => n.type === tab);
 
   useEffect(() => {
     const timer = setTimeout(() => markNotificationsRead(), 800);
@@ -60,12 +59,8 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Thông báo</Text>
-        <View style={styles.headerBtn} />
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <Text style={styles.brand}>Thông báo</Text>
       </View>
 
       <View style={styles.tabs}>
@@ -77,7 +72,9 @@ export default function NotificationsScreen() {
               activeOpacity={0.8}
               onPress={() => setTab(item.key)}
               style={[styles.tab, active && styles.tabActive]}>
-              <Text style={[styles.tabText, active && styles.tabTextActive]}>{item.label}</Text>
+              <Text style={[styles.tabText, active && styles.tabTextActive]}>
+                {item.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -107,24 +104,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
+    backgroundColor: 'rgba(248,249,255,0.92)',
+    paddingBottom: 12,
+    paddingHorizontal: 20,
     ...shadow.level1,
   },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  title: {
-    ...typography.headlineSm,
+  brand: {
+    ...typography.headlineMd,
     color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
+    fontSize: 22,
   },
   tabs: {
     borderBottomColor: 'rgba(195,198,215,0.3)',

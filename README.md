@@ -10,7 +10,8 @@
 | Người mua | `buyer@uniloop.vn` | `buyer123` |
 | Người đăng bán | `seller@uniloop.vn` | `seller123` |
 
-Màn hình đăng nhập có nút chọn vai trò và tự điền tài khoản tương ứng.
+Màn hình đăng nhập có nút chọn vai trò và tự điền tài khoản tương ứng, kèm
+nút **Dùng thử** để vào ngay bằng tài khoản demo.
 
 ## Chạy dự án
 
@@ -35,10 +36,21 @@ emulator, cần bật Location và thiết lập một vị trí mô phỏng tro
 ## Chức năng người đăng bán
 
 - Dashboard thống kê tin đăng, đơn chờ và doanh thu hoàn tất.
+- Quản lý sản phẩm theo trạng thái Đang bán/Chờ giao dịch/Đã bán/Bản nháp.
 - Đăng sản phẩm từ thư viện ảnh hoặc camera.
 - Chọn điểm hẹn bằng GPS, chạm bản đồ hoặc kéo ghim.
 - Sửa, xóa, quản lý tồn kho và đánh dấu đã bán.
 - Xác nhận, từ chối và hoàn tất đơn của người mua.
+- Xem cửa hàng công khai giống giao diện người mua.
+
+## Tài khoản, đăng ký và khôi phục mật khẩu
+
+- **Đăng nhập**: chọn vai trò Người mua/Người bán bằng segmented control hoặc
+  bấm **Dùng thử** để vào với tài khoản demo tương ứng.
+- **Đăng ký**: chọn vai trò ngay trên màn hình, sau đó đăng nhập bằng tài khoản
+  vừa tạo.
+- **Quên mật khẩu**: luồng nhập email → OTP → đặt lại mật khẩu → thông báo
+  thành công (demo điều hướng, chưa đổi mật khẩu thật).
 
 ## Dữ liệu và bản đồ
 
@@ -52,6 +64,8 @@ Phiên bản nộp bài dùng AsyncStorage để hoạt động ngay mà không 
 
 ```text
 app/                 Màn hình và điều hướng Expo Router
+app/(tabs)/(buyer)/  Tab dành cho người mua (Trang chủ, Khám phá, Đơn mua, Thông báo, Cá nhân)
+app/(tabs)/(seller)/ Tab dành cho người bán (Tổng quan, Sản phẩm, Đăng bán, Đơn bán, Cửa hàng)
 src/components/      Component giao diện, form sản phẩm và bản đồ
 src/context/         Store nghiệp vụ và lưu dữ liệu cục bộ
 src/data/            Tài khoản, sản phẩm và đơn hàng mẫu

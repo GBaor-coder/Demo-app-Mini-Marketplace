@@ -85,7 +85,7 @@ export default function FavoritesScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>Yêu thích</Text>
         <TouchableOpacity
-          onPress={() => router.push('/(tabs)/explore')}
+          onPress={() => router.push('/(tabs)/(buyer)/explore')}
           style={styles.headerBtn}>
           <Ionicons name="search" size={22} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function FavoritesScreen() {
           >
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/(tabs)/explore')}
+              onPress={() => router.push('/(tabs)/(buyer)/explore')}
               style={styles.cta}>
               <Text style={styles.ctaText}>Khám phá ngay</Text>
             </TouchableOpacity>
