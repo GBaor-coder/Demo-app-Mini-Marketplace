@@ -5,13 +5,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
+import { Button, Input } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
@@ -109,13 +108,11 @@ export default function OrderCancelScreen() {
             </View>
 
             {reason === OTHER_LABEL ? (
-              <TextInput
+              <Input
                 value={note}
                 onChangeText={setNote}
                 placeholder="Nhập chi tiết lý do của bạn..."
-                placeholderTextColor={colors.outline}
                 multiline
-                style={styles.noteInput}
               />
             ) : null}
           </View>
@@ -151,7 +148,7 @@ const styles = StyleSheet.create({
   modal: {
     alignSelf: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     maxWidth: 400,
     overflow: 'hidden',
     width: '100%',
@@ -186,7 +183,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 12,
@@ -223,17 +220,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  noteInput: {
-    backgroundColor: colors.surface,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    color: colors.onSurface,
-    fontSize: 14,
-    minHeight: 80,
-    padding: 14,
-    textAlignVertical: 'top',
-  },
   modalActions: {
     gap: 12,
     paddingBottom: 24,
@@ -243,7 +229,7 @@ const styles = StyleSheet.create({
   backBtn: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     justifyContent: 'center',
     minHeight: 50,
     paddingHorizontal: 20,

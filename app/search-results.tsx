@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -12,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/src/components/ProductCard';
-import { Button, Chip, EmptyState } from '@/src/components/ui';
+import { Button, Chip, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
@@ -59,13 +58,13 @@ export default function SearchResultsScreen() {
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => router.push('/search')}
           style={styles.searchBar}>
-          <Ionicons name="search" size={18} color={colors.outline} />
+          <MaterialIcons name="search" size={18} color={colors.outline} />
           <Text style={styles.searchText} numberOfLines={1}>
             {filters.query ? `“${filters.query}”` : 'Tìm kiếm sản phẩm'}
           </Text>
@@ -73,7 +72,7 @@ export default function SearchResultsScreen() {
         <TouchableOpacity
           onPress={() => router.push('/search')}
           style={styles.filterBtn}>
-          <Ionicons name="options-outline" size={22} color={colors.primary} />
+          <MaterialIcons name="tune" size={22} color={colors.primary} />
           {activeCount > 0 ? <View style={styles.filterDot} /> : null}
         </TouchableOpacity>
       </View>
@@ -95,7 +94,7 @@ export default function SearchResultsScreen() {
         ) : null}
         <View style={styles.spacer} />
         <TouchableOpacity onPress={() => setSortOpen(true)} style={styles.sortBtn}>
-          <Ionicons name="swap-vertical" size={16} color={colors.primaryContainer} />
+          <MaterialIcons name="swap-vert" size={16} color={colors.primaryContainer} />
           <Text style={styles.sortLabel}>
             {SORT_OPTIONS.find((s) => s.key === filters.sort)?.label}
           </Text>
@@ -115,12 +114,12 @@ export default function SearchResultsScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            icon="search-outline"
+            icon="search-off"
             title="Rất tiếc, không tìm thấy sản phẩm phù hợp"
             description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem thêm kết quả nhé."
           >
             <Button title="Thử lại" variant="outline" onPress={reset} />
-            <Button title="Khám phá thêm" onPress={() => router.push('/(tabs)/explore')} />
+            <Button title="Khám phá thêm" onPress={() => router.push('/(tabs)/(buyer)/explore')} />
           </EmptyState>
         }
       />
@@ -145,7 +144,7 @@ export default function SearchResultsScreen() {
                   <Text style={[styles.sortItemText, selected && styles.sortItemTextActive]}>
                     {option.label}
                   </Text>
-                  {selected ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
+                  {selected ? <MaterialIcons name="check" size={18} color={colors.primary} /> : null}
                 </TouchableOpacity>
               );
             })}
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
@@ -258,7 +257,7 @@ const styles = StyleSheet.create({
   },
   sortMenu: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     marginHorizontal: 24,
     paddingVertical: 6,
     position: 'absolute',

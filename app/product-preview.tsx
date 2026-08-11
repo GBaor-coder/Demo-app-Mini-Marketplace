@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
   Alert,
-  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -14,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { formatCurrencyFull, formatRelativeTime } from '@/src/utils/format';
@@ -33,14 +32,8 @@ export default function ProductPreviewScreen() {
   if (!product || product.sellerId !== currentUser?.id) {
     return (
       <View style={styles.screen}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Xem trước bài đăng</Text>
-          <View style={styles.headerBtn} />
-        </View>
-        <EmptyState icon="alert-circle-outline" title="Không tìm thấy sản phẩm" />
+        <ScreenHeader title="Xem trước bài đăng" />
+        <EmptyState icon="error-outline" title="Không tìm thấy sản phẩm" />
       </View>
     );
   }
@@ -71,17 +64,11 @@ export default function ProductPreviewScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Xem trước bài đăng</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title="Xem trước bài đăng" />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.imageWrap}>
-          <Image source={{ uri: image }} style={styles.image} />
+          <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
           <View style={styles.counter}>
             <Text style={styles.counterText}>1 / {imageCount}</Text>
           </View>
@@ -124,7 +111,7 @@ export default function ProductPreviewScreen() {
                     {isSelf ? ' (Bạn)' : ''}
                   </Text>
                   <View style={styles.sellerMetaRow}>
-                    <Ionicons name="school-outline" size={16} color={colors.onSurfaceVariant} />
+                    <MaterialIcons name="school" size={16} color={colors.onSurfaceVariant} />
                     <Text style={styles.sellerMeta}>{seller.campus}</Text>
                   </View>
                 </View>
@@ -134,7 +121,7 @@ export default function ProductPreviewScreen() {
 
           <View style={styles.card}>
             <View style={styles.mapHeading}>
-              <Ionicons name="location-outline" size={20} color={colors.primary} />
+              <MaterialIcons name="location-on" size={20} color={colors.primary} />
               <Text style={styles.cardHeading}>Khu vực giao dịch</Text>
             </View>
             <Text style={styles.mapAddress}>
@@ -143,7 +130,7 @@ export default function ProductPreviewScreen() {
             </Text>
             <View style={styles.mapBox}>
               <View style={styles.mapPin}>
-                <Ionicons name="location" size={24} color={colors.primary} />
+                <MaterialIcons name="location-on" size={24} color={colors.primary} />
               </View>
             </View>
           </View>
@@ -155,7 +142,7 @@ export default function ProductPreviewScreen() {
           <Button
             title="Đánh dấu đã bán"
             variant="outline"
-            icon="checkmark-circle-outline"
+            icon="check-circle"
             onPress={() =>
               Alert.alert('Đánh dấu đã bán?', 'Sản phẩm sẽ ngừng hiển thị với người mua.', [
                 { text: 'Hủy', style: 'cancel' },
@@ -169,13 +156,13 @@ export default function ProductPreviewScreen() {
           title="Xóa"
           variant="outline"
           danger
-          icon="trash-outline"
+          icon="delete"
           onPress={() => setDeleteOpen(true)}
           style={[styles.footerBtn, { flex: 1 }]}
         />
         <Button
           title="Sửa tin"
-          icon="create-outline"
+          icon="edit"
           onPress={() => router.push(`/product-form?id=${product.id}`)}
           style={[styles.footerBtn, { flex: product.status === 'active' ? 1.4 : 2 }]}
         />
@@ -186,7 +173,7 @@ export default function ProductPreviewScreen() {
           <TouchableOpacity style={styles.scrim} activeOpacity={1} onPress={() => setDeleteOpen(false)} />
           <View style={[styles.dialog, { marginBottom: insets.bottom + 24 }]}>
             <View style={styles.dialogIcon}>
-              <Ionicons name="trash-outline" size={28} color={colors.error} />
+              <MaterialIcons name="delete" size={28} color={colors.error} />
             </View>
             <Text style={styles.dialogTitle}>Xóa sản phẩm này?</Text>
             <Text style={styles.dialogText}>
@@ -207,26 +194,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.8)',
-    flexDirection: 'row',
-    paddingBottom: 12,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  title: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
   },
   body: {
     paddingBottom: 130,
@@ -328,7 +295,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     marginTop: 20,
     padding: 16,
     ...shadow.level1,
@@ -433,7 +400,7 @@ const styles = StyleSheet.create({
   },
   dialog: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     marginHorizontal: 40,
     padding: 24,
     ...shadow.level3,

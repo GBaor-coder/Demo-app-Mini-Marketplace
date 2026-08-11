@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   notice: {
     alignItems: 'center',
     backgroundColor: colors.errorContainer,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 8,
     left: 16,
@@ -277,15 +277,15 @@ const styles = StyleSheet.create({
   },
   bottomCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderTopLeftRadius: radius['3xl'],
-    borderTopRightRadius: radius['3xl'],
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
     padding: 20,
     ...shadow.level3,
   },
   addressRow: {
     alignItems: 'flex-start',
     backgroundColor: 'rgba(0,74,198,0.06)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 10,
     padding: 12,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   manualInput: {
     backgroundColor: colors.surfaceContainer,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     color: colors.onSurface,
     flex: 1,

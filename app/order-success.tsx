@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
+import { Button, MaterialIcons, toIconName } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
@@ -18,7 +17,7 @@ export default function OrderSuccessScreen() {
       <View style={styles.center}>
         <View style={styles.card}>
           <View style={styles.heroCircle}>
-            <Ionicons name="checkmark-circle" size={48} color={colors.tertiaryContainer} />
+            <MaterialIcons name={toIconName('checkmark_circle')} size={48} color={colors.tertiaryContainer} />
           </View>
 
           <Text style={styles.title}>Cảm ơn bạn đã mua hàng!</Text>
@@ -48,13 +47,13 @@ export default function OrderSuccessScreen() {
           <View style={styles.actions}>
             <Button
               title="Xem đơn hàng"
-              onPress={() => router.replace('/(tabs)/orders')}
+              onPress={() => router.replace('/(tabs)/(buyer)/orders')}
               style={styles.primaryBtn}
             />
             <Button
               title="Tiếp tục mua sắm"
               variant="outline"
-              onPress={() => router.replace('/(tabs)')}
+              onPress={() => router.replace('/(tabs)/(buyer)')}
               style={styles.secondaryBtn}
             />
           </View>
@@ -77,7 +76,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     maxWidth: 400,
     padding: 24,
     width: '100%',
@@ -108,7 +107,7 @@ const styles = StyleSheet.create({
   panel: {
     backgroundColor: 'rgba(211,228,254,0.3)',
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: 10,
     marginBottom: 24,
@@ -137,12 +136,12 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     backgroundColor: colors.primaryContainer,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     minHeight: 52,
   },
   secondaryBtn: {
     backgroundColor: '#E2E8F0',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderColor: 'transparent',
     minHeight: 52,
   },

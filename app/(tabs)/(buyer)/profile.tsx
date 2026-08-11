@@ -1,50 +1,51 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
+import { IconButton, LogoutModal, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 type MenuItem = {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   route?: string;
   badge?: number;
-  onPress?: () => void;
 };
 
-export default function ProfileScreen() {
+export default function BuyerProfileScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { currentUser, switchRole, logout, unreadCount } = useStore();
+  const { currentUser, logout, unreadCount } = useStore();
+  const [showLogout, setShowLogout] = useState(false);
 
   if (!currentUser) {
     return null;
   }
 
-  const isSeller = currentUser.role === 'seller';
-
   const group1: MenuItem[] = [
     {
-      icon: 'heart-outline',
+      icon: 'favorite',
       label: 'Sản phẩm yêu thích',
       route: '/favorites',
     },
-    { icon: 'location-outline', label: 'Địa chỉ đã lưu', route: '/addresses' },
-    { icon: 'time-outline', label: 'Lịch sử giao dịch', route: '/(tabs)/orders' },
+    { icon: 'location-on', label: 'Địa chỉ đã lưu', route: '/addresses' },
+    {
+      icon: 'shopping-bag',
+      label: 'Lịch sử mua hàng',
+      route: '/(tabs)/(buyer)/orders',
+    },
   ];
 
   const group2: MenuItem[] = [
     {
-      icon: 'notifications-outline',
-      label: 'Trung tâm thông báo',
-      route: '/notifications',
+      icon: 'notifications',
+      label: 'Thông báo',
+      route: '/(tabs)/(buyer)/notifications',
       badge: unreadCount,
     },
-    { icon: 'settings-outline', label: 'Cài đặt', route: '/status' },
-    { icon: 'flag-outline', label: 'Trợ giúp & Báo cáo', route: '/report' },
+    { icon: 'settings', label: 'Cài đặt', route: '/status' },
+    { icon: 'report', label: 'Trợ giúp & Báo cáo', route: '/report' },
   ];
 
   const renderGroup = (items: MenuItem[]) => (
@@ -53,21 +54,18 @@ export default function ProfileScreen() {
         <TouchableOpacity
           key={item.label}
           activeOpacity={0.7}
-          onPress={() => {
-            if (item.route) {
-              router.push(item.route as any);
-            }
-            item.onPress?.();
-          }}
+          onPress={() => item.route && router.push(item.route as any)}
           style={[styles.menuRow, index > 0 && styles.menuRowBorder]}>
-          <Ionicons name={item.icon} size={24} color={colors.outline} />
+          <View style={styles.menuIcon}>
+            <MaterialIcons name={item.icon} size={22} color={colors.primary} />
+          </View>
           <Text style={styles.menuLabel}>{item.label}</Text>
           {item.badge ? (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{item.badge}</Text>
             </View>
           ) : null}
-          <Ionicons name="chevron-forward" size={20} color={colors.outlineVariant} />
+          <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
         </TouchableOpacity>
       ))}
     </View>
@@ -75,74 +73,53 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.scroll}>
-        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-          <Text style={styles.brand}>UniLoop</Text>
-        </View>
+      <ScreenHeader
+        brand
+        showBack={false}
+        right={
+          <IconButton name="search" onPress={() => router.push('/search')} />
+        }
+      />
 
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.profileCard}>
           <View style={styles.avatarWrap}>
-            <View style={styles.avatarRing} />
             <Avatar uri={currentUser.avatar} name={currentUser.name} size={96} />
             <View style={styles.verified}>
-              <Ionicons name="shield-checkmark" size={16} color={colors.onSecondaryContainer} />
+              <MaterialIcons name="verified" size={16} color={colors.onSecondaryContainer} />
             </View>
           </View>
           <Text style={styles.name}>{currentUser.name}</Text>
           <View style={styles.schoolRow}>
-            <Ionicons name="school-outline" size={16} color={colors.onSurfaceVariant} />
+            <MaterialIcons name="school" size={16} color={colors.onSurfaceVariant} />
             <Text style={styles.school}>{currentUser.campus}</Text>
           </View>
           <View style={styles.ratingChip}>
-            <Ionicons name="star" size={18} color={colors.tertiaryContainer} />
-            <Text style={styles.ratingValue}>
-              {currentUser.rating?.toFixed(1) ?? '5.0'}/5
-            </Text>
+            <MaterialIcons name="star" size={18} color={colors.tertiaryContainer} />
+            <Text style={styles.ratingValue}>{currentUser.rating?.toFixed(1) ?? '5.0'}/5</Text>
             <Text style={styles.ratingSep}>•</Text>
-            <Text style={styles.ratingCount}>
-              {currentUser.reviewCount ?? 0} Đánh giá
-            </Text>
+            <Text style={styles.ratingCount}>{currentUser.reviewCount ?? 0} Đánh giá</Text>
           </View>
-        </View>
-
-        <View style={styles.toggle}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (isSeller) {
-                switchRole();
-              }
-            }}
-            style={[styles.toggleItem, !isSeller && styles.toggleItemActive]}>
-            <Text style={[styles.toggleText, !isSeller && styles.toggleTextActive]}>
-              Chế độ Mua
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (!isSeller) {
-                switchRole();
-              }
-            }}
-            style={[styles.toggleItem, isSeller && styles.toggleItemActive]}>
-            <Text style={[styles.toggleText, isSeller && styles.toggleTextActive]}>
-              Chế độ Bán
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {renderGroup(group1)}
         {renderGroup(group2)}
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={logout}
-          style={styles.logout}>
-          <Ionicons name="log-out-outline" size={20} color={colors.error} />
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowLogout(true)} style={styles.logout}>
+          <MaterialIcons name="logout" size={20} color={colors.error} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
+
+      <LogoutModal
+        visible={showLogout}
+        onClose={() => setShowLogout(false)}
+        onConfirm={() => {
+          setShowLogout(false);
+          logout();
+          router.replace('/login');
+        }}
+      />
     </View>
   );
 }
@@ -156,30 +133,17 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     paddingHorizontal: 20,
   },
-  header: {
-    paddingBottom: 12,
-  },
-  brand: {
-    ...typography.headlineSm,
-    color: colors.primary,
-    fontSize: 20,
-  },
   profileCard: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     marginBottom: 24,
+    marginTop: 16,
     padding: 24,
     ...shadow.level1,
   },
   avatarWrap: {
     position: 'relative',
-  },
-  avatarRing: {
-    ...StyleSheet.absoluteFillObject,
-    borderColor: 'rgba(0,74,198,0.1)',
-    borderRadius: 52,
-    borderWidth: 4,
   },
   verified: {
     alignItems: 'center',
@@ -230,35 +194,9 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontSize: 14,
   },
-  toggle: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    marginBottom: 32,
-    padding: 4,
-  },
-  toggleItem: {
-    alignItems: 'center',
-    borderRadius: 8,
-    flex: 1,
-    paddingVertical: 8,
-  },
-  toggleItemActive: {
-    backgroundColor: colors.primary,
-    ...shadow.level1,
-  },
-  toggleText: {
-    color: colors.onSurfaceVariant,
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 24,
-  },
-  toggleTextActive: {
-    color: colors.onPrimary,
-  },
   menuCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     marginBottom: 24,
     overflow: 'hidden',
     ...shadow.level1,
@@ -273,6 +211,14 @@ const styles = StyleSheet.create({
   menuRowBorder: {
     borderTopColor: 'rgba(195,198,215,0.2)',
     borderTopWidth: 1,
+  },
+  menuIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderRadius: radius.full,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
   menuLabel: {
     ...typography.bodyMd,
@@ -295,11 +241,11 @@ const styles = StyleSheet.create({
   logout: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   logoutText: {
     color: colors.error,

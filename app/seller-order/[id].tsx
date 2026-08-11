@@ -1,10 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, IconName, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { formatCurrency, formatDateTime } from '@/src/utils/format';
@@ -67,20 +65,20 @@ export default function SellerOrderDetailScreen() {
   const renderStep = (step: number) => {
     const state = stepState(step);
     let circle: ViewStyle;
-    let icon: keyof typeof Ionicons.glyphMap;
+    let icon: IconName;
     let iconColor: string;
     let labelColor: string;
     let subColor: string;
 
     if (state === 'done') {
       circle = styles.dotDone;
-      icon = 'checkmark';
+      icon = 'check';
       iconColor = colors.onPrimary;
       labelColor = colors.onSurface;
       subColor = colors.onSurfaceVariant;
     } else if (state === 'current') {
       circle = styles.dotCurrent;
-      icon = step === 1 ? 'ellipsis-horizontal' : 'hand-left-outline';
+      icon = step === 1 ? 'pending-actions' : 'handshake';
       iconColor = colors.onPrimary;
       labelColor = colors.primaryContainer;
       subColor = 'rgba(37,99,235,0.8)';
@@ -92,7 +90,7 @@ export default function SellerOrderDetailScreen() {
       subColor = colors.onErrorContainer;
     } else {
       circle = styles.dotFuture;
-      icon = step === 1 ? 'ellipsis-horizontal' : 'hand-left-outline';
+      icon = step === 1 ? 'pending-actions' : 'handshake';
       iconColor = colors.onSurfaceVariant;
       labelColor = colors.onSurface;
       subColor = colors.onSurfaceVariant;
@@ -102,7 +100,7 @@ export default function SellerOrderDetailScreen() {
     return (
       <View key={step} style={[styles.stepRow, state === 'future' && styles.stepRowFuture]}>
         <View style={[styles.stepDot, circle]}>
-          <Ionicons name={icon} size={14} color={iconColor} />
+          <MaterialIcons name={icon} size={14} color={iconColor} />
         </View>
         <View style={styles.stepInfo}>
           <Text style={[styles.stepLabel, { color: labelColor }]}>{STEP_LABELS[step]}</Text>
@@ -117,14 +115,8 @@ export default function SellerOrderDetailScreen() {
   if (!order) {
     return (
       <View style={styles.screen}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Chi tiết đơn hàng</Text>
-          <View style={styles.headerBtn} />
-        </View>
-        <EmptyState icon="receipt-outline" title="Không tìm thấy đơn hàng" />
+        <ScreenHeader title="Chi tiết đơn hàng" />
+        <EmptyState icon="receipt-long" title="Không tìm thấy đơn hàng" />
       </View>
     );
   }
@@ -169,13 +161,7 @@ export default function SellerOrderDetailScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>#{order.id}</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title={`#${order.id}`} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
@@ -192,21 +178,21 @@ export default function SellerOrderDetailScreen() {
             <View style={styles.buyerInfo}>
               <Text style={styles.buyerName}>{buyer.name}</Text>
               <View style={styles.buyerMetaRow}>
-                <Ionicons name="school-outline" size={14} color={colors.onSurfaceVariant} />
+                <MaterialIcons name="school" size={14} color={colors.onSurfaceVariant} />
                 <Text style={styles.buyerMeta} numberOfLines={1}>
                   {buyer.campus}
                 </Text>
               </View>
               {buyer.rating ? (
                 <View style={styles.ratingRow}>
-                  <Ionicons name="star" size={16} color={colors.star} />
+                  <MaterialIcons name="star" size={16} color={colors.star} />
                   <Text style={styles.ratingValue}>{buyer.rating.toFixed(1)}</Text>
                   <Text style={styles.ratingCount}>({buyer.reviewCount ?? 0} đánh giá)</Text>
                 </View>
               ) : null}
             </View>
             <View style={styles.chatIcon}>
-              <Ionicons name="chatbubble-ellipses" size={20} color={colors.secondaryContainer} />
+              <MaterialIcons name="chat" size={20} color={colors.secondaryContainer} />
             </View>
           </TouchableOpacity>
         ) : null}
@@ -222,6 +208,7 @@ export default function SellerOrderDetailScreen() {
               <Image
                 source={{ uri: item.image || product?.images[0] || product?.image }}
                 style={styles.itemImage}
+                contentFit="cover"
               />
               <View style={styles.itemInfo}>
                 <Text style={styles.itemTitle} numberOfLines={2}>
@@ -273,7 +260,7 @@ export default function SellerOrderDetailScreen() {
         <View style={styles.card}>
           <Text style={styles.sectionLabel}>THÔNG TIN GIAO HÀNG</Text>
           <View style={styles.deliveryRow}>
-            <Ionicons name="location-outline" size={20} color={colors.primaryContainer} />
+            <MaterialIcons name="location-on" size={20} color={colors.primaryContainer} />
             <View style={styles.deliveryInfo}>
               <Text style={styles.deliveryLabel}>
                 {order.deliveryMethod === 'meetup' ? 'Gặp mặt trực tiếp' : 'Giao tận nơi (COD)'}
@@ -284,11 +271,11 @@ export default function SellerOrderDetailScreen() {
             </View>
           </View>
           <View style={styles.mapBox}>
-            <Ionicons name="map-outline" size={44} color={colors.outlineVariant} />
+            <MaterialIcons name="map" size={44} color={colors.outlineVariant} />
           </View>
           {order.note ? (
             <View style={styles.deliveryRow}>
-              <Ionicons name="document-text-outline" size={20} color={colors.primaryContainer} />
+              <MaterialIcons name="description" size={20} color={colors.primaryContainer} />
               <View style={styles.deliveryInfo}>
                 <Text style={styles.deliveryLabel}>Ghi chú người mua</Text>
                 <Text style={styles.deliveryValue}>{order.note}</Text>
@@ -296,7 +283,7 @@ export default function SellerOrderDetailScreen() {
             </View>
           ) : null}
           <View style={styles.deliveryRow}>
-            <Ionicons name="time-outline" size={20} color={colors.primaryContainer} />
+            <MaterialIcons name="schedule" size={20} color={colors.primaryContainer} />
             <View style={styles.deliveryInfo}>
               <Text style={styles.deliveryLabel}>Thời gian đặt</Text>
               <Text style={[styles.deliveryValue, styles.deliveryTime]}>
@@ -309,35 +296,26 @@ export default function SellerOrderDetailScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
         {canReject ? (
-          <TouchableOpacity activeOpacity={0.85} onPress={rejectOrder} style={styles.footerReject}>
-            <Text style={styles.footerRejectText}>Từ chối</Text>
-          </TouchableOpacity>
+          <Button title="Từ chối" variant="tonal" onPress={rejectOrder} style={styles.footerBtn} />
         ) : null}
         {canConfirm ? (
-          <TouchableOpacity activeOpacity={0.85} onPress={confirmOrder} style={styles.footerConfirm}>
-            {updating === 'confirmed' ? (
-              <ActivityIndicator color={colors.onPrimary} size="small" />
-            ) : (
-              <Text style={styles.footerConfirmText}>Xác nhận đơn</Text>
-            )}
-          </TouchableOpacity>
+          <Button
+            title="Xác nhận đơn"
+            loading={updating === 'confirmed'}
+            onPress={confirmOrder}
+            style={styles.footerBtn}
+          />
         ) : null}
         {canDeliver ? (
-          <TouchableOpacity
-            activeOpacity={0.85}
+          <Button
+            title="Bắt đầu giao hàng"
+            loading={updating === 'in_transaction'}
             onPress={() => runUpdate('in_transaction', 'Đang giao dịch')}
-            style={styles.footerPrimary}>
-            {updating === 'in_transaction' ? (
-              <ActivityIndicator color={colors.onPrimary} size="small" />
-            ) : (
-              <Text style={styles.footerPrimaryText}>Bắt đầu giao hàng</Text>
-            )}
-          </TouchableOpacity>
+            style={styles.footerBtn}
+          />
         ) : null}
         {order.status === 'in_transaction' ? (
-          <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.footerOutline}>
-            <Text style={styles.footerOutlineText}>Liên hệ người mua</Text>
-          </TouchableOpacity>
+          <Button title="Liên hệ người mua" variant="outline" onPress={chat} style={styles.footerBtn} />
         ) : null}
       </View>
     </View>
@@ -349,26 +327,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
-  },
   body: {
     gap: 24,
     padding: 20,
@@ -376,7 +334,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: 16,
     ...shadow.level1,
@@ -451,7 +409,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 16,
@@ -511,7 +469,7 @@ const styles = StyleSheet.create({
   },
   itemImage: {
     backgroundColor: colors.surfaceVariant,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 80,
     width: 80,
   },
@@ -608,7 +566,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceDim,
     borderColor: 'rgba(195,198,215,0.1)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 128,
     justifyContent: 'center',
@@ -628,59 +586,7 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 4,
   },
-  footerReject: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceVariant,
-    borderRadius: radius.lg,
+  footerBtn: {
     flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  footerRejectText: {
-    ...typography.button,
-    color: colors.onSurface,
-  },
-  footerConfirm: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.lg,
-    elevation: 2,
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 12,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-  },
-  footerConfirmText: {
-    ...typography.button,
-    color: colors.onPrimary,
-  },
-  footerPrimary: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: radius.lg,
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  footerPrimaryText: {
-    ...typography.button,
-    color: colors.onPrimary,
-  },
-  footerOutline: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  footerOutlineText: {
-    ...typography.button,
-    color: colors.onSurface,
   },
 });

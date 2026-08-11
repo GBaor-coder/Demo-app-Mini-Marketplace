@@ -1,10 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -17,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LocationPicker } from '@/src/components/location-picker';
 import { UploadProgress, UploadProgressItem } from '@/src/components/UploadProgress';
-import { EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { CATEGORIES, DEFAULT_LOCATION } from '@/src/data/seed';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
@@ -196,7 +194,7 @@ export default function ProductFormScreen() {
       } else {
         addProduct(input);
         Alert.alert('Đăng tin thành công!', 'Sản phẩm của bạn đang được hiển thị cho người mua.', [
-          { text: 'Xem ngay', onPress: () => router.replace('/(tabs)') },
+          { text: 'Xem ngay', onPress: () => router.replace('/(tabs)/(seller)') },
         ]);
       }
       setSubmitting(false);
@@ -207,7 +205,7 @@ export default function ProductFormScreen() {
     return (
       <View style={styles.screen}>
         <EmptyState
-          icon="storefront-outline"
+          icon="storefront"
           title="Chỉ người bán mới có thể đăng sản phẩm"
           description="Chuyển sang chế độ người bán để bắt đầu đăng tin."
         />
@@ -217,13 +215,7 @@ export default function ProductFormScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>UniLoop</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader brand />
 
       <ScrollView
         contentContainerStyle={styles.body}
@@ -253,14 +245,14 @@ export default function ProductFormScreen() {
                   onPress={() => removeUpload(uploads.find((u) => u.uri === uri)?.id ?? '')}
                   hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
                   style={styles.removeImgBtn}>
-                  <Ionicons name="close" size={14} color={colors.error} />
+                  <MaterialIcons name="close" size={14} color={colors.error} />
                 </TouchableOpacity>
                 <Image source={{ uri }} style={styles.imageCellImage} contentFit="cover" />
               </View>
             ))}
             {doneUris.length < 6 ? (
               <TouchableOpacity onPress={pickImages} style={styles.addImageCell}>
-                <Ionicons name="images-outline" size={26} color={colors.primary} />
+                <MaterialIcons name="add-photo-alternate" size={26} color={colors.primary} />
                 <Text style={styles.addImageText}>Thêm ảnh</Text>
               </TouchableOpacity>
             ) : null}
@@ -372,8 +364,8 @@ export default function ProductFormScreen() {
             activeOpacity={0.85}
             onPress={() => setAllowsMeetup((v) => !v)}
             style={styles.methodOption}>
-            <Ionicons
-              name={allowsMeetup ? 'checkbox' : 'square-outline'}
+            <MaterialIcons
+              name={allowsMeetup ? 'check-box' : 'check-box-outline-blank'}
               size={22}
               color={allowsMeetup ? colors.primary : colors.outlineVariant}
             />
@@ -386,8 +378,8 @@ export default function ProductFormScreen() {
             activeOpacity={0.85}
             onPress={() => setAllowsCod((v) => !v)}
             style={styles.methodOption}>
-            <Ionicons
-              name={allowsCod ? 'checkbox' : 'square-outline'}
+            <MaterialIcons
+              name={allowsCod ? 'check-box' : 'check-box-outline-blank'}
               size={22}
               color={allowsCod ? colors.primary : colors.outlineVariant}
             />
@@ -403,8 +395,8 @@ export default function ProductFormScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Tên điểm hẹn (Tùy chọn)</Text>
             <View style={styles.inputWrap}>
-              <Ionicons
-                name="location-outline"
+              <MaterialIcons
+                name="location-on"
                 size={18}
                 color={colors.onSurfaceVariant}
                 style={styles.inputIcon}
@@ -428,27 +420,20 @@ export default function ProductFormScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
         {editing ? (
-          <TouchableOpacity
-            activeOpacity={0.85}
+          <Button
+            title="Hủy"
+            variant="tonal"
             onPress={() => router.back()}
-            style={[styles.footerBtn, styles.footerSecondary]}>
-            <Text style={styles.footerSecondaryText}>Hủy</Text>
-          </TouchableOpacity>
+            style={styles.footerBtn}
+          />
         ) : null}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          disabled={submitting}
+        <Button
+          title={editing ? 'Lưu thay đổi' : 'Đăng sản phẩm'}
+          icon="publish"
+          loading={submitting}
           onPress={handleSubmit}
-          style={[styles.footerBtn, styles.footerPrimary]}>
-          {submitting ? (
-            <ActivityIndicator color={colors.onPrimary} size="small" />
-          ) : (
-            <>
-              <Ionicons name="cloud-upload-outline" size={20} color={colors.onPrimary} />
-              <Text style={styles.footerPrimaryText}>{editing ? 'Lưu thay đổi' : 'Đăng sản phẩm'}</Text>
-            </>
-          )}
-        </TouchableOpacity>
+          style={styles.footerBtn}
+        />
       </View>
     </View>
   );
@@ -458,26 +443,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  title: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    flex: 1,
-    textAlign: 'center',
   },
   body: {
     gap: 16,
@@ -499,7 +464,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: 12,
     padding: 16,
@@ -523,7 +488,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: colors.surfaceVariant,
     borderColor: 'rgba(195,198,215,0.5)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     flexBasis: '30%',
     flexGrow: 1,
@@ -566,7 +531,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: colors.surfaceContainer,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderStyle: 'dashed',
     borderWidth: 2,
     flexBasis: '30%',
@@ -674,7 +639,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     flex: 1,
     justifyContent: 'center',
@@ -695,7 +660,7 @@ const styles = StyleSheet.create({
   },
   methodOption: {
     alignItems: 'flex-start',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     flexDirection: 'row',
     gap: 10,
     padding: 8,
@@ -735,32 +700,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   footerBtn: {
-    alignItems: 'center',
-    borderRadius: 16,
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'center',
     minWidth: 140,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  footerSecondary: {
-    backgroundColor: colors.surfaceVariant,
-  },
-  footerSecondaryText: {
-    ...typography.button,
-    color: colors.onSurface,
-  },
-  footerPrimary: {
-    backgroundColor: colors.primary,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  footerPrimaryText: {
-    ...typography.button,
-    color: colors.onPrimary,
   },
 });

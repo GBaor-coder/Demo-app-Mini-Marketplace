@@ -1,12 +1,19 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
 import { LocationPreview } from '@/src/components/location-preview';
-import { Button, EmptyState, StatusBadge } from '@/src/components/ui';
+import {
+  Button,
+  EmptyState,
+  IconName,
+  MaterialIcons,
+  ScreenHeader,
+  StatusBadge,
+  toIconName,
+} from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { OrderStatus } from '@/src/types';
@@ -26,19 +33,18 @@ const STEPS: Step[] = [
   { key: 'completed', title: 'Hoàn tất giao dịch', description: 'Đơn hàng đã được giao thành công.' },
 ];
 
-const STEP_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  placed: 'receipt-outline',
-  pending: 'time-outline',
-  confirmed: 'checkmark-circle-outline',
-  in_transaction: 'cube-outline',
-  completed: 'flag-outline',
+const STEP_ICONS: Record<string, IconName> = {
+  placed: toIconName('receipt_outline'),
+  pending: toIconName('time_outline'),
+  confirmed: 'check-circle-outline',
+  in_transaction: 'local-shipping',
+  completed: toIconName('flag_outline'),
 };
 
 const CANCEL_INDEX = 2;
 
 export default function OrderTrackingScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { orders, getUserById, startChat } = useStore();
 
@@ -48,14 +54,8 @@ export default function OrderTrackingScreen() {
   if (!order) {
     return (
       <View style={styles.screen}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Theo dõi đơn hàng</Text>
-          <View style={styles.headerBtn} />
-        </View>
-        <EmptyState icon="location-outline" title="Không tìm thấy đơn hàng" />
+        <ScreenHeader title="Theo dõi đơn hàng" />
+        <EmptyState icon={toIconName('location_outline')} title="Không tìm thấy đơn hàng" />
       </View>
     );
   }
@@ -71,13 +71,7 @@ export default function OrderTrackingScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Theo dõi đơn hàng</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title="Theo dõi đơn hàng" />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.summaryCard}>
@@ -88,7 +82,7 @@ export default function OrderTrackingScreen() {
           <View style={styles.productRow}>
             {firstItem ? (
               <>
-                <Image source={{ uri: firstItem.image }} style={styles.thumb} />
+                <Image contentFit="cover" source={{ uri: firstItem.image }} style={styles.thumb} />
                 <View style={styles.productInfo}>
                   <Text style={styles.productTitle} numberOfLines={2}>
                     {firstItem.title}
@@ -109,7 +103,7 @@ export default function OrderTrackingScreen() {
             {cancelled ? (
               <View style={styles.stepRow}>
                 <View style={[styles.dot, styles.dotCancelled]}>
-                  <Ionicons name="close" size={14} color={colors.error} />
+                  <MaterialIcons name="close" size={14} color={colors.error} />
                 </View>
                 <View style={styles.stepContent}>
                   <Text style={[styles.stepTitle, styles.stepTitleCancelled]}>
@@ -136,10 +130,10 @@ export default function OrderTrackingScreen() {
                           future && styles.dotFuture,
                         ]}>
                         {done ? (
-                          <Ionicons name="checkmark" size={14} color={colors.onTertiary} />
+                          <MaterialIcons name="check" size={14} color={colors.onTertiary} />
                         ) : active ? (
-                          <Ionicons
-                            name={STEP_ICONS[step.key] ?? 'ellipse'}
+                          <MaterialIcons
+                            name={STEP_ICONS[step.key] ?? 'circle'}
                             size={13}
                             color={colors.onPrimary}
                           />
@@ -166,7 +160,7 @@ export default function OrderTrackingScreen() {
                       </Text>
                       {active ? (
                         <View style={styles.infoBox}>
-                          <Ionicons name="information-circle" size={18} color={colors.primary} />
+                          <MaterialIcons name="info" size={18} color={colors.primary} />
                           <Text style={styles.infoText}>{step.description}</Text>
                         </View>
                       ) : (
@@ -184,7 +178,7 @@ export default function OrderTrackingScreen() {
           <View style={styles.meetupHeader}>
             <Text style={styles.cardTitle}>Điểm hẹn giao dịch</Text>
             <View style={styles.locationRow}>
-              <Ionicons name="location-outline" size={20} color={colors.primary} />
+              <MaterialIcons name="location-on" size={20} color={colors.primary} />
               <View style={styles.locationInfo}>
                 <Text style={styles.locationAddress} numberOfLines={2}>
                   {order.deliveryLocation.address}
@@ -206,7 +200,7 @@ export default function OrderTrackingScreen() {
               </Text>
               {seller?.rating != null ? (
                 <View style={styles.ratingRow}>
-                  <Ionicons name="star" size={14} color={colors.star} />
+                  <MaterialIcons name="star" size={14} color={colors.star} />
                   <Text style={styles.ratingText}>
                     {seller.rating.toFixed(1)} ({seller.reviewCount ?? 0} đánh giá)
                   </Text>
@@ -214,7 +208,7 @@ export default function OrderTrackingScreen() {
               ) : null}
             </View>
             <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.chatBtn}>
-              <Ionicons name="chatbubble-ellipses-outline" size={19} color={colors.onSecondaryContainer} />
+              <MaterialIcons name={toIconName('chat')} size={19} color={colors.onSecondaryContainer} />
             </TouchableOpacity>
           </View>
         </View>
@@ -228,8 +222,9 @@ export default function OrderTrackingScreen() {
           />
           <Button
             title="Liên hệ người bán"
+            variant="primaryContainer"
             onPress={chat}
-            style={[styles.actionBtn, styles.contactBtn]}
+            style={styles.actionBtn}
           />
         </View>
         <View style={styles.spacer} />
@@ -243,33 +238,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    textAlign: 'center',
-  },
   body: {
     gap: 16,
     padding: 20,
   },
   summaryCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     gap: 12,
     padding: 16,
     ...shadow.level1,
@@ -295,7 +270,7 @@ const styles = StyleSheet.create({
   },
   thumb: {
     backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 64,
     width: 64,
   },
@@ -320,7 +295,7 @@ const styles = StyleSheet.create({
   },
   timelineCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     padding: 16,
     ...shadow.level1,
   },
@@ -419,7 +394,7 @@ const styles = StyleSheet.create({
   infoBox: {
     alignItems: 'flex-start',
     backgroundColor: colors.surfaceContainerLow,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     flexDirection: 'row',
     gap: 8,
     marginTop: 8,
@@ -433,7 +408,7 @@ const styles = StyleSheet.create({
   },
   meetupCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     overflow: 'hidden',
     ...shadow.level1,
   },
@@ -504,9 +479,6 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-  },
-  contactBtn: {
-    backgroundColor: colors.primaryContainer,
   },
   spacer: {
     height: 8,

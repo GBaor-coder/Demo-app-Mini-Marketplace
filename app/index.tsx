@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
-export default function WelcomeScreen() {
+export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -26,18 +26,18 @@ export default function WelcomeScreen() {
             transition={200}
           />
           <View style={[styles.badge, styles.badgeTop]}>
-            <Ionicons name="pricetag" size={14} color={colors.primary} />
+            <MaterialIcons name="sell" size={14} color={colors.primary} />
             <Text style={styles.badgeText}>Đồ cũ giá tốt</Text>
           </View>
           <View style={[styles.badge, styles.badgeBottom]}>
-            <Ionicons name="shield-checkmark" size={14} color={colors.tertiary} />
+            <MaterialIcons name="verified" size={14} color={colors.tertiary} />
             <Text style={styles.badgeText}>An toàn</Text>
           </View>
         </View>
 
         <View style={styles.panel}>
           <View style={styles.logo}>
-            <Ionicons name="sync" size={32} color={colors.onPrimaryContainer} />
+            <MaterialIcons name="autorenew" size={32} color={colors.onPrimaryContainer} />
           </View>
           <Text style={styles.brand}>UniLoop</Text>
           <Text style={styles.tagline}>Chợ sinh viên nội bộ</Text>
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
               onPress={() => router.push('/role-select')}
               style={styles.primaryCta}>
               <Text style={styles.primaryCtaText}>Bắt đầu ngay</Text>
-              <Ionicons name="arrow-forward" size={20} color={colors.onPrimaryContainer} />
+              <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimaryContainer} />
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   hero: {
     aspectRatio: 1,
     backgroundColor: colors.surfaceContainerLow,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     marginBottom: 32,
     maxWidth: 448,
     overflow: 'hidden',
@@ -131,16 +131,12 @@ const styles = StyleSheet.create({
   logo: {
     alignItems: 'center',
     backgroundColor: colors.primaryContainer,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     height: 64,
     justifyContent: 'center',
     marginBottom: 24,
     width: 64,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 2,
+    ...shadow.level1,
   },
   brand: {
     ...typography.displayLgMobile,
@@ -167,16 +163,12 @@ const styles = StyleSheet.create({
   primaryCta: {
     alignItems: 'center',
     backgroundColor: colors.primaryContainer,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     flexDirection: 'row',
     gap: 8,
     height: 56,
     justifyContent: 'center',
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
+    ...shadow.primary,
     width: '100%',
   },
   primaryCtaText: {
@@ -187,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceContainer,
     borderColor: 'rgba(195,198,215,0.5)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 2,
     height: 56,
     justifyContent: 'center',

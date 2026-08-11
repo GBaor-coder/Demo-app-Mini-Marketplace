@@ -8,3 +8,6 @@ export { ScreenHeader } from './ScreenHeader';
 export { StatusBadge } from './StatusBadge';
 export { Chip } from './Chip';
 export { SectionHeader, RatingStars } from './SectionHeader';
+export { LogoutModal } from './LogoutModal';
+export type { IconName } from './Icon';
+export { MaterialIcons, toIconName } from './Icon';

@@ -1,27 +1,32 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ReactNode } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, typography } from '@/src/theme/colors';
+import { IconButton } from './Button';
+import { IconName } from './Icon';
+import { colors, shadow, typography } from '@/src/theme/colors';
 
 type ScreenHeaderProps = {
   title?: string;
+  brand?: boolean;
   showBack?: boolean;
   right?: ReactNode;
   onBack?: () => void;
   subtitle?: string;
   transparent?: boolean;
+  backIcon?: IconName;
 };
 
 export function ScreenHeader({
   title,
+  brand,
   showBack = true,
   right,
   onBack,
   subtitle,
   transparent,
+  backIcon = 'arrow-back',
 }: ScreenHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -35,18 +40,19 @@ export function ScreenHeader({
       ]}>
       <View style={styles.row}>
         {showBack ? (
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <IconButton
+            name={backIcon}
             onPress={onBack ?? (() => router.back())}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={styles.backButton}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
+            color={brand ? colors.primary : colors.onSurface}
+            style={styles.backButton}
+          />
         ) : (
           <View style={styles.backButtonPlaceholder} />
         )}
         <View style={styles.center}>
-          {title ? (
+          {brand ? (
+            <Text style={styles.brandTitle}>UniLoop</Text>
+          ) : title ? (
             <Text numberOfLines={1} style={styles.title}>
               {title}
             </Text>
@@ -66,8 +72,8 @@ export function ScreenHeader({
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.surface,
-    paddingHorizontal: 8,
     paddingBottom: 10,
+    ...shadow.level1,
   },
   headerTransparent: {
     backgroundColor: 'transparent',
@@ -76,18 +82,19 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     zIndex: 10,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   row: {
     alignItems: 'center',
     flexDirection: 'row',
     minHeight: 48,
+    paddingHorizontal: 20,
   },
   backButton: {
-    alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.full,
+    borderRadius: 999,
     height: 40,
-    justifyContent: 'center',
     width: 40,
   },
   backButtonPlaceholder: {
@@ -98,8 +105,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   title: {
-    ...typography.headlineSm,
+    ...typography.headlineSmMobile,
     color: colors.onSurface,
+    textAlign: 'center',
+  },
+  brandTitle: {
+    ...typography.headlineMdMobile,
+    color: colors.primary,
     textAlign: 'center',
   },
   subtitle: {

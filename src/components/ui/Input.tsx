@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import {
   StyleSheet,
@@ -9,15 +8,17 @@ import {
   View,
 } from 'react-native';
 
+import { IconName, MaterialIcons } from './Icon';
 import { colors, radius } from '@/src/theme/colors';
 
 type InputProps = TextInputProps & {
   label?: string;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
   error?: string;
   hint?: string;
   right?: ReactNode;
   containerStyle?: any;
+  boxRadius?: number;
 };
 
 export function Input({
@@ -28,6 +29,7 @@ export function Input({
   right,
   containerStyle,
   multiline,
+  boxRadius = radius.lg,
   style,
   ...props
 }: InputProps) {
@@ -37,16 +39,17 @@ export function Input({
       <View
         style={[
           styles.box,
+          { borderRadius: boxRadius },
           multiline && styles.boxMultiline,
           error ? styles.boxError : null,
         ]}>
         {icon ? (
-          <Ionicons name={icon} size={19} color={colors.onSurfaceVariant} style={styles.icon} />
+          <MaterialIcons name={icon} size={20} color={colors.outline} style={styles.icon} />
         ) : null}
         <TextInput
           {...props}
           multiline={multiline}
-          placeholderTextColor={colors.outline}
+          placeholderTextColor={colors.outlineVariant}
           style={[styles.input, multiline && styles.inputMultiline, style]}
         />
         {right ? <View style={styles.right}>{right}</View> : null}
@@ -59,13 +62,14 @@ export function Input({
 
 type PressableInputProps = {
   label?: string;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
   value?: string;
   placeholder?: string;
   error?: string;
   onPress: () => void;
   containerStyle?: any;
   right?: ReactNode;
+  boxRadius?: number;
 };
 
 export function PressableInput({
@@ -77,6 +81,7 @@ export function PressableInput({
   onPress,
   containerStyle,
   right,
+  boxRadius = radius.lg,
 }: PressableInputProps) {
   return (
     <View style={[styles.wrap, containerStyle]}>
@@ -84,18 +89,16 @@ export function PressableInput({
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onPress}
-        style={[styles.box, error ? styles.boxError : null]}>
+        style={[styles.box, { borderRadius: boxRadius }, error ? styles.boxError : null]}>
         {icon ? (
-          <Ionicons name={icon} size={19} color={colors.onSurfaceVariant} style={styles.icon} />
+          <MaterialIcons name={icon} size={20} color={colors.outline} style={styles.icon} />
         ) : null}
         <Text
           numberOfLines={1}
           style={[styles.input, value ? styles.value : styles.placeholder]}>
           {value || placeholder}
         </Text>
-        {right ?? (
-          <Ionicons name="chevron-down" size={18} color={colors.outline} />
-        )}
+        {right ?? <MaterialIcons name="expand-more" size={20} color={colors.outline} />}
       </TouchableOpacity>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -114,9 +117,9 @@ const styles = StyleSheet.create({
   },
   box: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: colors.surface,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 10,

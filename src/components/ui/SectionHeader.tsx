@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { MaterialIcons } from './Icon';
 import { colors, typography } from '@/src/theme/colors';
 
 type SectionHeaderProps = {
@@ -36,7 +36,7 @@ export function RatingStars({ rating, size = 15, count, showValue }: RatingStars
         const filled = rating >= i - 0.25;
         const half = !filled && rating >= i - 0.75;
         return (
-          <Ionicons
+          <MaterialIcons
             key={i}
             name={half ? 'star-half' : filled ? 'star' : 'star-outline'}
             size={size}

@@ -1,21 +1,30 @@
-import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, typography } from '@/src/theme/colors';
+import { IconName, MaterialIcons } from './Icon';
+import { colors, typography } from '@/src/theme/colors';
 
 type EmptyStateProps = {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: IconName;
   title: string;
   description?: string;
   children?: ReactNode;
+  iconSize?: number;
+  circleSize?: number;
 };
 
-export function EmptyState({ icon, title, description, children }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  children,
+  iconSize = 80,
+  circleSize = 192,
+}: EmptyStateProps) {
   return (
     <View style={styles.wrap}>
-      <View style={styles.iconWrap}>
-        <Ionicons name={icon} size={34} color={colors.primary} />
+      <View style={[styles.iconWrap, { width: circleSize, height: circleSize }]}>
+        <MaterialIcons name={icon} size={iconSize} color={colors.primary} style={{ opacity: 0.2 }} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {description ? <Text style={styles.description}>{description}</Text> : null}
@@ -32,15 +41,13 @@ const styles = StyleSheet.create({
   },
   iconWrap: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: radius['2xl'],
-    height: 72,
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 999,
     justifyContent: 'center',
-    marginBottom: 16,
-    width: 72,
+    marginBottom: 24,
   },
   title: {
-    ...typography.headlineSm,
+    ...typography.headlineMd,
     color: colors.onSurface,
     textAlign: 'center',
   },
@@ -50,8 +57,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 6,
     textAlign: 'center',
+    maxWidth: 280,
   },
   actions: {
-    marginTop: 20,
+    marginTop: 24,
+    width: '100%',
   },
 });

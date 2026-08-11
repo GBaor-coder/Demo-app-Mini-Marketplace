@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { QuantityStepper } from '@/src/components/QuantityStepper';
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { CartLine, Product } from '@/src/types';
@@ -33,7 +33,7 @@ function Checkbox({
       onPress={onPress}
       style={[styles.checkboxRow, label && styles.checkboxRowLabeled]}>
       <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-        {checked ? <Ionicons name="checkmark" size={12} color={colors.onPrimary} /> : null}
+        {checked ? <MaterialIcons name="check" size={12} color={colors.onPrimary} /> : null}
       </View>
       {label ? <Text style={styles.checkboxLabel}>{label}</Text> : null}
     </TouchableOpacity>
@@ -93,10 +93,12 @@ export default function CartScreen() {
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.title}>Giỏ hàng</Text>
-        <View style={styles.headerBtn} />
+        <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerBtn}>
+          <MaterialIcons name="search" size={22} color={colors.onSurface} />
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -106,11 +108,11 @@ export default function CartScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
-            icon="cart-outline"
+            icon="shopping-cart"
             title="Giỏ hàng của bạn còn trống"
             description="Thêm ngay những món đồ bạn thích vào giỏ để mua chúng nhé."
           >
-            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/explore')} />
+            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/(buyer)/explore')} />
           </EmptyState>
         }
         renderItem={({ item: group }) => {
@@ -126,7 +128,7 @@ export default function CartScreen() {
                       })
                     }
                   />
-                  <Ionicons name="school-outline" size={20} color={colors.outline} />
+                  <MaterialIcons name="school" size={20} color={colors.outline} />
                   <Text numberOfLines={1} style={styles.sellerName}>
                     {group.sellerName} {group.sellerCampus ? `(${group.sellerCampus})` : ''}
                   </Text>
@@ -143,7 +145,7 @@ export default function CartScreen() {
                       activeOpacity={0.85}
                       onPress={() => router.push(`/product/${product.id}`)}
                       style={styles.imageWrap}>
-                       <Image source={{ uri: product.images?.[0] || product.image }} style={styles.image} />
+                       <Image source={{ uri: product.images?.[0] || product.image }} style={styles.image} contentFit="cover" />
                       <View style={[styles.conditionTag, conditionTagStyle(product.condition)]}>
                         <Text style={styles.conditionTagText}>{product.condition}</Text>
                       </View>
@@ -171,7 +173,7 @@ export default function CartScreen() {
                       }
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       style={styles.deleteBtn}>
-                      <Ionicons name="trash-outline" size={20} color={colors.outline} />
+                      <MaterialIcons name="delete" size={20} color={colors.outline} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -266,7 +268,7 @@ const styles = StyleSheet.create({
   },
   sellerCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     marginTop: 16,
     padding: 16,
     ...shadow.level1,
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
   },
   imageWrap: {
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 80,
     overflow: 'hidden',
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   conditionTag: {
-    borderTopLeftRadius: radius.lg,
+    borderTopLeftRadius: radius.md,
     bottom: 0,
     borderWidth: 0,
     paddingHorizontal: 4,

@@ -19,6 +19,10 @@ export default function RootLayout() {
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="register" options={{ animation: 'fade' }} />
         <Stack.Screen name="role-select" options={{ animation: 'fade' }} />
+        <Stack.Screen name="forgot-password" />
+        <Stack.Screen name="otp" />
+        <Stack.Screen name="reset-password" />
+        <Stack.Screen name="reset-success" />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="search" />
         <Stack.Screen name="search-results" />
@@ -34,13 +38,13 @@ export default function RootLayout() {
         <Stack.Screen name="order-cancel" />
         <Stack.Screen name="order-rate" />
         <Stack.Screen name="seller-order/[id]" />
-        <Stack.Screen name="seller-orders" />
-        <Stack.Screen name="seller-products" />
         <Stack.Screen name="favorites" />
         <Stack.Screen name="addresses" />
         <Stack.Screen name="address-form" />
         <Stack.Screen name="chat/[id]" />
-        <Stack.Screen name="notifications" />
+        <Stack.Screen name="chats" />
+        <Stack.Screen name="seller-chats" />
+        <Stack.Screen name="seller-notifications" />
         <Stack.Screen name="map" />
         <Stack.Screen name="report" />
         <Stack.Screen name="status" />

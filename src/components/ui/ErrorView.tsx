@@ -1,27 +1,40 @@
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { Button } from './Button';
+import { IconName, MaterialIcons } from './Icon';
 import { colors, radius, typography } from '@/src/theme/colors';
 
 type ErrorViewProps = {
   message?: string;
   onRetry?: () => void;
   compact?: boolean;
+  icon?: IconName;
+  title?: string;
 };
 
-export function ErrorView({ message = 'Đã có lỗi xảy ra, vui lòng thử lại.', onRetry, compact }: ErrorViewProps) {
+export function ErrorView({
+  message = 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau vài phút.',
+  onRetry,
+  compact,
+  icon = 'warning',
+  title = 'Đã có lỗi xảy ra',
+}: ErrorViewProps) {
   return (
     <View style={[styles.wrap, compact && styles.wrapCompact]}>
       <View style={styles.iconWrap}>
-        <Ionicons name="cloud-offline-outline" size={30} color={colors.error} />
+        <MaterialIcons name={icon} size={48} color={colors.error} />
       </View>
-      <Text style={styles.title}>Không thể tải dữ liệu</Text>
+      <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
       {onRetry ? (
-        <TouchableOpacity activeOpacity={0.8} onPress={onRetry} style={styles.retryButton}>
-          <Ionicons name="refresh" size={18} color={colors.primary} />
-          <Text style={styles.retryText}>Thử lại</Text>
-        </TouchableOpacity>
+        <Button
+          title="Thử lại"
+          variant="primary"
+          icon="refresh"
+          size="sm"
+          onPress={onRetry}
+          style={styles.retryButton}
+        />
       ) : null}
     </View>
   );
@@ -38,15 +51,15 @@ const styles = StyleSheet.create({
   },
   iconWrap: {
     alignItems: 'center',
-    backgroundColor: colors.errorContainer,
-    borderRadius: radius['2xl'],
-    height: 64,
+    backgroundColor: 'rgba(186,26,26,0.10)',
+    borderRadius: radius.full,
+    height: 96,
     justifyContent: 'center',
-    marginBottom: 14,
-    width: 64,
+    marginBottom: 20,
+    width: 96,
   },
   title: {
-    ...typography.headlineSm,
+    ...typography.headlineMd,
     color: colors.onSurface,
     textAlign: 'center',
   },
@@ -56,18 +69,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 6,
     textAlign: 'center',
+    maxWidth: 280,
   },
   retryButton: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  retryText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: '600',
+    marginTop: 24,
+    minWidth: 140,
   },
 });

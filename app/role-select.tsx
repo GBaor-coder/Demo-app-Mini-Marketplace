@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Button, MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { UserRole } from '@/src/types';
 
@@ -11,13 +11,13 @@ const ROLE_CARDS: {
   role: UserRole;
   title: string;
   description: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: 'shopping-bag' | 'storefront';
 }[] = [
   {
     role: 'buyer',
     title: 'Người mua',
     description: 'Tìm kiếm giáo trình, đồ dùng học tập dễ dàng từ sinh viên khác.',
-    icon: 'bag-handle',
+    icon: 'shopping-bag',
   },
   {
     role: 'seller',
@@ -49,7 +49,7 @@ export default function RoleSelectScreen() {
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.avatar}>
-              <Ionicons name="hand-left" size={32} color={colors.onPrimaryContainer} />
+              <MaterialIcons name="autorenew" size={32} color={colors.onPrimaryContainer} />
             </View>
             <Text style={styles.title}>Chào mừng bạn đến với UniLoop!</Text>
             <Text style={styles.subtitle}>Bạn muốn bắt đầu với vai trò nào?</Text>
@@ -66,7 +66,7 @@ export default function RoleSelectScreen() {
                   style={[styles.roleCard, active && styles.roleCardActive]}>
                   <View style={styles.roleHeader}>
                     <View style={[styles.roleIcon, active && styles.roleIconActive]}>
-                      <Ionicons
+                      <MaterialIcons
                         name={item.icon}
                         size={24}
                         color={active ? colors.onPrimary : colors.primary}
@@ -74,7 +74,7 @@ export default function RoleSelectScreen() {
                     </View>
                     {active ? (
                       <View style={styles.check}>
-                        <Ionicons name="checkmark" size={16} color={colors.onPrimary} />
+                        <MaterialIcons name="check" size={16} color={colors.onPrimary} />
                       </View>
                     ) : null}
                   </View>
@@ -86,19 +86,19 @@ export default function RoleSelectScreen() {
           </View>
 
           <View style={styles.infoPill}>
-            <Ionicons name="information-circle" size={18} color={colors.onSurfaceVariant} />
+            <MaterialIcons name="info" size={18} color={colors.onSurfaceVariant} />
             <Text style={styles.infoText}>
               Bạn có thể thay đổi vai trò bất cứ lúc nào trong trang cá nhân
             </Text>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.85}
+          <Button
+            title="Bắt đầu ngay"
+            variant="primaryContainer"
+            icon="arrow-forward"
             disabled={!selected}
             onPress={handleStart}
-            style={[styles.startBtn, !selected && styles.startBtnDisabled]}>
-            <Text style={styles.startBtnText}>Bắt đầu ngay</Text>
-          </TouchableOpacity>
+          />
         </View>
       </ScrollView>
     </View>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     gap: 24,
     maxWidth: 672,
     padding: 32,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   roleCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 2,
     gap: 8,
     padding: 16,
@@ -235,25 +235,5 @@ const styles = StyleSheet.create({
     ...typography.bodySm,
     color: colors.onSurfaceVariant,
     flexShrink: 1,
-  },
-  startBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.xl,
-    justifyContent: 'center',
-    minHeight: 48,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
-    width: '100%',
-  },
-  startBtnText: {
-    ...typography.button,
-    color: colors.onPrimaryContainer,
-  },
-  startBtnDisabled: {
-    opacity: 0.5,
   },
 });
