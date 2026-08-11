@@ -1,11 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
@@ -33,10 +32,10 @@ function WishlistCard({
           accessibilityLabel="Xóa khỏi yêu thích"
           onPress={onRemove}
           style={styles.heartButton}>
-          <Ionicons name="heart" size={20} color={colors.error} />
+          <MaterialIcons name="favorite" size={20} color={colors.error} />
         </TouchableOpacity>
         <View style={styles.distanceTag}>
-          <Ionicons name="location" size={14} color={colors.primary} />
+          <MaterialIcons name="location-on" size={14} color={colors.primary} />
           <Text style={styles.distanceText}>
             {product.location
               ? distanceLabel(
@@ -81,13 +80,13 @@ export default function FavoritesScreen() {
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurfaceVariant} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
         <Text style={styles.title}>Yêu thích</Text>
         <TouchableOpacity
           onPress={() => router.push('/(tabs)/(buyer)/explore')}
           style={styles.headerBtn}>
-          <Ionicons name="search" size={22} color={colors.onSurfaceVariant} />
+          <MaterialIcons name="search" size={22} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
       </View>
 
@@ -125,16 +124,15 @@ export default function FavoritesScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            icon="heart-outline"
+            icon="heart-broken"
             title="Chưa có sản phẩm yêu thích"
             description="Bấm trái tim trên mỗi sản phẩm để lưu lại những món đồ bạn quan tâm nhé."
           >
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <Button
+              title="Khám phá ngay"
+              icon="explore"
               onPress={() => router.push('/(tabs)/(buyer)/explore')}
-              style={styles.cta}>
-              <Text style={styles.ctaText}>Khám phá ngay</Text>
-            </TouchableOpacity>
+            />
           </EmptyState>
         }
       />
@@ -202,7 +200,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 20,
+    borderRadius: radius.xl,
     flex: 1,
     maxWidth: '48.5%',
     overflow: 'hidden',
@@ -211,8 +209,8 @@ const styles = StyleSheet.create({
   imageWrap: {
     aspectRatio: 1,
     backgroundColor: colors.surfaceContainer,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     overflow: 'hidden',
     position: 'relative',
     width: '100%',
@@ -235,7 +233,7 @@ const styles = StyleSheet.create({
   distanceTag: {
     alignItems: 'center',
     backgroundColor: 'rgba(248,249,255,0.8)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     bottom: 8,
     flexDirection: 'row',
     gap: 4,
@@ -264,18 +262,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '700',
     marginTop: 4,
-  },
-  cta: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: radius.xl,
-    marginTop: 4,
-    paddingHorizontal: 28,
-    paddingVertical: 13,
-  },
-  ctaText: {
-    color: colors.onPrimary,
-    fontSize: 15,
-    fontWeight: '700',
   },
 });

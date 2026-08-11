@@ -11,13 +11,13 @@ type SkeletonProps = {
 };
 
 export function Skeleton({ width = '100%', height = 16, radius: r = 8, style }: SkeletonProps) {
-  const opacity = useRef(new Animated.Value(0.45)).current;
+  const opacity = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.45, duration: 700, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.5, duration: 700, useNativeDriver: true }),
       ]),
     );
     loop.start();
@@ -26,11 +26,7 @@ export function Skeleton({ width = '100%', height = 16, radius: r = 8, style }: 
 
   return (
     <Animated.View
-      style={[
-        styles.base,
-        { width, height, borderRadius: r, opacity },
-        style,
-      ]}
+      style={[styles.base, { width, height, borderRadius: r, opacity }, style]}
     />
   );
 }
@@ -53,12 +49,13 @@ export function SkeletonBlock({ lines = 3, style }: SkeletonBlockProps) {
 type SkeletonCardProps = {
   style?: ViewStyle;
   lines?: number;
+  imageHeight?: number;
 };
 
-export function SkeletonCard({ style, lines = 3 }: SkeletonCardProps) {
+export function SkeletonCard({ style, lines = 3, imageHeight = 160 }: SkeletonCardProps) {
   return (
     <View style={[styles.card, style]}>
-      <Skeleton width="100%" height={160} radius={radius['2xl']} />
+      <Skeleton width="100%" height={imageHeight} radius={radius.sm} />
       <View style={styles.cardBody}>
         <SkeletonBlock lines={lines} />
       </View>
@@ -68,20 +65,25 @@ export function SkeletonCard({ style, lines = 3 }: SkeletonCardProps) {
 
 const styles = StyleSheet.create({
   base: {
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceVariant,
   },
   block: {
     gap: 10,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
+    borderRadius: radius.xl,
     overflow: 'hidden',
-    padding: 12,
+    width: '100%',
+    ...{
+      shadowColor: '#0F172A',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.05,
+      shadowRadius: 12,
+      elevation: 2,
+    },
   },
   cardBody: {
-    paddingTop: 12,
+    padding: 12,
   },
 });

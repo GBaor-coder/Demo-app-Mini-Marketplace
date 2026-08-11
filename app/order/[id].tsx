@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +13,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
 import { LocationPreview } from '@/src/components/location-preview';
-import { Button, EmptyState, StatusBadge } from '@/src/components/ui';
+import {
+  Button,
+  EmptyState,
+  MaterialIcons,
+  ScreenHeader,
+  StatusBadge,
+  toIconName,
+} from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import {
@@ -36,15 +42,9 @@ export default function OrderDetailScreen() {
   if (!order) {
     return (
       <View style={styles.screen}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Chi tiết đơn hàng</Text>
-          <View style={styles.headerBtn} />
-        </View>
+        <ScreenHeader title="Chi tiết đơn hàng" />
         <EmptyState
-          icon="receipt-outline"
+          icon={toIconName('receipt_outline')}
           title="Không tìm thấy đơn hàng"
           description="Đơn hàng này không tồn tại hoặc đã bị xóa."
         />
@@ -92,13 +92,7 @@ export default function OrderDetailScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Chi tiết đơn hàng</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title="Chi tiết đơn hàng" />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.statusCard}>
@@ -122,7 +116,7 @@ export default function OrderDetailScreen() {
               activeOpacity={0.85}
               onPress={() => router.push(`/order-tracking?id=${order.id}`)}
               style={styles.trackLink}>
-              <Ionicons name="location-outline" size={16} color={colors.primary} />
+              <MaterialIcons name="location-on" size={16} color={colors.primary} />
               <Text style={styles.trackLinkText}>Theo dõi vận chuyển</Text>
             </TouchableOpacity>
           ) : null}
@@ -136,6 +130,7 @@ export default function OrderDetailScreen() {
               onPress={() => router.push(`/product/${item.productId}`)}
               style={[styles.itemRow, index > 0 && styles.itemDivider]}>
               <Image
+                contentFit="cover"
                 source={{ uri: item.image || product?.images[0] || product?.image }}
                 style={styles.itemImage}
               />
@@ -161,21 +156,21 @@ export default function OrderDetailScreen() {
               </Text>
             </View>
             <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.chatBtn}>
-              <Ionicons name="chatbubble-ellipses-outline" size={19} color={colors.primary} />
+              <MaterialIcons name={toIconName('chat')} size={19} color={colors.primary} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.card}>
           <View style={styles.deliveryHeader}>
-            <Ionicons name="people-outline" size={20} color={colors.primary} />
+            <MaterialIcons name={toIconName('handshake')} size={20} color={colors.primary} />
             <Text style={styles.cardTitle}>Giao dịch: {deliveryLabel}</Text>
           </View>
           <LocationPreview location={order.deliveryLocation} />
           {order.note ? (
             <View style={styles.deliveryRow}>
               <View style={styles.deliveryIcon}>
-                <Ionicons name="document-text-outline" size={19} color={colors.primary} />
+                <MaterialIcons name="description" size={19} color={colors.primary} />
               </View>
               <View style={styles.deliveryInfo}>
                 <Text style={styles.deliveryLabel}>Ghi chú</Text>
@@ -185,7 +180,7 @@ export default function OrderDetailScreen() {
           ) : null}
           <View style={styles.deliveryRow}>
             <View style={styles.deliveryIcon}>
-              <Ionicons name="time-outline" size={19} color={colors.primary} />
+              <MaterialIcons name="schedule" size={19} color={colors.primary} />
             </View>
             <View style={styles.deliveryInfo}>
               <Text style={styles.deliveryLabel}>Thời gian đặt</Text>
@@ -225,7 +220,7 @@ export default function OrderDetailScreen() {
         {canConfirm ? (
           <Button title="Đã nhận được hàng" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
         ) : (
-          <Button title="Liên hệ người bán" icon="chatbubble-ellipses-outline" onPress={chat} style={styles.footerBtn} />
+          <Button title="Liên hệ người bán" icon="forum" onPress={chat} style={styles.footerBtn} />
         )}
       </View>
     </View>
@@ -237,26 +232,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    textAlign: 'center',
-  },
   body: {
     gap: 16,
     padding: 20,
@@ -264,7 +239,7 @@ const styles = StyleSheet.create({
   statusCard: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     padding: 16,
     ...shadow.level1,
   },
@@ -299,7 +274,7 @@ const styles = StyleSheet.create({
   },
   productCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     overflow: 'hidden',
     ...shadow.level1,
   },
@@ -315,7 +290,7 @@ const styles = StyleSheet.create({
   },
   itemImage: {
     backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 80,
     width: 80,
   },
@@ -369,7 +344,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     gap: 4,
     padding: 16,
     ...shadow.level1,

@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -14,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/src/components/ProductCard';
-import { Button, Chip, EmptyState } from '@/src/components/ui';
+import { Button, Chip, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { CATEGORIES } from '@/src/data/seed';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
@@ -61,10 +60,10 @@ export default function SearchScreen() {
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
         </TouchableOpacity>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={19} color={colors.outline} />
+          <MaterialIcons name="search" size={19} color={colors.outline} />
           <TextInput
             value={query}
             onChangeText={setQuery}
@@ -76,14 +75,14 @@ export default function SearchScreen() {
           />
           {query ? (
             <TouchableOpacity onPress={clearQuery} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close" size={18} color={colors.onSurfaceVariant} />
+              <MaterialIcons name="close" size={18} color={colors.onSurfaceVariant} />
             </TouchableOpacity>
           ) : null}
         </View>
         <TouchableOpacity
           onPress={() => setSheetOpen(true)}
           style={styles.filterBtn}>
-          <Ionicons name="options-outline" size={22} color={colors.primary} />
+          <MaterialIcons name="tune" size={22} color={colors.primary} />
           {activeCount > 0 ? <View style={styles.filterDot} /> : null}
         </TouchableOpacity>
       </View>
@@ -93,12 +92,13 @@ export default function SearchScreen() {
           label={filters.sort === 'newest' ? 'Sắp xếp' : `Sắp xếp: ${SORT_OPTIONS.find((s) => s.key === filters.sort)?.label}`}
           selected={filters.sort !== 'newest'}
           onPress={() => setSheetOpen(true)}
+          icon="expand-more"
         />
         {filters.categories.length > 0 ? (
-          <Chip label={`Danh mục (${filters.categories.length})`} selected onPress={() => setSheetOpen(true)} />
+          <Chip label={`Danh mục (${filters.categories.length})`} selected onPress={() => setSheetOpen(true)} icon="expand-more" />
         ) : null}
         {filters.maxPrice !== undefined || filters.minPrice !== undefined ? (
-          <Chip label="Giá" selected onPress={() => setSheetOpen(true)} />
+          <Chip label="Giá" selected onPress={() => setSheetOpen(true)} icon="expand-more" />
         ) : null}
       </View>
 
@@ -120,7 +120,7 @@ export default function SearchScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            icon="search-outline"
+            icon="search-off"
             title="Rất tiếc, không tìm thấy sản phẩm phù hợp"
             description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem thêm kết quả nhé."
           >
@@ -193,7 +193,7 @@ function FilterSheet({ visible, onClose, initial, resultCount, onApply }: Filter
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Bộ lọc</Text>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close" size={24} color={colors.onSurface} />
+              <MaterialIcons name="close" size={24} color={colors.onSurface} />
             </TouchableOpacity>
           </View>
 
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
@@ -401,8 +401,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderTopLeftRadius: radius['3xl'],
-    borderTopRightRadius: radius['3xl'],
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
     maxHeight: '88%',
     ...shadow.level3,
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   priceInput: {
     backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     color: colors.onSurface,
     flex: 1,
     fontSize: 15,
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   conditionCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.5)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flex: 1,
     paddingHorizontal: 8,
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   sortRow: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 14,

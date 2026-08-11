@@ -1,5 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import {
   Alert,
@@ -10,17 +11,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
+import { Button, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 const RATING_LABELS = ['Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+const MAX_IMAGES = 3;
 
 export default function OrderRateScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { orders, currentUser, addReview } = useStore();
 
@@ -28,7 +28,28 @@ export default function OrderRateScreen() {
   const item = order?.items[0];
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const pickImages = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Cần quyền thư viện ảnh', 'Vui lòng cấp quyền để thêm ảnh thực tế.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: MAX_IMAGES - images.length,
+      quality: 0.82,
+    });
+    if (result.canceled) {
+      return;
+    }
+    setImages((current) =>
+      [...current, ...result.assets.map((asset) => asset.uri)].slice(0, MAX_IMAGES)
+    );
+  };
 
   const submit = () => {
     if (rating === 0) {
@@ -44,7 +65,7 @@ export default function OrderRateScreen() {
           productId: it.productId,
           rating,
           content: comment.trim(),
-          images: [],
+          images,
         });
       });
       setSubmitting(false);
@@ -56,22 +77,20 @@ export default function OrderRateScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Đánh giá đơn hàng</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader brand />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Đánh giá sản phẩm</Text>
 
         {item ? (
           <View style={styles.productCard}>
-            <View style={styles.productThumb}>
-              <Text style={styles.productFallback}>{item.title.charAt(0)}</Text>
-            </View>
+            {item.image ? (
+              <Image source={{ uri: item.image }} contentFit="cover" style={styles.productThumb} />
+            ) : (
+              <View style={[styles.productThumb, styles.productThumbFallback]}>
+                <Text style={styles.productFallback}>{item.title.charAt(0)}</Text>
+              </View>
+            )}
             <View style={styles.productInfo}>
               <Text style={styles.productTitle} numberOfLines={2}>
                 {item.title}
@@ -90,7 +109,7 @@ export default function OrderRateScreen() {
               key={value}
               onPress={() => setRating(value)}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-              <Ionicons
+              <MaterialIcons
                 name={value <= rating ? 'star' : 'star-outline'}
                 size={40}
                 color={value <= rating ? colors.primaryContainer : colors.outlineVariant}
@@ -112,9 +131,32 @@ export default function OrderRateScreen() {
           style={styles.commentInput}
         />
         <Text style={styles.commentCount}>{comment.length}/500</Text>
+
+        <Text style={styles.sectionTitle}>
+          Thêm hình ảnh thực tế <Text style={styles.uploadSub}>(Tối đa 3 ảnh)</Text>
+        </Text>
+        <View style={styles.uploadRow}>
+          {images.length < MAX_IMAGES ? (
+            <TouchableOpacity activeOpacity={0.8} onPress={pickImages} style={styles.uploadBtn}>
+              <MaterialIcons name="add-a-photo" size={28} color={colors.onSurfaceVariant} />
+              <Text style={styles.uploadLabel}>Thêm ảnh</Text>
+            </TouchableOpacity>
+          ) : null}
+          {images.map((uri, index) => (
+            <View key={index} style={styles.uploadedWrap}>
+              <Image source={{ uri }} contentFit="cover" style={styles.uploadedImg} />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setImages((current) => current.filter((_, i) => i !== index))}
+                style={styles.removeBtn}>
+                <MaterialIcons name="close" size={16} color={colors.onSurface} />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
+      <View style={styles.footer}>
         <Button title="Gửi đánh giá" size="lg" loading={submitting} fullWidth onPress={submit} />
       </View>
     </View>
@@ -125,26 +167,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    textAlign: 'center',
   },
   body: {
     gap: 8,
@@ -159,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 16,
@@ -168,13 +190,14 @@ const styles = StyleSheet.create({
     ...shadow.level1,
   },
   productThumb: {
-    alignItems: 'center',
     backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 80,
-    justifyContent: 'center',
-    overflow: 'hidden',
     width: 80,
+  },
+  productThumbFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   productFallback: {
     color: colors.primary,
@@ -214,7 +237,7 @@ const styles = StyleSheet.create({
   commentInput: {
     backgroundColor: colors.surfaceContainerLow,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     color: colors.onSurface,
     fontSize: 15,
@@ -227,6 +250,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 6,
     textAlign: 'right',
+  },
+  uploadSub: {
+    color: colors.outline,
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  uploadRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  uploadBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainer,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.md,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    height: 96,
+    justifyContent: 'center',
+    width: 96,
+  },
+  uploadLabel: {
+    color: colors.onSurfaceVariant,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  uploadedWrap: {
+    borderRadius: radius.md,
+    height: 96,
+    overflow: 'hidden',
+    position: 'relative',
+    width: 96,
+  },
+  uploadedImg: {
+    height: '100%',
+    width: '100%',
+  },
+  removeBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,249,255,0.8)',
+    borderRadius: radius.full,
+    height: 24,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    width: 24,
   },
   footer: {
     backgroundColor: colors.surfaceContainerLowest,

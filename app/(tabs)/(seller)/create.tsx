@@ -1,27 +1,25 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
+import { Button, IconName, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { formatCurrency } from '@/src/utils/format';
 
-const TIPS: { icon: keyof typeof Ionicons.glyphMap; title: string; body: string }[] = [
+const TIPS: { icon: IconName; title: string; body: string }[] = [
   {
-    icon: 'camera-outline',
+    icon: 'photo-camera',
     title: 'Ảnh rõ nét',
     body: 'Chụp ảnh đầy đủ, ánh sáng tốt để sản phẩm thu hút hơn.',
   },
   {
-    icon: 'pricetag-outline',
+    icon: 'local-offer',
     title: 'Giá hợp lý',
     body: 'Tham khảo mặt bằng giá để đưa ra mức giá cạnh tranh.',
   },
   {
-    icon: 'chatbubble-ellipses-outline',
+    icon: 'chat',
     title: 'Trả lời nhanh',
     body: 'Phản hồi tin nhắn sớm giúp chốt giao dịch nhanh hơn.',
   },
@@ -29,7 +27,6 @@ const TIPS: { icon: keyof typeof Ionicons.glyphMap; title: string; body: string 
 
 export default function SellerCreateTab() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { currentUser, products } = useStore();
 
   const myProducts = currentUser
@@ -38,9 +35,7 @@ export default function SellerCreateTab() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
-      </View>
+      <ScreenHeader brand showBack={false} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -49,7 +44,7 @@ export default function SellerCreateTab() {
 
         <View style={styles.hero}>
           <View style={styles.heroIcon}>
-            <Ionicons name="add-circle" size={48} color={colors.primary} />
+            <MaterialIcons name="add-circle" size={48} color={colors.primary} />
           </View>
           <Text style={styles.heroTitle}>Tạo tin đăng mới</Text>
           <Text style={styles.heroBody}>
@@ -69,7 +64,7 @@ export default function SellerCreateTab() {
           {TIPS.map((tip, index) => (
             <View key={tip.title} style={styles.tipRow}>
               <View style={styles.tipIcon}>
-                <Ionicons name={tip.icon} size={22} color={colors.primary} />
+                <MaterialIcons name={tip.icon} size={22} color={colors.primary} />
               </View>
               <View style={styles.tipInfo}>
                 <Text style={styles.tipTitle}>
@@ -107,7 +102,7 @@ export default function SellerCreateTab() {
                     </Text>
                     <Text style={styles.recentPrice}>{formatCurrency(product.price)}</Text>
                   </View>
-                  <Ionicons name="create-outline" size={20} color={colors.secondary} />
+                  <MaterialIcons name="edit" size={20} color={colors.secondary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -123,17 +118,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
-  },
   scroll: {
     padding: 20,
     paddingBottom: 32,
@@ -147,7 +131,7 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     gap: 12,
     padding: 24,
     ...shadow.level1,
@@ -201,7 +185,7 @@ const styles = StyleSheet.create({
   tipIcon: {
     alignItems: 'center',
     backgroundColor: 'rgba(33,112,228,0.1)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     height: 48,
     justifyContent: 'center',
     width: 48,
@@ -225,7 +209,7 @@ const styles = StyleSheet.create({
   recentItem: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 12,
     padding: 12,
@@ -233,7 +217,7 @@ const styles = StyleSheet.create({
   },
   recentImage: {
     backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 56,
     width: 56,
   },

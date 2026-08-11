@@ -1,18 +1,18 @@
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Button, EmptyState, StatusBadge } from '@/src/components/ui';
+import { Button, Chip, EmptyState, ScreenHeader, StatusBadge } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Order, OrderStatus } from '@/src/types';
@@ -30,7 +30,6 @@ const TABS: { key: TabFilter; label: string }[] = [
 
 export default function SellerOrdersTab() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { currentUser, orders, getUserById, updateOrderStatus } = useStore();
   const [tab, setTab] = useState<TabFilter>('pending');
 
@@ -86,7 +85,7 @@ export default function SellerOrdersTab() {
         </View>
         {firstItem ? (
           <View style={styles.productBox}>
-            <Image source={{ uri: firstItem.image }} style={styles.thumb} />
+            <Image source={{ uri: firstItem.image }} style={styles.thumb} contentFit="cover" />
             <View style={styles.productInfo}>
               <Text numberOfLines={2} style={styles.productTitle}>
                 {firstItem.title}
@@ -98,18 +97,17 @@ export default function SellerOrdersTab() {
         ) : null}
         {item.status === 'pending' ? (
           <View style={styles.actions}>
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <Button
+              title="Từ chối"
+              variant="tonal"
               onPress={() => rejectOrder(item)}
-              style={styles.rejectBtn}>
-              <Text style={styles.rejectText}>Từ chối</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.85}
+              style={styles.actionBtn}
+            />
+            <Button
+              title="Xác nhận"
               onPress={() => confirmOrder(item)}
-              style={styles.confirmBtn}>
-              <Text style={styles.confirmText}>Xác nhận</Text>
-            </TouchableOpacity>
+              style={styles.actionBtn}
+            />
           </View>
         ) : null}
       </TouchableOpacity>
@@ -118,32 +116,24 @@ export default function SellerOrdersTab() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
-      </View>
+      <ScreenHeader brand showBack={false} />
 
       <Text style={styles.pageTitle}>Đơn bán</Text>
 
       <View style={styles.tabs}>
-        <FlatList
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={TABS}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={styles.tabsContent}
-          renderItem={({ item }) => {
-            const active = tab === item.key;
-            return (
-              <TouchableOpacity
-                key={item.key}
-                activeOpacity={0.8}
-                onPress={() => setTab(item.key)}
-                style={[styles.tab, active && styles.tabActive]}>
-                <Text style={[styles.tabText, active && styles.tabTextActive]}>{item.label}</Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
+          contentContainerStyle={styles.tabsContent}>
+          {TABS.map((item) => (
+            <Chip
+              key={item.key}
+              label={item.label}
+              selected={tab === item.key}
+              onPress={() => setTab(item.key)}
+            />
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
@@ -154,7 +144,7 @@ export default function SellerOrdersTab() {
         renderItem={renderOrder}
         ListEmptyComponent={
           <EmptyState
-            icon="cube-outline"
+            icon="inventory-2"
             title="Chưa có đơn hàng"
             description="Khi có người mua đặt hàng, đơn hàng sẽ xuất hiện ở đây."
           >
@@ -170,17 +160,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
   },
   pageTitle: {
     ...typography.headlineSm,
@@ -198,27 +177,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 4,
   },
-  tab: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.full,
-    borderWidth: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  tabActive: {
-    backgroundColor: 'rgba(0,74,198,0.1)',
-    borderColor: 'rgba(0,74,198,0.2)',
-  },
-  tabText: {
-    ...typography.labelMd,
-    color: colors.onSurfaceVariant,
-  },
-  tabTextActive: {
-    color: colors.primary,
-  },
   list: {
     gap: 16,
     paddingBottom: 24,
@@ -228,7 +186,7 @@ const styles = StyleSheet.create({
   orderCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.1)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     gap: 16,
     padding: 16,
@@ -294,33 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  rejectBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceVariant,
-    borderRadius: radius.lg,
+  actionBtn: {
     flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  rejectText: {
-    ...typography.button,
-    color: colors.onSurfaceVariant,
-  },
-  confirmBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.lg,
-    elevation: 2,
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-  },
-  confirmText: {
-    ...typography.button,
-    color: colors.onPrimary,
   },
 });

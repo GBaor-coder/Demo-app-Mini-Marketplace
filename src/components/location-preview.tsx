@@ -46,7 +46,7 @@ export function LocationPreview({ location }: { location: LocationPoint }) {
 const styles = StyleSheet.create({
   mapFrame: {
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 188,
     overflow: 'hidden',

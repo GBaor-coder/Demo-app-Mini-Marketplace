@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,13 +12,28 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, Chip, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
 import { formatCurrency } from '@/src/utils/format';
 
 type Tab = 'active' | 'transaction' | 'sold' | 'draft';
+
+function productImageUri(product: Product): string | null {
+  if (Array.isArray(product.images)) {
+    const first = product.images.find(
+      (uri) => typeof uri === 'string' && uri.trim().length > 0
+    );
+    if (first) {
+      return first;
+    }
+  }
+  if (typeof product.image === 'string' && product.image.trim().length > 0) {
+    return product.image;
+  }
+  return null;
+}
 
 export default function SellerProductsTab() {
   const router = useRouter();
@@ -91,13 +106,20 @@ export default function SellerProductsTab() {
 
   const renderItem = ({ item }: { item: Product }) => {
     const chip = statusChip(item.status);
+    const imageUri = productImageUri(item);
     return (
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => router.push(`/product-preview?id=${item.id}`)}
         style={styles.card}>
         <View style={styles.imageWrap}>
-          <Image source={{ uri: item.images[0] || item.image }} style={styles.image} />
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.image} contentFit="cover" />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <MaterialIcons name="image" size={40} color={colors.onSurfaceVariant} />
+            </View>
+          )}
           <View style={[styles.statusChip, { backgroundColor: chip.bg }]}>
             <View style={[styles.statusDot, { backgroundColor: chip.dot }]} />
             <Text style={[styles.statusChipText, { color: chip.fg }]}>{chip.label}</Text>
@@ -107,7 +129,7 @@ export default function SellerProductsTab() {
             onPress={() => openMenu(item)}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             style={styles.menuBtn}>
-            <Ionicons name="ellipsis-vertical" size={20} color={colors.onSurface} />
+            <MaterialIcons name="more-vert" size={20} color={colors.onSurface} />
           </TouchableOpacity>
         </View>
         <View style={styles.cardBody}>
@@ -117,7 +139,7 @@ export default function SellerProductsTab() {
           <Text style={styles.price}>{formatCurrency(item.price)}</Text>
           <View style={styles.cardFooter}>
             <View style={styles.stockRow}>
-              <Ionicons name="cube-outline" size={16} color={colors.onSurfaceVariant} />
+              <MaterialIcons name="inventory-2" size={16} color={colors.onSurfaceVariant} />
               <Text style={styles.stockText}>Tồn kho: {item.stock}</Text>
             </View>
             <View style={styles.actions}>
@@ -125,13 +147,13 @@ export default function SellerProductsTab() {
                 onPress={() => router.push(`/product-form?id=${item.id}`)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.actionBtn}>
-                <Ionicons name="create-outline" size={18} color={colors.secondary} />
+                <MaterialIcons name="edit" size={18} color={colors.secondary} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setDeleting(item)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.actionBtn}>
-                <Ionicons name="trash-outline" size={18} color={colors.error} />
+                <MaterialIcons name="delete" size={18} color={colors.error} />
               </TouchableOpacity>
             </View>
           </View>
@@ -142,32 +164,24 @@ export default function SellerProductsTab() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
-      </View>
+      <ScreenHeader brand showBack={false} />
 
       <Text style={styles.pageTitle}>Sản phẩm</Text>
 
       <View style={styles.tabs}>
-        <FlatList
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={tabs}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={styles.tabsContent}
-          renderItem={({ item }) => {
-            const active = tab === item.key;
-            return (
-              <TouchableOpacity
-                key={item.key}
-                activeOpacity={0.8}
-                onPress={() => setTab(item.key)}
-                style={[styles.tab, active && styles.tabActive]}>
-                <Text style={[styles.tabText, active && styles.tabTextActive]}>{item.label}</Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
+          contentContainerStyle={styles.tabsContent}>
+          {tabs.map((item) => (
+            <Chip
+              key={item.key}
+              label={item.label}
+              selected={tab === item.key}
+              onPress={() => setTab(item.key)}
+            />
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
@@ -178,7 +192,7 @@ export default function SellerProductsTab() {
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            icon="pricetags-outline"
+            icon="sell"
             title="Chưa có sản phẩm"
             description="Đăng tin bán sản phẩm đầu tiên của bạn để bắt đầu."
           >
@@ -192,7 +206,7 @@ export default function SellerProductsTab() {
           activeOpacity={0.85}
           onPress={() => router.push('/product-form')}
           style={styles.fabBtn}>
-          <Ionicons name="add" size={28} color={colors.onPrimary} />
+          <MaterialIcons name="add" size={28} color={colors.onPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -228,17 +242,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
-  },
   pageTitle: {
     ...typography.displayLgMobile,
     color: colors.onSurface,
@@ -257,23 +260,6 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingHorizontal: 20,
   },
-  tab: {
-    alignItems: 'center',
-    borderRadius: radius.full,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  tabActive: {
-    backgroundColor: 'rgba(0,74,198,0.1)',
-  },
-  tabText: {
-    ...typography.labelMd,
-    color: colors.onSurfaceVariant,
-  },
-  tabTextActive: {
-    color: colors.primary,
-  },
   list: {
     gap: 16,
     padding: 20,
@@ -281,7 +267,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     borderWidth: 1,
     overflow: 'hidden',
     ...shadow.level1,
@@ -293,6 +279,12 @@ const styles = StyleSheet.create({
   },
   image: {
     height: '100%',
+    width: '100%',
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+    height: '100%',
+    justifyContent: 'center',
     width: '100%',
   },
   statusChip: {

@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   mapFrame: {
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 255,
     overflow: 'hidden',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   addressRow: {
     alignItems: 'flex-start',
     backgroundColor: 'rgba(0,74,198,0.06)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 8,
     marginTop: 8,

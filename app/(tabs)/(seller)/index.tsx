@@ -1,27 +1,14 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
+import { Button, MaterialIcons, ScreenHeader, StatusBadge } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { OrderStatus } from '@/src/types';
-import { formatCurrency, ORDER_STATUS_LABELS } from '@/src/utils/format';
-
-const STATUS_BADGE: Record<OrderStatus, { background: string; color: string }> = {
-  pending: { background: colors.errorContainer, color: colors.onErrorContainer },
-  confirmed: { background: 'rgba(0,74,198,0.1)', color: colors.primary },
-  in_transaction: { background: 'rgba(0,74,198,0.1)', color: colors.primary },
-  completed: { background: 'rgba(0,98,41,0.12)', color: colors.tertiaryContainer },
-  cancelled: { background: colors.errorContainer, color: colors.onErrorContainer },
-  rejected: { background: colors.errorContainer, color: colors.onErrorContainer },
-};
+import { formatCurrency } from '@/src/utils/format';
 
 export default function SellerOverviewScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { currentUser, products, orders, getUserById } = useStore();
 
   if (!currentUser) {
@@ -39,9 +26,7 @@ export default function SellerOverviewScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
-      </View>
+      <ScreenHeader brand showBack={false} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.greeting}>Chào, {currentUser.name.split(' ')[0]}! 👋</Text>
         <Text style={styles.greetingSub}>Đây là tổng quan cửa hàng của bạn hôm nay.</Text>
@@ -50,21 +35,21 @@ export default function SellerOverviewScreen() {
           <View style={styles.statCard}>
             <View style={styles.statTop}>
               <Text style={styles.statLabel}>Tổng sản phẩm</Text>
-              <Ionicons name="cube-outline" size={20} color={colors.secondary} />
+              <MaterialIcons name="inventory-2" size={20} color={colors.secondary} />
             </View>
             <Text style={styles.statValue}>{myProducts.length}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.statTop}>
               <Text style={styles.statLabel}>Tin đang bán</Text>
-              <Ionicons name="megaphone-outline" size={20} color={colors.secondary} />
+              <MaterialIcons name="campaign" size={20} color={colors.secondary} />
             </View>
             <Text style={styles.statValue}>{activeCount}</Text>
           </View>
           <View style={[styles.statCard, styles.statCardHighlight]}>
             <View style={styles.statTop}>
               <Text style={[styles.statLabel, styles.statLabelLight]}>Đơn chờ xử lý</Text>
-              <Ionicons name="time-outline" size={20} color={colors.onPrimary} />
+              <MaterialIcons name="pending-actions" size={20} color={colors.onPrimary} />
             </View>
             <Text style={[styles.statValue, styles.statValueLight]}>{pendingOrders}</Text>
             <Text style={[styles.statHint, styles.statHintLight]}>Cần xử lý ngay!</Text>
@@ -72,7 +57,7 @@ export default function SellerOverviewScreen() {
           <View style={styles.statCard}>
             <View style={styles.statTop}>
               <Text style={styles.statLabel}>Doanh thu (VND)</Text>
-              <Ionicons name="cash-outline" size={20} color={colors.tertiaryContainer} />
+              <MaterialIcons name="account-balance-wallet" size={20} color={colors.tertiaryContainer} />
             </View>
             <Text style={styles.statValue}>
               {revenue >= 1000000
@@ -95,14 +80,14 @@ export default function SellerOverviewScreen() {
               activeOpacity={0.85}
               onPress={() => router.push('/(tabs)/(seller)/orders')}
               style={styles.quickItem}>
-              <Ionicons name="cube" size={26} color={colors.primary} />
+              <MaterialIcons name="receipt-long" size={26} color={colors.primary} />
               <Text style={styles.quickText}>Quản lý đơn</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => router.push('/(tabs)/(seller)/products')}
               style={styles.quickItem}>
-              <Ionicons name="albums-outline" size={26} color={colors.secondary} />
+              <MaterialIcons name="warehouse" size={26} color={colors.secondary} />
               <Text style={styles.quickText}>Kho hàng</Text>
             </TouchableOpacity>
           </View>
@@ -118,14 +103,13 @@ export default function SellerOverviewScreen() {
 
           {recentOrders.length === 0 ? (
             <View style={styles.noOrders}>
-              <Ionicons name="receipt-outline" size={36} color={colors.outline} />
+              <MaterialIcons name="receipt-long" size={36} color={colors.outline} />
               <Text style={styles.noOrdersText}>Chưa có đơn hàng nào</Text>
             </View>
           ) : (
             <View>
               {recentOrders.map((order, index) => {
                 const item = order.items[0];
-                const badge = STATUS_BADGE[order.status];
                 return (
                   <TouchableOpacity
                     key={order.id}
@@ -148,11 +132,7 @@ export default function SellerOverviewScreen() {
                     </View>
                     <View style={styles.orderRight}>
                       <Text style={styles.orderPrice}>{formatCurrency(order.total)}</Text>
-                      <View style={[styles.orderBadge, { backgroundColor: badge.background }]}>
-                        <Text style={[styles.orderBadgeText, { color: badge.color }]}>
-                          {ORDER_STATUS_LABELS[order.status]}
-                        </Text>
-                      </View>
+                      <StatusBadge status={order.status} small style={styles.orderBadge} />
                     </View>
                   </TouchableOpacity>
                 );
@@ -203,17 +183,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
-  },
   scroll: {
     padding: 20,
     paddingBottom: 32,
@@ -237,7 +206,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     padding: 16,
     width: '48%',
     ...shadow.level1,
@@ -287,7 +256,7 @@ const styles = StyleSheet.create({
   quickItem: {
     alignItems: 'center',
     backgroundColor: '#E2E8F0',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flex: 1,
     gap: 8,
     justifyContent: 'center',
@@ -317,7 +286,7 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     overflow: 'hidden',
     ...shadow.level1,
   },
@@ -347,7 +316,7 @@ const styles = StyleSheet.create({
   orderNumberBox: {
     alignItems: 'center',
     backgroundColor: colors.surfaceVariant,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 48,
     justifyContent: 'center',
     width: 48,
@@ -373,7 +342,7 @@ const styles = StyleSheet.create({
   },
   orderRight: {
     alignItems: 'flex-end',
-    gap: 2,
+    gap: 4,
   },
   orderPrice: {
     color: colors.onSurface,
@@ -381,22 +350,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   orderBadge: {
-    borderRadius: radius.full,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  orderBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    alignSelf: 'flex-end',
   },
   productStrip: {
     gap: 12,
   },
   productMini: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     overflow: 'hidden',
     width: 140,
     ...shadow.level1,
@@ -426,7 +387,7 @@ const styles = StyleSheet.create({
   noOrders: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     gap: 8,
     padding: 24,
     ...shadow.level1,

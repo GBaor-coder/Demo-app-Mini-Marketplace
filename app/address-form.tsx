@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -10,12 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LocationPicker } from '@/src/components/location-picker';
-import { Button } from '@/src/components/ui';
+import { Button, IconName, MaterialIcons, ScreenHeader, toIconName } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
 import { takeLocationDraft } from '@/src/utils/location-draft';
 
@@ -38,16 +36,15 @@ const WARDS: Record<string, string[]> = {
   'Huyện Nhà Bè': ['Xã Phú Xuân', 'Xã Hiệp Phước', 'Thị trấn Nhà Bè'],
 };
 
-const LABEL_OPTIONS: { label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { label: 'Nhà', icon: 'home' },
-  { label: 'Ký túc xá', icon: 'bed' },
-  { label: 'Trường học', icon: 'school' },
-  { label: 'Công ty', icon: 'business' },
+const LABEL_OPTIONS: { label: string; icon: IconName }[] = [
+  { label: 'Nhà', icon: toIconName('home') },
+  { label: 'Ký túc xá', icon: toIconName('bed') },
+  { label: 'Trường học', icon: toIconName('school') },
+  { label: 'Công ty', icon: toIconName('business') },
 ];
 
 export default function AddressFormScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { addresses, addAddress, updateAddress } = useStore();
 
@@ -139,13 +136,7 @@ export default function AddressFormScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>{editing ? 'Sửa địa chỉ' : 'Thêm địa chỉ'}</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title={editing ? 'Sửa địa chỉ' : 'Thêm địa chỉ'} />
 
       <ScrollView
         contentContainerStyle={styles.body}
@@ -269,7 +260,7 @@ export default function AddressFormScreen() {
 
         <TouchableOpacity activeOpacity={0.85} onPress={openMapPicker} style={styles.mapToggle}>
           <View style={styles.mapToggleIcon}>
-            <Ionicons name="map-outline" size={20} color={colors.primary} />
+            <MaterialIcons name="map" size={20} color={colors.primary} />
           </View>
           <View style={styles.mapToggleInfo}>
             <Text style={styles.mapToggleTitle}>Chọn vị trí trên bản đồ</Text>
@@ -277,7 +268,7 @@ export default function AddressFormScreen() {
               {location.address || 'Xác định vị trí chính xác để giao hàng'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.outline} />
+          <MaterialIcons name="chevron-right" size={20} color={colors.outline} />
         </TouchableOpacity>
 
         {location.address ? <LocationPicker onChange={setLocation} value={location} /> : null}
@@ -293,7 +284,7 @@ export default function AddressFormScreen() {
                   activeOpacity={0.85}
                   onPress={() => setLabel(option.label)}
                   style={[styles.labelPill, selected && styles.labelPillActive]}>
-                  <Ionicons
+                  <MaterialIcons
                     name={option.icon}
                     size={18}
                     color={selected ? colors.primary : colors.onSurfaceVariant}
@@ -324,7 +315,7 @@ export default function AddressFormScreen() {
           onPress={() => setIsDefault((v) => !v)}
           style={styles.defaultRow}>
           <View style={[styles.checkbox, isDefault && styles.checkboxActive]}>
-            {isDefault ? <Ionicons name="checkmark" size={14} color={colors.onPrimary} /> : null}
+            {isDefault ? <MaterialIcons name="check" size={14} color={colors.onPrimary} /> : null}
           </View>
           <Text style={styles.defaultText}>Đặt làm địa chỉ mặc định</Text>
         </TouchableOpacity>
@@ -344,26 +335,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    textAlign: 'center',
   },
   body: {
     padding: 20,
@@ -411,7 +382,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     color: colors.onSurface,
     fontSize: 15,
@@ -460,7 +431,7 @@ const styles = StyleSheet.create({
   mapToggle: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     flexDirection: 'row',
     gap: 12,
     marginTop: 18,

@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
+import { IconName, MaterialIcons } from '@/src/components/ui/Icon';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 
@@ -10,9 +10,9 @@ type TabIconProps = {
   focused: boolean;
 };
 
-function tabIcon(name: keyof typeof Ionicons.glyphMap, active: keyof typeof Ionicons.glyphMap) {
+function tabIcon(name: IconName, filled: IconName = name) {
   const TabIcon = ({ color, focused }: TabIconProps) => (
-    <Ionicons name={focused ? active : name} size={24} color={color} />
+    <MaterialIcons name={focused ? filled : name} size={22} color={color} />
   );
   TabIcon.displayName = 'TabIcon';
   return TabIcon;
@@ -37,8 +37,6 @@ export default function SellerTabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
-        tabBarActiveBackgroundColor: 'rgba(0,74,198,0.10)',
-        tabBarInactiveBackgroundColor: 'transparent',
         tabBarHideOnKeyboard: true,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
@@ -46,26 +44,28 @@ export default function SellerTabLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Tổng quan', tabBarIcon: tabIcon('stats-chart-outline', 'stats-chart') }}
+        options={{ title: 'Tổng quan', tabBarIcon: tabIcon('dashboard', 'dashboard') }}
       />
       <Tabs.Screen
         name="products"
-        options={{ title: 'Sản phẩm', tabBarIcon: tabIcon('cube-outline', 'cube') }}
+        options={{ title: 'Sản phẩm', tabBarIcon: tabIcon('inventory-2', 'inventory-2') }}
       />
       <Tabs.Screen
         name="create"
         options={{
           title: 'Đăng bán',
-          tabBarIcon: () => <Ionicons name="add-circle" size={28} color={colors.primary} />,
+          tabBarIcon: ({ color }: TabIconProps) => (
+            <MaterialIcons name="add-circle" size={28} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="orders"
-        options={{ title: 'Đơn bán', tabBarIcon: tabIcon('receipt-outline', 'receipt') }}
+        options={{ title: 'Đơn bán', tabBarIcon: tabIcon('receipt-long', 'receipt-long') }}
       />
       <Tabs.Screen
         name="store"
-        options={{ title: 'Cửa hàng', tabBarIcon: tabIcon('storefront-outline', 'storefront') }}
+        options={{ title: 'Cửa hàng', tabBarIcon: tabIcon('storefront', 'storefront') }}
       />
     </Tabs>
   );
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   bar: {
     backgroundColor: 'rgba(248,249,255,0.92)',
     borderTopColor: 'rgba(195,198,215,0.2)',
-    borderTopLeftRadius: radius['3xl'],
-    borderTopRightRadius: radius['3xl'],
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
     borderTopWidth: 1,
     height: 80,
     paddingHorizontal: 8,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     ...shadow.level1,
   },
   item: {
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     marginHorizontal: 2,
     marginVertical: 6,
     paddingHorizontal: 6,

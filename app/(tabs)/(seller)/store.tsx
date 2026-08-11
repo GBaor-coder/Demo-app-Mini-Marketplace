@@ -1,18 +1,18 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
+import { Button, LogoutModal, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { formatCurrency } from '@/src/utils/format';
 
 export default function SellerStoreTab() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { currentUser, products, orders } = useStore();
+  const { currentUser, products, orders, logout } = useStore();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   if (!currentUser) {
     return null;
@@ -45,9 +45,7 @@ export default function SellerStoreTab() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
-      </View>
+      <ScreenHeader brand showBack={false} />
 
       <FlatList
         data={myProducts}
@@ -66,16 +64,16 @@ export default function SellerStoreTab() {
                   <Text style={styles.shopName}>{currentUser.name}</Text>
                   <View style={styles.badgeRow}>
                     <View style={styles.verifiedBadge}>
-                      <Ionicons name="checkmark-circle" size={14} color={colors.onPrimary} />
+                      <MaterialIcons name="check-circle" size={14} color={colors.onPrimary} />
                       <Text style={styles.verifiedText}>Đã xác thực</Text>
                     </View>
                     <View style={styles.ratingBadge}>
-                      <Ionicons name="star" size={13} color="#F59E0B" />
+                      <MaterialIcons name="star" size={13} color="#F59E0B" />
                       <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
                     </View>
                   </View>
                   <Text style={styles.campus}>
-                    <Ionicons name="location-outline" size={12} color={colors.onSurfaceVariant} />{' '}
+                    <MaterialIcons name="location-on" size={12} color={colors.onSurfaceVariant} />{' '}
                     {currentUser.campus}
                   </Text>
                 </View>
@@ -111,7 +109,7 @@ export default function SellerStoreTab() {
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="storefront-outline" size={56} color={colors.surfaceDim} />
+              <MaterialIcons name="storefront" size={56} color={colors.surfaceDim} />
             </View>
             <Text style={styles.emptyTitle}>Chưa có sản phẩm nào</Text>
             <Text style={styles.emptyText}>
@@ -125,6 +123,27 @@ export default function SellerStoreTab() {
             </TouchableOpacity>
           </View>
         }
+        ListFooterComponent={
+          <View style={styles.logoutWrap}>
+            <Button
+              title="Đăng xuất"
+              variant="outline"
+              danger
+              icon="logout"
+              onPress={() => setLogoutOpen(true)}
+              fullWidth
+            />
+          </View>
+        }
+      />
+
+      <LogoutModal
+        visible={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          logout();
+        }}
       />
     </View>
   );
@@ -135,17 +154,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
-  },
   list: {
     gap: 16,
     padding: 20,
@@ -155,7 +163,7 @@ const styles = StyleSheet.create({
   },
   shopHeader: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     gap: 16,
     padding: 20,
     ...shadow.level1,
@@ -219,7 +227,7 @@ const styles = StyleSheet.create({
   stats: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     flexDirection: 'row',
     marginTop: 16,
     paddingVertical: 16,
@@ -262,7 +270,7 @@ const styles = StyleSheet.create({
   },
   productCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     flex: 1,
     gap: 4,
     overflow: 'hidden',
@@ -324,5 +332,8 @@ const styles = StyleSheet.create({
   emptyBtnText: {
     ...typography.button,
     color: colors.onPrimary,
+  },
+  logoutWrap: {
+    marginTop: 24,
   },
 });

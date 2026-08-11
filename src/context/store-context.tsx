@@ -99,6 +99,34 @@ type StoreContextValue = {
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
+function normalizeProducts(list: unknown): Product[] {
+  if (!Array.isArray(list)) {
+    return [];
+  }
+  return list.flatMap((raw) => {
+    if (!raw || typeof raw !== 'object') {
+      return [];
+    }
+    const product = raw as Product;
+    const images = Array.isArray(product.images)
+      ? product.images.filter(
+          (uri): uri is string => typeof uri === 'string' && uri.trim().length > 0
+        )
+      : [];
+    const image =
+      typeof product.image === 'string' && product.image.trim().length > 0
+        ? product.image
+        : images[0] ?? '';
+    return [
+      {
+        ...product,
+        image,
+        images: images.length > 0 ? images : image ? [image] : [],
+      },
+    ];
+  });
+}
+
 export function StoreProvider({ children }: PropsWithChildren) {
   const [hydrated, setHydrated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -119,7 +147,9 @@ export function StoreProvider({ children }: PropsWithChildren) {
         if (raw) {
           const saved = JSON.parse(raw) as PersistedState;
           setCurrentUserId(saved.currentUserId);
-          setProducts(saved.products?.length ? saved.products : INITIAL_PRODUCTS);
+          setProducts(
+            saved.products?.length ? normalizeProducts(saved.products) : INITIAL_PRODUCTS
+          );
           setCart(saved.cart ?? []);
           setOrders(saved.orders ?? INITIAL_ORDERS);
           setFavoriteIds(saved.favoriteIds ?? []);

@@ -1,18 +1,23 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState } from '@/src/components/ui';
+import {
+  EmptyState,
+  IconButton,
+  MaterialIcons,
+  ScreenHeader,
+  toIconName,
+} from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { AppNotification, NotificationType } from '@/src/types';
 import { formatRelativeTime } from '@/src/utils/format';
 
-const ICONS: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
-  order: 'cube-outline',
-  message: 'chatbubble-ellipses-outline',
-  other: 'megaphone-outline',
+const ICONS: Record<NotificationType, keyof typeof MaterialIcons.glyphMap> = {
+  order: 'receipt-long',
+  message: 'chat-bubble-outline',
+  other: 'campaign',
 };
 
 const TABS: { key: NotificationType; label: string }[] = [
@@ -22,7 +27,7 @@ const TABS: { key: NotificationType; label: string }[] = [
 ];
 
 export default function BuyerNotificationsScreen() {
-  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { notifications, markNotificationsRead } = useStore();
   const [tab, setTab] = useState<NotificationType>('order');
 
@@ -37,11 +42,12 @@ export default function BuyerNotificationsScreen() {
 
   const renderItem = ({ item }: { item: AppNotification }) => (
     <View style={[styles.card, item.read && styles.cardRead]}>
-      <View style={[styles.iconWrap, !item.read && styles.iconWrapUnread]}>
-        <Ionicons
-          name={ICONS[item.type] ?? 'megaphone-outline'}
+      {!item.read ? <View style={styles.unreadDot} /> : null}
+      <View style={[styles.iconWrap, item.read && styles.iconWrapRead]}>
+        <MaterialIcons
+          name={toIconName(item.icon) ?? ICONS[item.type]}
           size={22}
-          color={item.read ? colors.onSurfaceVariant : colors.primary}
+          color={item.read ? colors.onSurfaceVariant : colors.onPrimaryContainer}
         />
       </View>
       <View style={styles.info}>
@@ -53,15 +59,18 @@ export default function BuyerNotificationsScreen() {
         </Text>
         <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
-      {!item.read ? <View style={styles.unreadDot} /> : null}
     </View>
   );
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.brand}>Thông báo</Text>
-      </View>
+      <ScreenHeader
+        title="Thông báo"
+        showBack={false}
+        right={
+          <IconButton name="settings" onPress={() => router.push('/status')} />
+        }
+      />
 
       <View style={styles.tabs}>
         {TABS.map((item) => {
@@ -88,7 +97,7 @@ export default function BuyerNotificationsScreen() {
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            icon="notifications-outline"
+            icon="notifications-active"
             title="Chưa có thông báo nào"
             description="Bạn sẽ nhận được thông báo khi có cập nhật về đơn hàng, tin nhắn và chương trình."
           />
@@ -103,21 +112,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    backgroundColor: 'rgba(248,249,255,0.92)',
-    paddingBottom: 12,
-    paddingHorizontal: 20,
-    ...shadow.level1,
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 22,
-  },
   tabs: {
     borderBottomColor: 'rgba(195,198,215,0.3)',
     borderBottomWidth: 1,
     flexDirection: 'row',
+    paddingHorizontal: 20,
   },
   tab: {
     alignItems: 'center',
@@ -144,25 +143,36 @@ const styles = StyleSheet.create({
   card: {
     alignItems: 'flex-start',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     flexDirection: 'row',
     gap: 16,
     padding: 16,
+    position: 'relative',
     ...shadow.level1,
   },
   cardRead: {
     opacity: 0.7,
   },
+  unreadDot: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    height: 8,
+    left: 4,
+    marginTop: -4,
+    position: 'absolute',
+    top: '50%',
+    width: 8,
+  },
   iconWrap: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceVariant,
+    backgroundColor: 'rgba(37,99,235,0.1)',
     borderRadius: radius.full,
     height: 48,
     justifyContent: 'center',
     width: 48,
   },
-  iconWrapUnread: {
-    backgroundColor: 'rgba(37,99,235,0.1)',
+  iconWrapRead: {
+    backgroundColor: colors.surfaceVariant,
   },
   info: {
     flex: 1,
@@ -181,14 +191,5 @@ const styles = StyleSheet.create({
     color: colors.outline,
     fontSize: 12,
     marginTop: 4,
-  },
-  unreadDot: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-    height: 8,
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    width: 8,
   },
 });

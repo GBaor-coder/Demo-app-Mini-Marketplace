@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Input } from '@/src/components/ui';
+import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 export default function ForgotPasswordScreen() {
@@ -37,7 +36,7 @@ export default function ForgotPasswordScreen() {
       <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.primary} />
+            <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>XÁC THỰC - Quên mật khẩu</Text>
           <View style={styles.headerBtn} />
@@ -54,7 +53,7 @@ export default function ForgotPasswordScreen() {
 
             <View style={styles.content}>
               <View style={styles.iconWrap}>
-                <Ionicons name="key-outline" size={32} color={colors.primaryContainer} />
+                <MaterialIcons name="lock-reset" size={32} color={colors.primaryContainer} />
               </View>
               <Text style={styles.title}>Quên mật khẩu?</Text>
               <Text style={styles.subtitle}>
@@ -64,7 +63,7 @@ export default function ForgotPasswordScreen() {
               <View style={styles.form}>
                 <Input
                   label="Email sinh viên"
-                  icon="mail-outline"
+                  icon="mail"
                   value={email}
                   onChangeText={setEmail}
                   placeholder="mssv@student.edu.vn"
@@ -75,20 +74,18 @@ export default function ForgotPasswordScreen() {
                 {error ? <Text style={styles.error}>{error}</Text> : null}
               </View>
 
-              <TouchableOpacity
-                activeOpacity={0.85}
+              <Button
+                title="Gửi mã OTP"
+                icon="send"
+                variant="primaryContainer"
                 onPress={handleSubmit}
-                style={styles.primaryBtn}>
-                <Text style={styles.primaryBtnText}>Gửi mã OTP</Text>
-                <Ionicons name="send" size={20} color={colors.onPrimary} />
-              </TouchableOpacity>
+              />
 
-              <TouchableOpacity
-                activeOpacity={0.85}
+              <Button
+                title="Quay lại Đăng nhập"
+                variant="tonal"
                 onPress={() => router.replace('/login')}
-                style={styles.secondaryBtn}>
-                <Text style={styles.secondaryBtnText}>Quay lại Đăng nhập</Text>
-              </TouchableOpacity>
+              />
             </View>
           </View>
         </ScrollView>
@@ -134,7 +131,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 20,
+    borderRadius: radius.xl,
     maxWidth: 480,
     overflow: 'hidden',
     padding: 28,
@@ -193,37 +190,5 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 14,
     lineHeight: 20,
-  },
-  primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: 16,
-    flexDirection: 'row',
-    gap: 8,
-    height: 52,
-    justifyContent: 'center',
-    marginTop: 4,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
-    width: '100%',
-  },
-  primaryBtnText: {
-    ...typography.button,
-    color: colors.onPrimary,
-  },
-  secondaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 16,
-    height: 52,
-    justifyContent: 'center',
-    width: '100%',
-  },
-  secondaryBtnText: {
-    ...typography.button,
-    color: colors.onSurface,
   },
 });

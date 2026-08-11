@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Alert,
@@ -10,7 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { SavedAddress } from '@/src/types';
@@ -66,7 +65,7 @@ export default function AddressesScreen() {
             activeOpacity={0.85}
             onPress={() => router.push(`/address-form?id=${item.id}`)}
             style={styles.actionBtn}>
-            <Ionicons name="create-outline" size={16} color={colors.primary} />
+            <MaterialIcons name="edit" size={16} color={colors.primary} />
             <Text style={styles.actionText}>Sửa</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -78,7 +77,7 @@ export default function AddressesScreen() {
               ])
             }
             style={styles.actionBtn}>
-            <Ionicons name="trash-outline" size={16} color={colors.error} />
+            <MaterialIcons name="delete" size={16} color={colors.error} />
             <Text style={[styles.actionText, styles.actionTextDanger]}>Xóa</Text>
           </TouchableOpacity>
         </View>
@@ -90,12 +89,10 @@ export default function AddressesScreen() {
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.title}>Sổ địa chỉ</Text>
-        <TouchableOpacity onPress={() => router.push('/address-form')} style={styles.headerBtn}>
-          <Ionicons name="add" size={26} color={colors.primary} />
-        </TouchableOpacity>
+        <View style={styles.headerBtn} />
       </View>
 
       <FlatList
@@ -106,7 +103,7 @@ export default function AddressesScreen() {
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            icon="location-outline"
+            icon="location-on"
             title="Chưa có địa chỉ nào"
             description="Thêm địa chỉ để việc đặt hàng nhanh chóng hơn."
           >
@@ -119,7 +116,7 @@ export default function AddressesScreen() {
         <Button
           title="Thêm địa chỉ mới"
           icon="add"
-          variant="secondary"
+          variant="primary"
           style={styles.footerButton}
           onPress={() => router.push('/address-form')}
         />
@@ -159,7 +156,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     padding: 16,
     ...shadow.level1,
   },
@@ -260,12 +257,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderTopLeftRadius: radius['3xl'],
-    borderTopRightRadius: radius['3xl'],
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
     padding: 20,
     ...shadow.level3,
   },
-  footerButton: {
-    backgroundColor: colors.primaryContainer,
-  },
+  footerButton: {},
 });

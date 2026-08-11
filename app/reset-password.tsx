@@ -1,8 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Input } from '@/src/components/ui';
+import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 type Requirement = 'length' | 'upper' | 'number';
@@ -72,7 +70,7 @@ export default function ResetPasswordScreen() {
           <View style={styles.card}>
             <View style={styles.topRow}>
               <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                <Ionicons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
+                <MaterialIcons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
               </TouchableOpacity>
               <Text style={styles.brand}>UniLoop</Text>
               <View style={styles.backBtn} />
@@ -88,7 +86,7 @@ export default function ResetPasswordScreen() {
             <View style={styles.form}>
               <Input
                 label="Mật khẩu mới"
-                icon="lock-closed-outline"
+                icon="lock"
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder="Nhập mật khẩu mới"
@@ -97,8 +95,8 @@ export default function ResetPasswordScreen() {
                   <TouchableOpacity
                     onPress={() => setShowNew((v) => !v)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons
-                      name={showNew ? 'eye-outline' : 'eye-off-outline'}
+                    <MaterialIcons
+                      name={showNew ? 'visibility' : 'visibility-off'}
                       size={20}
                       color={colors.onSurfaceVariant}
                     />
@@ -107,7 +105,7 @@ export default function ResetPasswordScreen() {
               />
               <Input
                 label="Xác nhận mật khẩu"
-                icon="key-outline"
+                icon="lock-reset"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Nhập lại mật khẩu"
@@ -116,8 +114,8 @@ export default function ResetPasswordScreen() {
                   <TouchableOpacity
                     onPress={() => setShowConfirm((v) => !v)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons
-                      name={showConfirm ? 'eye-outline' : 'eye-off-outline'}
+                    <MaterialIcons
+                      name={showConfirm ? 'visibility' : 'visibility-off'}
                       size={20}
                       color={colors.onSurfaceVariant}
                     />
@@ -132,8 +130,8 @@ export default function ResetPasswordScreen() {
                 const isMet = met[req.key];
                 return (
                   <View key={req.key} style={styles.criteriaRow}>
-                    <Ionicons
-                      name={isMet ? 'checkmark-circle' : 'radio-button-off'}
+                    <MaterialIcons
+                      name={isMet ? 'check-circle' : 'radio-button-unchecked'}
                       size={18}
                       color={isMet ? colors.primary : colors.outline}
                     />
@@ -148,16 +146,12 @@ export default function ResetPasswordScreen() {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <Button
+              title="Cập nhật mật khẩu"
+              variant="primaryContainer"
+              loading={loading}
               onPress={handleSubmit}
-              style={styles.primaryBtn}>
-              {loading ? (
-                <ActivityIndicator color={colors.onPrimary} size="small" />
-              ) : (
-                <Text style={styles.primaryBtnText}>Cập nhật mật khẩu</Text>
-              )}
-            </TouchableOpacity>
+            />
           </View>
         </ScrollView>
       </View>
@@ -201,7 +195,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(255,255,255,0.5)',
-    borderRadius: 24,
+    borderRadius: radius['2xl'],
     borderWidth: 1,
     gap: 24,
     maxWidth: 480,
@@ -244,7 +238,7 @@ const styles = StyleSheet.create({
   criteria: {
     backgroundColor: 'rgba(211,228,254,0.3)',
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: 8,
     padding: 16,
@@ -270,22 +264,5 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 14,
     lineHeight: 20,
-  },
-  primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: 16,
-    height: 52,
-    justifyContent: 'center',
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
-    width: '100%',
-  },
-  primaryBtnText: {
-    ...typography.button,
-    color: colors.onPrimary,
   },
 });

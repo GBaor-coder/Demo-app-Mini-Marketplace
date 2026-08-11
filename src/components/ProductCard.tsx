@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { MaterialIcons } from '@/src/components/ui/Icon';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
@@ -14,6 +14,9 @@ type ProductCardProps = {
   favorite?: boolean;
   onToggleFavorite?: () => void;
   compact?: boolean;
+  showSeller?: boolean;
+  imageHeight?: number;
+  badge?: string;
 };
 
 export function ProductCard({
@@ -22,22 +25,30 @@ export function ProductCard({
   favorite,
   onToggleFavorite,
   compact,
+  showSeller,
+  imageHeight = 160,
+  badge,
 }: ProductCardProps) {
   const { getUserById } = useStore();
   const seller = getUserById(product.sellerId);
 
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
-      <View style={styles.imageWrap}>
+      <View style={[styles.imageWrap, { height: imageHeight }]}>
         <Image
           contentFit="cover"
           source={{ uri: product.images?.[0] || product.image }}
           style={styles.image}
         />
+        {badge ? (
+          <View style={[styles.badge, badge === 'HOT' ? styles.badgeHot : styles.badgeNew]}>
+            <Text style={[styles.badgeText, badge === 'HOT' && styles.badgeTextHot]}>{badge}</Text>
+          </View>
+        ) : null}
         {seller?.verified && product.status !== 'sold' && (
           <View style={styles.verifiedBadge}>
-            <Ionicons name="shield-checkmark" size={13} color={colors.tertiary} />
-            <Text style={styles.verifiedText}>Verified</Text>
+            <MaterialIcons name="verified" size={13} color={colors.tertiary} />
+            <Text style={styles.verifiedText}>Đã xác thực</Text>
           </View>
         )}
         {product.status === 'sold' && (
@@ -56,8 +67,8 @@ export function ProductCard({
             onPress={onToggleFavorite}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={styles.favoriteButton}>
-            <Ionicons
-              name={favorite ? 'heart' : 'heart-outline'}
+            <MaterialIcons
+              name={favorite ? 'favorite' : 'favorite-border'}
               size={18}
               color={favorite ? colors.error : colors.onSurfaceVariant}
             />
@@ -65,26 +76,28 @@ export function ProductCard({
         ) : null}
       </View>
       <View style={styles.body}>
-        <Text numberOfLines={compact ? 1 : 1} style={styles.title}>
+        <Text numberOfLines={2} style={styles.title}>
           {product.title}
         </Text>
         <Text style={styles.price}>{formatCurrency(product.price)}</Text>
-        <View style={styles.meta}>
-          <View style={styles.metaRow}>
-            <Ionicons name="school-outline" size={14} color={colors.onSurfaceVariant} />
-            <Text numberOfLines={1} style={styles.metaText}>
-              {seller?.campus || 'Trường đại học'}
-            </Text>
+        {showSeller ? (
+          <View style={styles.meta}>
+            <View style={styles.metaRow}>
+              <MaterialIcons name="school" size={14} color={colors.onSurfaceVariant} />
+              <Text numberOfLines={1} style={styles.metaText}>
+                {seller?.campus || 'Trường đại học'}
+              </Text>
+            </View>
+            <View style={styles.metaRow}>
+              <MaterialIcons name="location-on" size={14} color={colors.onSurfaceVariant} />
+              <Text style={styles.metaText}>
+                {product.location
+                  ? distanceLabel(distanceFromCenter(product.location.latitude, product.location.longitude))
+                  : '---'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.metaRow}>
-            <Ionicons name="location-outline" size={14} color={colors.onSurfaceVariant} />
-            <Text style={styles.metaText}>
-              {product.location
-                ? distanceLabel(distanceFromCenter(product.location.latitude, product.location.longitude))
-                : '---'}
-            </Text>
-          </View>
-        </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -93,14 +106,13 @@ export function ProductCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     flex: 1,
     maxWidth: '48.5%',
     overflow: 'hidden',
     ...shadow.level1,
   },
   imageWrap: {
-    aspectRatio: 1,
     backgroundColor: colors.surfaceVariant,
     position: 'relative',
     width: '100%',
@@ -109,26 +121,53 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
-  verifiedBadge: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.9)',
+  badge: {
     borderRadius: radius.full,
-    flexDirection: 'row',
-    gap: 4,
     left: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
     position: 'absolute',
     top: 8,
+    zIndex: 2,
+  },
+  badgeNew: {
+    backgroundColor: 'rgba(0,74,198,0.10)',
+    borderColor: 'rgba(0,74,198,0.30)',
+    borderWidth: 1,
+  },
+  badgeHot: {
+    backgroundColor: colors.error,
+  },
+  badgeText: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  badgeTextHot: {
+    color: colors.onError,
+  },
+  verifiedBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.tertiaryContainer,
+    borderRadius: radius.full,
+    flexDirection: 'row',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 2,
   },
   verifiedText: {
-    color: colors.onSurface,
+    color: colors.onTertiaryContainer,
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   favoriteButton: {
     alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.8)',
+    backgroundColor: 'rgba(248,249,255,0.9)',
     borderRadius: radius.full,
     height: 32,
     justifyContent: 'center',
@@ -136,6 +175,7 @@ const styles = StyleSheet.create({
     right: 8,
     top: 8,
     width: 32,
+    zIndex: 3,
   },
   soldOverlay: {
     alignItems: 'center',
@@ -155,7 +195,7 @@ const styles = StyleSheet.create({
   },
   codBadge: {
     backgroundColor: colors.primary,
-    borderTopLeftRadius: radius.lg,
+    borderTopLeftRadius: radius.sm,
     bottom: 0,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -179,7 +219,7 @@ const styles = StyleSheet.create({
   },
   price: {
     color: colors.primary,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     marginTop: 4,
   },
@@ -187,6 +227,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 4,
     marginTop: 8,
+    borderTopColor: 'rgba(195,198,215,0.3)',
+    borderTopWidth: 1,
+    paddingTop: 8,
   },
   metaRow: {
     alignItems: 'center',

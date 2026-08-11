@@ -1,389 +1,534 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as Location from 'expo-location';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
 
-import { useStore } from '@/src/context/store-context';
+import { Button, MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { Product } from '@/src/types';
-import { distanceFromCenter } from '@/src/utils/filter';
-import { distanceLabel, formatCompact, formatCurrency } from '@/src/utils/format';
+import { normalizeSearch } from '@/src/utils/format';
+import { setLocationDraft } from '@/src/utils/location-draft';
 
-const HCM_CENTER = { latitude: 10.762622, longitude: 106.660172, latitudeDelta: 0.1, longitudeDelta: 0.1 };
+const HCM_CENTER = { latitude: 10.762622, longitude: 106.660172 };
+
+const SUGGESTIONS = [
+  {
+    title: 'Cổng D5, Đại học Bách Khoa TP.HCM',
+    address: '268 Lý Thường Kiệt, P.14, Q.10, TP. HCM',
+    latitude: 10.762622,
+    longitude: 106.660172,
+  },
+  {
+    title: 'Thư viện trung tâm ĐH Bách Khoa',
+    address: '268 Lý Thường Kiệt, P.14, Q.10, TP. HCM',
+    latitude: 10.760925,
+    longitude: 106.660656,
+  },
+  {
+    title: 'KTX Khu B, ĐHQG TP.HCM',
+    address: 'KP6, Linh Trung, TP. Thủ Đức, TP. HCM',
+    latitude: 10.882096,
+    longitude: 106.803155,
+  },
+  {
+    title: 'Trường ĐH Kinh tế TP.HCM',
+    address: '59C Nguyễn Đình Chiểu, Q.3, TP. HCM',
+    latitude: 10.775928,
+    longitude: 106.685033,
+  },
+  {
+    title: 'Cổng A, ĐH Sư phạm Kỹ thuật',
+    address: '01 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP. HCM',
+    latitude: 10.850808,
+    longitude: 106.771873,
+  },
+];
+
+function formatAddress(address: Location.LocationGeocodedAddress | undefined) {
+  if (!address) return '';
+  if (address.formattedAddress) return address.formattedAddress;
+  return [address.name, address.street, address.district, address.city, address.region]
+    .filter(Boolean)
+    .filter((item, index, all) => all.indexOf(item) === index)
+    .join(', ');
+}
 
 export default function MapScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { products } = useStore();
+  const params = useLocalSearchParams<{ lat?: string; lng?: string; address?: string }>();
+  const searchRef = useRef<TextInput>(null);
 
-  const [selected, setSelected] = useState<Product | null>(null);
-  const [region, setRegion] = useState(HCM_CENTER);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_coords, setCoords] = useState({
+    latitude: params.lat ? Number(params.lat) : HCM_CENTER.latitude,
+    longitude: params.lng ? Number(params.lng) : HCM_CENTER.longitude,
+  });
+  const [address, setAddress] = useState(params.address ?? '');
+  const [detail, setDetail] = useState(params.address ?? '');
+  const [query, setQuery] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [denied, setDenied] = useState(false);
 
-  const activeProducts = useMemo(
-    () => products.filter((p) => p.status === 'active' && p.location),
-    [products],
-  );
+  const results = useMemo(() => {
+    const q = normalizeSearch(query.trim());
+    if (!q) return [];
+    return SUGGESTIONS.filter((item) =>
+      normalizeSearch(`${item.title} ${item.address}`).includes(q)
+    );
+  }, [query]);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Không thể truy cập vị trí của bạn. Vui lòng bật quyền định vị trong cài đặt.');
-        setLoading(false);
-        return;
-      }
-      try {
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        setRegion({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-          latitudeDelta: 0.08,
-          longitudeDelta: 0.08,
-        });
-      } catch {
-        // fallback to HCM center
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  const recenter = async () => {
-    setLoading(true);
+  const locate = useCallback(async () => {
+    setLocating(true);
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      setError('Không thể truy cập vị trí của bạn.');
-      setLoading(false);
+      setDenied(true);
+      setLocating(false);
       return;
     }
+    setDenied(false);
     try {
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      setRegion({
+      setCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      const result = await Location.reverseGeocodeAsync({
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
       });
+      const text = formatAddress(result[0]);
+      if (text) setAddress(text);
     } catch {
-      setRegion(HCM_CENTER);
+      setCoords(HCM_CENTER);
     } finally {
-      setLoading(false);
+      setLocating(false);
     }
+  }, []);
+
+  useEffect(() => {
+    void locate();
+  }, [locate]);
+
+  const retry = () => {
+    setDenied(false);
+    void locate();
+  };
+
+  const selectSuggestion = (item: (typeof SUGGESTIONS)[number]) => {
+    setCoords({ latitude: item.latitude, longitude: item.longitude });
+    setAddress(item.address);
+    setDetail(item.address);
+    setQuery('');
+    Keyboard.dismiss();
+  };
+
+  const confirm = () => {
+    const finalAddress = detail.trim() || address;
+    if (!finalAddress) {
+      Alert.alert('Chọn vị trí', 'Vui lòng chọn hoặc nhập địa chỉ giao hàng.');
+      return;
+    }
+    setLocationDraft({ latitude: _coords.latitude, longitude: _coords.longitude, address: finalAddress });
+    router.back();
   };
 
   return (
-    <View style={styles.screen}>
-      <MapView
-        style={StyleSheet.absoluteFill}
-        region={region}
-        onRegionChangeComplete={(r) => setRegion(r)}
-        showsUserLocation
-        showsMyLocationButton={false}>
-        {activeProducts.map((product) => (
-          <Marker
-            key={product.id}
-            coordinate={{ latitude: product.location?.latitude ?? 0, longitude: product.location?.longitude ?? 0 }}
-            onPress={() => setSelected(product)}
-            tracksViewChanges={false}>
-            <View
-              style={[
-                styles.marker,
-                selected?.id === product.id && styles.markerSelected,
-              ]}>
-              <View style={styles.markerPill}>
-                <Text
-                  style={[
-                    styles.markerText,
-                    selected?.id === product.id && styles.markerTextSelected,
-                  ]}>
-                  {formatCompact(product.price)}
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.markerTip,
-                  selected?.id === product.id && styles.markerTipSelected,
-                ]}
-              />
-            </View>
-          </Marker>
-        ))}
-      </MapView>
-
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => router.push('/search')}
-          style={styles.searchBar}>
-          <Ionicons name="search" size={19} color={colors.onSurfaceVariant} />
-          <Text style={styles.searchPlaceholder}>Tìm kiếm khu vực...</Text>
-          <Ionicons name="options-outline" size={20} color={colors.onSurfaceVariant} />
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
+          <MaterialIcons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
+        <Text style={styles.title}>Bản đồ chọn vị trí</Text>
+      </View>
+
+      <View style={styles.mapArea}>
+        <View style={styles.dotGrid}>
+          {Array.from({ length: 420 }).map((_, index) => (
+            <View key={index} style={styles.dot} />
+          ))}
+        </View>
+
+        <View style={styles.centerPin} pointerEvents="none">
+          <View style={styles.pinBubble}>
+            <Text style={styles.pinBubbleText}>Giao đến đây</Text>
+          </View>
+          <MaterialIcons name="location-on" size={40} color={colors.primary} style={styles.pinIcon} />
+        </View>
+
+        <View style={styles.searchWrap}>
+          <View style={styles.searchBar}>
+            <MaterialIcons name="search" size={20} color={colors.onSurfaceVariant} />
+            <TextInput
+              ref={searchRef}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Tìm kiếm địa chỉ..."
+              placeholderTextColor="rgba(67,70,85,0.7)"
+              style={styles.searchInput}
+            />
+          </View>
+          {results.length ? (
+            <ScrollView
+              style={styles.suggestionCard}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}>
+              {results.map((item, index) => (
+                <TouchableOpacity
+                  key={item.title}
+                  activeOpacity={0.8}
+                  onPress={() => selectSuggestion(item)}
+                  style={[
+                    styles.suggestionRow,
+                    index === results.length - 1 && styles.suggestionRowLast,
+                  ]}>
+                  <View style={styles.suggestionIcon}>
+                    <MaterialIcons name="place" size={18} color={colors.primary} />
+                  </View>
+                  <View style={styles.suggestionInfo}>
+                    <Text style={styles.suggestionTitle} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text style={styles.suggestionAddress} numberOfLines={1}>
+                      {item.address}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : null}
+        </View>
+
         <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={recenter}
-          style={styles.locationButton}>
-          <Ionicons name="locate" size={18} color={colors.primary} />
-          <Text style={styles.locationButtonText}>Sử dụng vị trí hiện tại</Text>
+          onPress={locate}
+          disabled={locating}
+          style={styles.locateBtn}>
+          {locating ? (
+            <ActivityIndicator color={colors.primary} size="small" />
+          ) : (
+            <MaterialIcons name="my-location" size={22} color={colors.primary} />
+          )}
         </TouchableOpacity>
       </View>
 
-      {loading ? (
-        <View style={styles.centerOverlay}>
-          <ActivityIndicator color={colors.primary} size="large" />
-        </View>
-      ) : null}
-
-      {error ? (
-        <View style={styles.errorCard}>
-          <Ionicons name="location-outline" size={20} color={colors.error} />
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : null}
-
-      {selected ? (
-        <View
-          style={[
-            styles.productCard,
-            { marginBottom: insets.bottom + 12, paddingBottom: 12 },
-          ]}>
-          <Image source={{ uri: selected.images[0] || selected.image }} style={styles.productImage} />
-          <View style={styles.productInfo}>
-            <View style={styles.categoryRow}>
-              <Text style={styles.categoryTag}>{selected.category}</Text>
-              <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="heart-outline" size={20} color={colors.onSurfaceVariant} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.productTitle} numberOfLines={2}>
-              {selected.title}
-            </Text>
-            <View style={styles.distanceRow}>
-              <Ionicons name="location-outline" size={15} color={colors.onSurfaceVariant} />
-              <Text style={styles.distanceText}>
-                Cách bạn {distanceLabel(distanceFromCenter(selected.location.latitude, selected.location.longitude))}
-              </Text>
-            </View>
-            <View style={styles.buyRow}>
-              <Text style={styles.productPrice}>{formatCurrency(selected.price)}</Text>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => router.push(`/product/${selected.id}`)}
-                style={styles.detailButton}>
-                <Text style={styles.detailButtonText}>Xem chi tiết</Text>
-              </TouchableOpacity>
-            </View>
+      {locating ? (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingCard}>
+            <ActivityIndicator color={colors.primary} size="small" />
+            <Text style={styles.loadingText}>Đang tải vị trí...</Text>
           </View>
         </View>
       ) : null}
-    </View>
+
+      {denied ? (
+        <View style={styles.deniedOverlay}>
+          <View style={styles.deniedCard}>
+            <View style={styles.deniedIcon}>
+              <MaterialIcons name="location-off" size={32} color={colors.error} />
+            </View>
+            <Text style={styles.deniedTitle}>Không có quyền truy cập vị trí</Text>
+            <Text style={styles.deniedText}>
+              Vui lòng cấp quyền truy cập vị trí trong cài đặt để sử dụng tính năng này.
+            </Text>
+            <Button title="Thử lại" variant="primary" fullWidth onPress={retry} />
+          </View>
+        </View>
+      ) : null}
+
+      <View style={[styles.bottomCard, { paddingBottom: insets.bottom + 16 }]}>
+        <Text style={styles.fieldLabel}>Tỉnh/Thành phố, Quận/Huyện, Phường/Xã</Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => searchRef.current?.focus()}
+          style={styles.addressRow}>
+          <Text style={styles.addressText} numberOfLines={1}>
+            {address || 'Chọn vị trí từ bản đồ'}
+          </Text>
+          <MaterialIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
+        </TouchableOpacity>
+        <Text style={styles.fieldLabel}>Địa chỉ cụ thể (Số nhà, tên đường...)</Text>
+        <TextInput
+          value={detail}
+          onChangeText={setDetail}
+          placeholder="Nhập địa chỉ cụ thể"
+          placeholderTextColor={colors.outline}
+          style={styles.detailInput}
+          multiline
+        />
+        <Button
+          title="Xác nhận vị trí"
+          variant="primary"
+          fullWidth
+          onPress={confirm}
+          style={styles.confirmBtn}
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    backgroundColor: colors.surface,
     flex: 1,
   },
-  marker: {
+  header: {
     alignItems: 'center',
-  },
-  markerPill: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: 'rgba(0,74,198,0.2)',
-    borderRadius: radius.full,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    ...shadow.level1,
+    borderBottomColor: 'rgba(195,198,215,0.2)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
   },
-  markerText: {
-    color: colors.primary,
+  headerBtn: {
+    alignItems: 'center',
+    borderRadius: radius.full,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  title: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    flex: 1,
+  },
+  mapArea: {
+    backgroundColor: '#e5e5e5',
+    flex: 1,
+    minHeight: 300,
+    overflow: 'hidden',
+  },
+  dotGrid: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dot: {
+    backgroundColor: '#cbd5e1',
+    borderRadius: 1,
+    height: 2,
+    margin: 9,
+    width: 2,
+  },
+  centerPin: {
+    alignItems: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: '38%',
+  },
+  pinBubble: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    ...shadow.level2,
+  },
+  pinBubbleText: {
+    color: colors.onSurface,
     fontSize: 14,
     fontWeight: '500',
   },
-  markerSelected: {
-    transform: [{ scale: 1.08 }],
+  pinIcon: {
+    textShadowColor: 'rgba(15,23,42,0.25)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
   },
-  markerTextSelected: {
-    color: colors.onPrimary,
-  },
-  markerTip: {
-    borderLeftColor: 'transparent',
-    borderLeftWidth: 6,
-    borderRightColor: 'transparent',
-    borderRightWidth: 6,
-    borderTopColor: colors.surfaceContainerLowest,
-    borderTopWidth: 8,
-    height: 0,
-    marginTop: -1,
-    width: 0,
-  },
-  markerTipSelected: {
-    borderTopColor: colors.primary,
-  },
-  header: {
-    alignItems: 'flex-start',
-    gap: 10,
-    left: 0,
-    paddingHorizontal: 20,
+  searchWrap: {
+    left: 20,
     position: 'absolute',
-    right: 0,
-    top: 0,
+    right: 20,
+    top: 16,
   },
   searchBar: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 10,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    width: '100%',
+    paddingVertical: 4,
     ...shadow.level1,
   },
-  searchPlaceholder: {
-    color: 'rgba(67,70,85,0.7)',
+  searchInput: {
+    color: colors.onSurface,
     flex: 1,
     fontSize: 16,
-  },
-  locationButton: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    ...shadow.level1,
-  },
-  locationButtonText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  centerOverlay: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: 'rgba(248,249,255,0.8)',
-    borderRadius: radius.full,
-    bottom: 180,
-    height: 56,
-    justifyContent: 'center',
-    position: 'absolute',
-    width: 56,
-    ...shadow.level1,
-  },
-  errorCard: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: colors.errorContainer,
-    borderRadius: radius.xl,
-    bottom: 180,
-    flexDirection: 'row',
-    gap: 8,
-    marginHorizontal: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    position: 'absolute',
-  },
-  errorText: {
-    color: colors.onErrorContainer,
-    flex: 1,
-    fontSize: 13,
-  },
-  productCard: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
-    bottom: 0,
-    flexDirection: 'row',
-    gap: 16,
-    left: 20,
-    padding: 16,
-    position: 'absolute',
-    right: 20,
-    ...shadow.level3,
-  },
-  productImage: {
-    backgroundColor: colors.surfaceVariant,
-    borderRadius: radius.lg,
-    height: 100,
-    width: 100,
-  },
-  productInfo: {
-    flex: 1,
-    gap: 4,
-    justifyContent: 'space-between',
-    paddingVertical: 2,
-  },
-  categoryRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  categoryTag: {
-    backgroundColor: 'rgba(0,74,198,0.1)',
-    borderRadius: radius.full,
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    overflow: 'hidden',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    textTransform: 'uppercase',
-  },
-  productTitle: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  distanceRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 4,
-  },
-  distanceText: {
-    color: colors.onSurfaceVariant,
-    fontSize: 14,
-  },
-  buyRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  productPrice: {
-    color: colors.primary,
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  detailButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.xl,
-    paddingHorizontal: 16,
+    minHeight: 44,
     paddingVertical: 8,
   },
-  detailButtonText: {
-    color: colors.onPrimary,
-    fontSize: 16,
+  suggestionCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    marginTop: 8,
+    maxHeight: 260,
+    ...shadow.level2,
+  },
+  suggestionRow: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(195,198,215,0.2)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  suggestionRowLast: {
+    borderBottomWidth: 0,
+  },
+  suggestionIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: radius.full,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  suggestionInfo: {
+    flex: 1,
+  },
+  suggestionTitle: {
+    ...typography.labelMd,
+    color: colors.onSurface,
+  },
+  suggestionAddress: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+    marginTop: 1,
+  },
+  locateBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.full,
+    borderWidth: 1,
+    bottom: 16,
+    height: 48,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 16,
+    width: 48,
+    ...shadow.level2,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,249,255,0.5)',
+    justifyContent: 'center',
+    zIndex: 50,
+  },
+  loadingCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    ...shadow.level2,
+  },
+  loadingText: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
     fontWeight: '500',
+  },
+  deniedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,249,255,0.8)',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    zIndex: 60,
+  },
+  deniedCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius['2xl'],
+    maxWidth: 320,
+    padding: 24,
+    width: '100%',
+    ...shadow.level3,
+  },
+  deniedIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.errorContainer,
+    borderRadius: radius.full,
+    height: 64,
+    justifyContent: 'center',
+    marginBottom: 16,
+    width: 64,
+  },
+  deniedTitle: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  deniedText: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  bottomCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopColor: 'rgba(195,198,215,0.2)',
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
+    borderTopWidth: 1,
+    gap: 8,
+    padding: 20,
+    ...shadow.level3,
+  },
+  fieldLabel: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
+  },
+  addressRow: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(195,198,215,0.3)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 12,
+  },
+  addressText: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+    flex: 1,
+  },
+  detailInput: {
+    backgroundColor: colors.surface,
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    color: colors.onSurface,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 64,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    textAlignVertical: 'top',
+  },
+  confirmBtn: {
+    marginTop: 12,
   },
 });

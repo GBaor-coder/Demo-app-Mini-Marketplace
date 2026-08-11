@@ -66,6 +66,13 @@ export const shadow = {
     shadowRadius: 32,
     elevation: 6,
   },
+  primary: {
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 3,
+  },
 };
 
 export const spacing = {
@@ -78,14 +85,22 @@ export const spacing = {
 };
 
 export const radius = {
-  lg: 12,
-  xl: 16,
-  '2xl': 20,
-  '3xl': 24,
+  sm: 8, // rounded-lg (8px)
+  md: 12, // rounded-xl (12px)
+  lg: 16, // rounded-2xl / button chính (16px)
+  xl: 20, // card chính (20px)
+  '2xl': 24, // modal (24px)
+  '3xl': 28, // modal lớn (28px)
   full: 9999,
 };
 
 export const typography = {
+  displayLg: {
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: -0.64,
+    fontWeight: '600',
+  },
   displayLgMobile: {
     fontSize: 28,
     lineHeight: 36,
@@ -97,9 +112,19 @@ export const typography = {
     lineHeight: 32,
     fontWeight: '600',
   },
+  headlineMdMobile: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '600',
+  },
   headlineSm: {
     fontSize: 20,
     lineHeight: 28,
+    fontWeight: '600',
+  },
+  headlineSmMobile: {
+    fontSize: 18,
+    lineHeight: 24,
     fontWeight: '600',
   },
   bodyLg: {

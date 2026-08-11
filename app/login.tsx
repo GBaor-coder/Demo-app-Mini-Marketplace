@@ -1,8 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,8 +11,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { Input } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { UserRole } from '@/src/types';
 
@@ -77,7 +75,7 @@ export default function LoginScreen() {
           <View style={styles.card}>
             <View style={styles.header}>
               <View style={styles.logo}>
-                <Ionicons name="sync" size={32} color={colors.onPrimaryContainer} />
+                <MaterialIcons name="sync" size={32} color={colors.onPrimaryContainer} />
               </View>
               <Text style={styles.brand}>UniLoop</Text>
               <Text style={styles.subtitle}>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</Text>
@@ -106,7 +104,7 @@ export default function LoginScreen() {
             <View style={styles.form}>
               <Input
                 label="Email trường học"
-                icon="mail-outline"
+                icon="mail"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="student@university.edu.vn"
@@ -116,7 +114,7 @@ export default function LoginScreen() {
               />
               <Input
                 label="Mật khẩu"
-                icon="lock-closed-outline"
+                icon="lock"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="••••••••"
@@ -125,8 +123,8 @@ export default function LoginScreen() {
                   <TouchableOpacity
                     onPress={() => setShowPassword((v) => !v)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons
-                      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    <MaterialIcons
+                      name={showPassword ? 'visibility' : 'visibility-off'}
                       size={20}
                       color={colors.onSurfaceVariant}
                     />
@@ -141,7 +139,7 @@ export default function LoginScreen() {
                   style={styles.remember}>
                   <View style={[styles.checkbox, remember && styles.checkboxChecked]}>
                     {remember ? (
-                      <Ionicons name="checkmark" size={12} color={colors.onPrimary} />
+                      <MaterialIcons name="check" size={12} color={colors.onPrimary} />
                     ) : null}
                   </View>
                   <Text style={styles.rememberText}>Nhớ tài khoản</Text>
@@ -155,19 +153,14 @@ export default function LoginScreen() {
 
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
-              <TouchableOpacity
-                activeOpacity={0.85}
+              <Button
+                title="Đăng nhập"
+                icon="arrow-forward"
+                variant="primaryContainer"
+                loading={loading}
                 onPress={handleLogin}
-                style={styles.primaryBtn}>
-                {loading ? (
-                  <ActivityIndicator color={colors.onPrimary} size="small" />
-                ) : (
-                  <>
-                    <Text style={styles.primaryBtnText}>Đăng nhập</Text>
-                    <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
-                  </>
-                )}
-              </TouchableOpacity>
+                style={styles.submitBtn}
+              />
             </View>
 
             <View style={styles.divider}>
@@ -177,34 +170,20 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.demoGroup}>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                disabled={demoLoading !== null}
+              <Button
+                title="Dùng thử vai trò Người mua"
+                icon="shopping-bag"
+                variant="outline"
+                loading={demoLoading === 'buyer'}
                 onPress={() => handleGuest('buyer')}
-                style={styles.guestBtn}>
-                {demoLoading === 'buyer' ? (
-                  <ActivityIndicator color={colors.primary} size="small" />
-                ) : (
-                  <>
-                    <Ionicons name="bag-outline" size={20} color={colors.primary} />
-                    <Text style={styles.guestBtnText}>Dùng thử vai trò Người mua</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                disabled={demoLoading !== null}
+              />
+              <Button
+                title="Dùng thử vai trò Người bán"
+                icon="sell"
+                variant="outline"
+                loading={demoLoading === 'seller'}
                 onPress={() => handleGuest('seller')}
-                style={styles.guestBtn}>
-                {demoLoading === 'seller' ? (
-                  <ActivityIndicator color={colors.primary} size="small" />
-                ) : (
-                  <>
-                    <Ionicons name="storefront-outline" size={20} color={colors.primary} />
-                    <Text style={styles.guestBtnText}>Dùng thử vai trò Người bán</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+              />
             </View>
 
             <View style={styles.footer}>
@@ -256,7 +235,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'rgba(255,255,255,0.9)',
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     borderWidth: 1,
     gap: 24,
     maxWidth: 440,
@@ -272,7 +251,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     backgroundColor: colors.primaryContainer,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     height: 64,
     justifyContent: 'center',
     marginBottom: 8,
@@ -295,13 +274,13 @@ const styles = StyleSheet.create({
   },
   segment: {
     backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     padding: 4,
   },
   segmentItem: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: radius.md,
     flex: 1,
     justifyContent: 'center',
     paddingVertical: 8,
@@ -359,25 +338,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.xl,
-    flexDirection: 'row',
-    gap: 8,
-    height: 48,
-    justifyContent: 'center',
+  submitBtn: {
     marginTop: 8,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
-    width: '100%',
-  },
-  primaryBtnText: {
-    ...typography.button,
-    color: colors.onPrimary,
   },
   divider: {
     alignItems: 'center',
@@ -396,22 +358,6 @@ const styles = StyleSheet.create({
   },
   demoGroup: {
     gap: 8,
-  },
-  guestBtn: {
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderColor: colors.primary,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 8,
-    height: 48,
-    justifyContent: 'center',
-    width: '100%',
-  },
-  guestBtnText: {
-    ...typography.button,
-    color: colors.primary,
   },
   footer: {
     alignItems: 'center',

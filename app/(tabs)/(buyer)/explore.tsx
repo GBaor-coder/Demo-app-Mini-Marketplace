@@ -1,20 +1,32 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
-import { CATEGORIES, CATEGORY_ICONS } from '@/src/data/seed';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product, ProductCategory } from '@/src/types';
 import { formatCurrency } from '@/src/utils/format';
 
+const EXPLORE_CATEGORIES: {
+  category: ProductCategory;
+  icon: keyof typeof MaterialIcons.glyphMap;
+}[] = [
+  { category: 'Giáo trình', icon: 'menu-book' },
+  { category: 'Đồ điện tử', icon: 'devices' },
+  { category: 'Đồ dùng học tập', icon: 'architecture' },
+  { category: 'Đồ ký túc xá', icon: 'chair' },
+  { category: 'Handmade', icon: 'brush' },
+];
+
 export default function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { products, favoriteIds, toggleFavorite } = useStore();
+  const { products, favoriteIds, toggleFavorite, cart } = useStore();
+
+  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
   const activeProducts = products.filter((p) => p.status === 'active');
 
@@ -39,10 +51,10 @@ export default function ExploreScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={() => toggleFavorite(item.id)}
             style={styles.favorite}>
-            <Ionicons
-              name={favoriteIds.includes(item.id) ? 'heart' : 'heart-outline'}
+            <MaterialIcons
+              name={favoriteIds.includes(item.id) ? 'favorite' : 'favorite-border'}
               size={18}
-              color={favoriteIds.includes(item.id) ? '#e11d48' : colors.onSurface}
+              color={favoriteIds.includes(item.id) ? colors.error : colors.onSurface}
             />
           </TouchableOpacity>
         </View>
@@ -65,10 +77,27 @@ export default function ExploreScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity
           activeOpacity={0.7}
+          onPress={() => router.back()}
+          style={styles.headerBtn}>
+          <MaterialIcons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => router.push('/search')}
           style={styles.searchBar}>
-          <Ionicons name="search" size={19} color={colors.outline} />
+          <MaterialIcons name="search" size={19} color={colors.outline} />
           <Text style={styles.searchPlaceholder}>Tìm kiếm sách, đồ dùng...</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/cart')}
+          style={styles.cartBtn}>
+          <MaterialIcons name="shopping-cart" size={24} color={colors.onSurfaceVariant} />
+          {cartCount > 0 ? (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+            </View>
+          ) : null}
         </TouchableOpacity>
       </View>
 
@@ -82,7 +111,33 @@ export default function ExploreScreen() {
         ListHeaderComponent={
           <View>
             <Text style={styles.sectionTitle}>Danh mục</Text>
-            <ScrollViewHorizontal />
+            <View style={styles.categoryStrip}>
+              {EXPLORE_CATEGORIES.map((item, index) => {
+                const active = index === 0;
+                return (
+                  <TouchableOpacity
+                    key={item.category}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/search-results',
+                        params: { category: item.category },
+                      })
+                    }
+                    style={styles.categoryItem}>
+                    <View
+                      style={[styles.categoryCircle, active && styles.categoryCircleActive]}>
+                      <MaterialIcons
+                        name={item.icon}
+                        size={28}
+                        color={active ? colors.onPrimaryContainer : colors.onSurface}
+                      />
+                    </View>
+                    <Text style={styles.categoryLabel}>{item.category}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Gợi ý cho bạn</Text>
               <TouchableOpacity onPress={() => router.push('/search-results')}>
@@ -97,55 +152,61 @@ export default function ExploreScreen() {
   );
 }
 
-function ScrollViewHorizontal() {
-  const router = useRouter();
-  return (
-    <View style={styles.categoryStrip}>
-      {CATEGORIES.map((category: ProductCategory, index) => {
-        const active = index === 0;
-        return (
-          <TouchableOpacity
-            key={category}
-            activeOpacity={0.8}
-            onPress={() => router.push({ pathname: '/search-results', params: { category } })}
-            style={styles.categoryItem}>
-            <View style={[styles.categoryCircle, active && styles.categoryCircleActive]}>
-              <Ionicons
-                name={CATEGORY_ICONS[category] as keyof typeof Ionicons.glyphMap}
-                size={27}
-                color={active ? colors.onPrimaryContainer : colors.onSurface}
-              />
-            </View>
-            <Text style={styles.categoryLabel}>{category}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
   },
   header: {
+    alignItems: 'center',
     backgroundColor: 'rgba(248,249,255,0.92)',
+    flexDirection: 'row',
+    gap: 4,
     paddingBottom: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
+  },
+  headerBtn: {
+    alignItems: 'center',
+    height: 44,
+    justifyContent: 'center',
+    width: 40,
   },
   searchBar: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainer,
     borderRadius: radius.full,
+    flex: 1,
     flexDirection: 'row',
     gap: 10,
-    minHeight: 42,
+    minHeight: 40,
     paddingHorizontal: 16,
   },
   searchPlaceholder: {
     color: colors.outline,
     fontSize: 14,
+  },
+  cartBtn: {
+    alignItems: 'center',
+    height: 44,
+    justifyContent: 'center',
+    position: 'relative',
+    width: 40,
+  },
+  cartBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
+    borderRadius: radius.full,
+    height: 16,
+    justifyContent: 'center',
+    minWidth: 16,
+    position: 'absolute',
+    right: 2,
+    top: 4,
+  },
+  cartBadgeText: {
+    color: colors.onError,
+    fontSize: 10,
+    fontWeight: '700',
   },
   list: {
     paddingBottom: 24,
@@ -180,6 +241,7 @@ const styles = StyleSheet.create({
     height: 64,
     justifyContent: 'center',
     width: 64,
+    ...shadow.level1,
   },
   categoryCircleActive: {
     backgroundColor: colors.primaryContainer,
@@ -202,7 +264,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.lg,
     flex: 1,
     marginBottom: 16,
     maxWidth: '48.5%',

@@ -1,8 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,10 +11,15 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Input } from '@/src/components/ui';
+import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { UserRole } from '@/src/types';
+
+const ROLE_OPTIONS: { role: UserRole; label: string; icon: 'shopping-bag' | 'storefront' }[] = [
+  { role: 'buyer', label: 'Người mua', icon: 'shopping-bag' },
+  { role: 'seller', label: 'Người bán', icon: 'storefront' },
+];
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -29,6 +32,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirm, setConfirm] = useState('');
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState('');
@@ -84,107 +88,100 @@ export default function RegisterScreen() {
           keyboardShouldPersistTaps="handled"
           bounces={false}>
           <View style={styles.card}>
-            <View style={styles.accent} />
-            <Text style={styles.brand}>UniLoop</Text>
             <Text style={styles.title}>Tạo tài khoản mới</Text>
-            <Text style={styles.subtitle}>Tham gia cộng đồng sinh viên ngay hôm nay.</Text>
+            <Text style={styles.subtitle}>Tham gia cộng đồng UniLoop ngay hôm nay.</Text>
 
             <View style={styles.form}>
               <Input
                 label="Họ và tên"
-                icon="person-outline"
+                icon="person"
+                boxRadius={radius.sm}
                 value={name}
                 onChangeText={setName}
-                placeholder="Nguyễn Văn A"
+                placeholder="Nhập họ và tên của bạn"
               />
               <Input
-                label="Email sinh viên (edu.vn)"
-                icon="mail-outline"
+                label="Email sinh viên"
+                icon="mail"
+                boxRadius={radius.sm}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="nguyenvana@student.edu.vn"
+                placeholder="example@domain.edu.vn"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                hint="* Vui lòng sử dụng email do trường cấp."
+                error={email.trim() ? (/\.edu\.vn$/.test(email.trim()) ? undefined : 'Vui lòng sử dụng email có đuôi .edu.vn') : undefined}
               />
               <Input
                 label="Số điện thoại"
-                icon="call-outline"
+                icon="phone"
+                boxRadius={radius.sm}
                 value={phone}
                 onChangeText={setPhone}
-                placeholder="0912345678"
+                placeholder="Nhập số điện thoại"
                 keyboardType="phone-pad"
               />
               <Input
                 label="Mật khẩu"
-                icon="lock-closed-outline"
+                icon="lock"
+                boxRadius={radius.sm}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="••••••••"
-                secureTextEntry
+                placeholder="Tạo mật khẩu"
+                secureTextEntry={!showPassword}
+                right={
+                  <TouchableOpacity
+                    onPress={() => setShowPassword((v) => !v)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <MaterialIcons
+                      name={showPassword ? 'visibility' : 'visibility-off'}
+                      size={20}
+                      color={colors.onSurfaceVariant}
+                    />
+                  </TouchableOpacity>
+                }
               />
               <Input
                 label="Xác nhận mật khẩu"
-                icon="key-outline"
+                icon="lock-clock"
+                boxRadius={radius.sm}
                 value={confirm}
                 onChangeText={setConfirm}
-                placeholder="••••••••"
+                placeholder="Nhập lại mật khẩu"
                 secureTextEntry
               />
 
               <View style={styles.roleSection}>
                 <Text style={styles.roleLabel}>Mục đích sử dụng chính</Text>
                 <View style={styles.roleGrid}>
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    onPress={() => setDefaultRole('buyer')}
-                    style={[
-                      styles.roleCard,
-                      defaultRole === 'buyer' && styles.roleCardActive,
-                    ]}>
-                    <Ionicons
-                      name="bag-handle-outline"
-                      size={32}
-                      color={defaultRole === 'buyer' ? colors.primary : colors.onSurfaceVariant}
-                    />
-                    <Text
-                      style={[
-                        styles.roleCardText,
-                        defaultRole === 'buyer' && styles.roleCardTextActive,
-                      ]}>
-                      Tôi muốn là{'\n'}Người mua
-                    </Text>
-                    {defaultRole === 'buyer' ? (
-                      <View style={styles.roleCheck}>
-                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                      </View>
-                    ) : null}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    onPress={() => setDefaultRole('seller')}
-                    style={[
-                      styles.roleCard,
-                      defaultRole === 'seller' && styles.roleCardActive,
-                    ]}>
-                    <Ionicons
-                      name="storefront-outline"
-                      size={32}
-                      color={defaultRole === 'seller' ? colors.primary : colors.onSurfaceVariant}
-                    />
-                    <Text
-                      style={[
-                        styles.roleCardText,
-                        defaultRole === 'seller' && styles.roleCardTextActive,
-                      ]}>
-                      Tôi muốn là{'\n'}Người bán
-                    </Text>
-                    {defaultRole === 'seller' ? (
-                      <View style={styles.roleCheck}>
-                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                      </View>
-                    ) : null}
-                  </TouchableOpacity>
+                  {ROLE_OPTIONS.map((item) => {
+                    const active = defaultRole === item.role;
+                    return (
+                      <TouchableOpacity
+                        key={item.role}
+                        activeOpacity={0.85}
+                        onPress={() => setDefaultRole(item.role)}
+                        style={[styles.roleCard, active && styles.roleCardActive]}>
+                        <MaterialIcons
+                          name={item.icon}
+                          size={32}
+                          color={active ? colors.primary : colors.onSurfaceVariant}
+                        />
+                        <Text
+                          style={[
+                            styles.roleCardText,
+                            active && styles.roleCardTextActive,
+                          ]}>
+                          Tôi muốn là{'\n'}
+                          {item.label}
+                        </Text>
+                        {active ? (
+                          <View style={styles.roleCheck}>
+                            <MaterialIcons name="check-circle" size={20} color={colors.primary} />
+                          </View>
+                        ) : null}
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
 
@@ -194,7 +191,7 @@ export default function RegisterScreen() {
                 style={styles.terms}>
                 <View style={[styles.checkbox, agree && styles.checkboxChecked]}>
                   {agree ? (
-                    <Ionicons name="checkmark" size={12} color={colors.onPrimary} />
+                    <MaterialIcons name="check" size={12} color={colors.onPrimary} />
                   ) : null}
                 </View>
                 <Text style={styles.termsText}>
@@ -205,25 +202,19 @@ export default function RegisterScreen() {
 
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
-              <TouchableOpacity
-                activeOpacity={0.85}
+              <Button
+                title="Đăng ký tài khoản"
+                variant="primary"
+                loading={loading}
                 onPress={handleRegister}
-                style={styles.primaryBtn}>
-                {loading ? (
-                  <ActivityIndicator color={colors.onPrimary} size="small" />
-                ) : (
-                  <>
-                    <Text style={styles.primaryBtnText}>Đăng ký tài khoản</Text>
-                    <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
-                  </>
-                )}
-              </TouchableOpacity>
+                style={styles.submitBtn}
+              />
             </View>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Đã có tài khoản? </Text>
               <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/login')}>
-                <Text style={styles.footerLink}>Đăng nhập tại đây</Text>
+                <Text style={styles.footerLink}>Đăng nhập ngay</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -249,43 +240,30 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   card: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: 'rgba(255,255,255,0.5)',
     borderRadius: radius['2xl'],
+    borderWidth: 1,
+    gap: 16,
     maxWidth: 480,
-    overflow: 'hidden',
     padding: 24,
-    position: 'relative',
     width: '100%',
-    ...shadow.level1,
-  },
-  accent: {
-    backgroundColor: colors.primary,
-    height: 8,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  brand: {
-    ...typography.displayLgMobile,
-    color: colors.primary,
-    marginBottom: 8,
-    textAlign: 'center',
+    ...shadow.level2,
   },
   title: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
+    ...typography.displayLgMobile,
+    color: colors.primary,
     textAlign: 'center',
   },
   subtitle: {
     ...typography.bodySm,
     color: colors.onSurfaceVariant,
-    marginTop: 8,
+    marginTop: 4,
     textAlign: 'center',
   },
   form: {
     gap: 16,
-    marginTop: 32,
+    marginTop: 24,
   },
   terms: {
     alignItems: 'flex-start',
@@ -331,7 +309,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceBright,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 2,
     flex: 1,
     gap: 8,
@@ -361,27 +339,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: radius.xl,
-    flexDirection: 'row',
-    gap: 8,
-    height: 48,
-    justifyContent: 'center',
-    marginTop: 32,
-    width: '100%',
-    ...shadow.level1,
-  },
-  primaryBtnText: {
-    ...typography.button,
-    color: colors.onPrimary,
+  submitBtn: {
+    marginTop: 8,
   },
   footer: {
     alignItems: 'center',
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderTopWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
+    paddingTop: 16,
   },
   footerText: {
     ...typography.bodySm,

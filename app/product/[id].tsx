@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useState } from 'react';
@@ -13,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { distanceFromCenter } from '@/src/utils/filter';
@@ -41,7 +40,7 @@ export default function ProductDetailScreen() {
   if (!product) {
     return (
       <View style={styles.screen}>
-        <EmptyState icon="cube-outline" title="Không tìm thấy sản phẩm" description="Sản phẩm này có thể đã bị xóa." />
+        <EmptyState icon="inventory-2" title="Không tìm thấy sản phẩm" description="Sản phẩm này có thể đã bị xóa." />
       </View>
     );
   }
@@ -74,12 +73,17 @@ export default function ProductDetailScreen() {
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.headerButton}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+            <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="share-social-outline" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>UniLoop</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerButton}>
+              <MaterialIcons name="search" size={22} color={colors.onSurface} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton}>
+              <MaterialIcons name="share" size={22} color={colors.onSurface} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.carousel}>
@@ -113,7 +117,7 @@ export default function ProductDetailScreen() {
                 <Text style={styles.chipPrimaryText}>Tình trạng: {product.condition}</Text>
               </View>
               <View style={styles.chipSecondary}>
-                <Ionicons name="pricetag-outline" size={14} color={colors.secondary} />
+                <MaterialIcons name="local-offer" size={14} color={colors.secondary} />
                 <Text style={styles.chipSecondaryText}>{product.category}</Text>
               </View>
             </View>
@@ -128,21 +132,21 @@ export default function ProductDetailScreen() {
               <View style={styles.sellerNameRow}>
                 <Text style={styles.sellerName}>{seller?.name ?? 'Người bán'}</Text>
                 {seller?.verified ? (
-                  <Ionicons name="shield-checkmark" size={18} color={colors.tertiaryFixedDim} />
+                  <MaterialIcons name="verified" size={18} color={colors.primary} />
                 ) : null}
               </View>
               <Text style={styles.sellerUni}>{seller?.campus ?? ''}</Text>
               <View style={styles.sellerTrust}>
-                <Ionicons name="star" size={13} color={colors.tertiary} />
+                <MaterialIcons name="star" size={13} color={colors.star} />
                 <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={22} color={colors.outline} />
+            <MaterialIcons name="chevron-right" size={22} color={colors.outline} />
           </TouchableOpacity>
 
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeading}>
-              <Ionicons name="document-text-outline" size={20} color={colors.primary} />
+              <MaterialIcons name="description" size={20} color={colors.primary} />
               <Text style={styles.sectionTitle}>Mô tả sản phẩm</Text>
             </View>
             <Text style={styles.description}>{product.description}</Text>
@@ -150,7 +154,7 @@ export default function ProductDetailScreen() {
 
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeading}>
-              <Ionicons name="location-outline" size={20} color={colors.primary} />
+              <MaterialIcons name="location-on" size={20} color={colors.primary} />
               <Text style={styles.sectionTitle}>Địa điểm giao dịch</Text>
             </View>
             <Text style={styles.meetup}>{product.meetupPoint ?? product.location?.address ?? '---'}</Text>
@@ -162,19 +166,27 @@ export default function ProductDetailScreen() {
                 : 'Giao dịch trực tiếp tại khu vực trường'}
             </Text>
             <View style={styles.mapPlaceholder}>
-              <Ionicons name="map-outline" size={40} color={colors.outlineVariant} />
+              <MaterialIcons name="map" size={40} color={colors.outlineVariant} />
             </View>
           </View>
 
           {product.allowsCod ? (
             <View style={styles.codCard}>
-              <Ionicons name="cash-outline" size={20} color={colors.tertiary} />
+              <MaterialIcons name="payments" size={20} color={colors.tertiary} />
               <View style={styles.codInfo}>
                 <Text style={styles.codTitle}>Hỗ trợ giao hàng COD</Text>
                 <Text style={styles.codText}>Phí ship 15.000đ cho nội khu Làng Đại học</Text>
               </View>
             </View>
           ) : null}
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push('/report')}
+            style={styles.reportBtn}>
+            <MaterialIcons name="flag" size={16} color={colors.outline} />
+            <Text style={styles.reportText}>Báo cáo tin đăng này</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -187,20 +199,21 @@ export default function ProductDetailScreen() {
           <TouchableOpacity
             onPress={() => toggleFavorite(product.id)}
             style={[styles.roundButton, favorite && styles.roundButtonActive]}>
-            <Ionicons
-              name={favorite ? 'heart' : 'heart-outline'}
+            <MaterialIcons
+              name={favorite ? 'favorite' : 'favorite-border'}
               size={22}
-              color={favorite ? '#e11d48' : colors.onSurface}
+              color={favorite ? colors.error : colors.onSurface}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleChat} style={styles.chatButton}>
-            <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
+            <MaterialIcons name="chat" size={22} color={colors.primary} />
           </TouchableOpacity>
           <Button
             title="Thêm giỏ"
-            variant="secondary"
+            icon="add-shopping-cart"
+            variant="tonal"
+            size="sm"
             style={styles.addCartButton}
-            compact
             onPress={() => {
               if (currentUser?.role !== 'buyer') {
                 return;
@@ -212,8 +225,8 @@ export default function ProductDetailScreen() {
           <Button
             title="Mua ngay"
             icon="arrow-forward"
+            size="sm"
             style={styles.buyButton}
-            compact
             onPress={handleBuyNow}
           />
         </View>
@@ -238,6 +251,12 @@ const styles = StyleSheet.create({
     top: 0,
     width: '100%',
     zIndex: 20,
+    ...shadow.level1,
+  },
+  headerActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   headerButton: {
     alignItems: 'center',
@@ -248,10 +267,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   headerTitle: {
-    ...typography.headlineSm,
+    ...typography.headlineMdMobile,
     color: colors.primary,
-    fontSize: 18,
-    fontWeight: '700',
   },
   carousel: {
     backgroundColor: colors.surfaceVariant,
@@ -289,7 +306,7 @@ const styles = StyleSheet.create({
   detailCard: {
     backgroundColor: colors.surface,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     gap: 10,
     padding: 16,
@@ -339,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 12,
@@ -367,7 +384,7 @@ const styles = StyleSheet.create({
   sellerTrust: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0,98,41,0.1)',
+    backgroundColor: 'rgba(245,158,11,0.12)',
     borderRadius: 6,
     flexDirection: 'row',
     gap: 4,
@@ -376,14 +393,14 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   sellerTrustText: {
-    color: colors.tertiary,
+    color: colors.star,
     fontSize: 12,
     fontWeight: '500',
   },
   sectionCard: {
     backgroundColor: colors.surface,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     gap: 10,
     padding: 16,
@@ -412,11 +429,12 @@ const styles = StyleSheet.create({
   distance: {
     color: colors.onSurfaceVariant,
     fontSize: 14,
-  },  mapPlaceholder: {
+  },
+  mapPlaceholder: {
     alignItems: 'center',
     backgroundColor: colors.surfaceVariant,
     borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 160,
     justifyContent: 'center',
@@ -425,7 +443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,98,41,0.06)',
     borderColor: 'rgba(0,98,41,0.15)',
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 10,
@@ -444,6 +462,18 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontSize: 13,
   },
+  reportBtn: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  reportText: {
+    color: colors.outline,
+    fontSize: 14,
+    fontWeight: '500',
+  },
   bottomBar: {
     alignItems: 'center',
     backgroundColor: 'rgba(248,249,255,0.94)',
@@ -457,12 +487,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     position: 'absolute',
     right: 0,
+    ...shadow.level3,
   },
   roundButton: {
     alignItems: 'center',
     backgroundColor: colors.surfaceVariant,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 48,
     justifyContent: 'center',
@@ -475,7 +506,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,74,198,0.08)',
     borderColor: 'rgba(0,74,198,0.2)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 48,
     justifyContent: 'center',

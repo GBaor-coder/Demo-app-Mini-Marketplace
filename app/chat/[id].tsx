@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -15,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { EmptyState } from '@/src/components/ui';
+import { EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { ChatMessage } from '@/src/types';
@@ -50,12 +49,12 @@ export default function ChatScreen() {
       <View style={styles.screen}>
         <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
+            <MaterialIcons name="arrow-back" size={22} color={colors.onSurfaceVariant} />
           </TouchableOpacity>
           <Text style={styles.peerName}>Trò chuyện</Text>
           <View style={styles.headerBtn} />
         </View>
-        <EmptyState icon="chatbubble-outline" title="Không tìm thấy hội thoại" />
+        <EmptyState icon="chat-bubble-outline" title="Không tìm thấy hội thoại" />
       </View>
     );
   }
@@ -83,9 +82,7 @@ export default function ChatScreen() {
     const mine = item.senderId === currentUser?.id;
     return (
       <View style={[styles.messageRow, mine ? styles.messageRowMine : styles.messageRowOther]}>
-        {!mine ? (
-          <Avatar uri={other?.avatar} name={other?.name ?? '?'} size={28} />
-        ) : null}
+        {!mine ? <Avatar uri={other?.avatar} name={other?.name ?? '?'} size={32} /> : null}
         <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleOther]}>
           {item.offerLocation ? (
             <TouchableOpacity
@@ -93,22 +90,25 @@ export default function ChatScreen() {
               onPress={() => router.push('/map')}
               style={styles.offerCard}>
               <View style={styles.offerRow}>
-                <Ionicons name="location" size={20} color={colors.primary} />
+                <MaterialIcons name="place" size={20} color={colors.primary} />
                 <Text style={styles.offerAddress} numberOfLines={2}>
                   {item.offerLocation.address}
                 </Text>
               </View>
-              <View style={styles.offerDivider} />
               <View style={styles.offerRow}>
-                <Ionicons name="time" size={20} color={colors.primary} />
+                <MaterialIcons name="schedule" size={20} color={colors.primary} />
                 <Text style={styles.offerTime}>Hôm nay, {formatClock(item.createdAt)}</Text>
               </View>
             </TouchableOpacity>
           ) : null}
           <Text style={[styles.messageText, mine && styles.messageTextMine]}>{item.text}</Text>
           <View style={styles.messageMeta}>
-            <Text style={styles.messageTime}>{formatClock(item.createdAt)}</Text>
-            {mine ? <Ionicons name="checkmark-done" size={14} color={colors.primary} /> : null}
+            <Text style={[styles.messageTime, mine && styles.messageTimeMine]}>
+              {formatClock(item.createdAt)}
+            </Text>
+            {mine ? (
+              <MaterialIcons name="done-all" size={14} color={colors.onPrimaryContainer} />
+            ) : null}
           </View>
         </View>
       </View>
@@ -121,7 +121,7 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurfaceVariant} />
+          <MaterialIcons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <View style={styles.avatarRing}>
@@ -138,7 +138,7 @@ export default function ChatScreen() {
           </View>
         </View>
         <TouchableOpacity style={styles.headerBtn}>
-          <Ionicons name="ellipsis-vertical" size={20} color={colors.onSurfaceVariant} />
+          <MaterialIcons name="more-vert" size={24} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
       </View>
 
@@ -165,12 +165,14 @@ export default function ChatScreen() {
                   style={styles.productThumb}
                 />
                 <View style={styles.productInfo}>
-                  <Text numberOfLines={2} style={styles.productTitle}>
+                  <Text numberOfLines={1} style={styles.productTitle}>
                     {product.title}
                   </Text>
                   <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.outlineVariant} />
+                <View style={styles.productBtn}>
+                  <Text style={styles.productBtnText}>Xem</Text>
+                </View>
               </TouchableOpacity>
             ) : null}
           </>
@@ -179,23 +181,28 @@ export default function ChatScreen() {
       />
 
       <View style={[styles.inputBar, { paddingBottom: insets.bottom + 12 }]}>
+        <TouchableOpacity style={styles.inputIconBtn}>
+          <MaterialIcons name="add-circle" size={24} color={colors.onSurfaceVariant} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={offerLocation} style={styles.inputIconBtn}>
-          <Ionicons name="location-outline" size={22} color={colors.primary} />
+          <MaterialIcons name="location-on" size={24} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder="Nhập tin nhắn..."
-          placeholderTextColor={colors.outline}
-          style={styles.input}
-          multiline
-        />
-        <TouchableOpacity
-          onPress={send}
-          disabled={!text.trim()}
-          style={[styles.sendBtn, !text.trim() && styles.sendBtnDisabled]}>
-          <Ionicons name="send" size={20} color={colors.onPrimary} />
-        </TouchableOpacity>
+        <View style={styles.inputWrap}>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder="Nhắn tin..."
+            placeholderTextColor={colors.outlineVariant}
+            style={styles.input}
+            multiline
+          />
+          <TouchableOpacity
+            onPress={send}
+            disabled={!text.trim()}
+            style={[styles.sendBtn, !text.trim() && styles.sendBtnDisabled]}>
+            <MaterialIcons name="send" size={20} color={colors.onPrimary} />
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -234,9 +241,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatarRing: {
-    borderColor: 'rgba(195,198,215,0.3)',
+    borderColor: colors.surfaceContainerHigh,
     borderRadius: radius.full,
-    borderWidth: 1,
+    borderWidth: 2,
     overflow: 'hidden',
   },
   headerText: {
@@ -244,9 +251,8 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   peerName: {
-    ...typography.headlineSm,
+    ...typography.headlineSmMobile,
     color: colors.onSurface,
-    fontWeight: '700',
   },
   onlineRow: {
     alignItems: 'center',
@@ -261,7 +267,7 @@ const styles = StyleSheet.create({
   },
   onlineText: {
     ...typography.bodySm,
-    color: colors.outline,
+    color: colors.tertiary,
     fontSize: 12,
   },
   list: {
@@ -273,32 +279,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dividerText: {
-    ...typography.labelMd,
+    ...typography.bodySm,
     backgroundColor: colors.surfaceContainer,
     borderRadius: radius.full,
-    color: colors.outline,
+    color: colors.onSurfaceVariant,
+    fontSize: 12,
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
   productCard: {
     alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: colors.surfaceContainerLow,
-    borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(195,198,215,0.2)',
+    borderRadius: radius.md,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 12,
     marginBottom: 8,
-    maxWidth: '100%',
     padding: 12,
-    width: '92%',
     ...shadow.level1,
   },
   productThumb: {
-    borderRadius: radius.lg,
-    height: 64,
-    width: 64,
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: radius.md,
+    height: 56,
+    width: 56,
   },
   productInfo: {
     flex: 1,
@@ -307,13 +312,21 @@ const styles = StyleSheet.create({
   productTitle: {
     ...typography.labelMd,
     color: colors.onSurface,
-    lineHeight: 18,
   },
   productPrice: {
+    ...typography.labelMd,
     color: colors.primary,
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 4,
+    fontWeight: '600',
+  },
+  productBtn: {
+    backgroundColor: 'rgba(33,112,228,0.1)',
+    borderRadius: radius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  productBtnText: {
+    ...typography.labelMd,
+    color: colors.secondaryContainer,
   },
   messageRow: {
     alignItems: 'flex-end',
@@ -327,9 +340,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   bubble: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius['2xl'],
-    borderTopLeftRadius: 4,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(195,198,215,0.1)',
+    borderRadius: radius.lg,
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
     maxWidth: '85%',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -337,11 +352,11 @@ const styles = StyleSheet.create({
   },
   bubbleMine: {
     backgroundColor: colors.primaryContainer,
-    borderTopLeftRadius: radius['2xl'],
-    borderTopRightRadius: 4,
+    borderBottomLeftRadius: radius.lg,
+    borderBottomRightRadius: 4,
   },
   bubbleOther: {
-    borderTopLeftRadius: 4,
+    borderBottomLeftRadius: 4,
   },
   messageText: {
     ...typography.bodyMd,
@@ -358,13 +373,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   messageTime: {
-    color: colors.outline,
+    color: colors.onSurfaceVariant,
     fontSize: 11,
+  },
+  messageTimeMine: {
+    color: 'rgba(238,239,255,0.7)',
   },
   offerCard: {
     backgroundColor: colors.surfaceBright,
     borderColor: 'rgba(0,74,198,0.2)',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     gap: 8,
     marginBottom: 8,
@@ -381,19 +399,13 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
-  offerDivider: {
-    backgroundColor: 'rgba(195,198,215,0.3)',
-    height: 1,
-    marginVertical: 2,
-    width: '100%',
-  },
   offerTime: {
     ...typography.labelMd,
     color: colors.onSurface,
   },
   inputBar: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(248,249,255,0.9)',
     borderTopColor: 'rgba(195,198,215,0.2)',
     borderTopWidth: 1,
     flexDirection: 'row',
@@ -408,27 +420,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 40,
   },
+  inputWrap: {
+    flex: 1,
+    position: 'relative',
+  },
   input: {
     backgroundColor: colors.surfaceContainerLow,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius['2xl'],
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.full,
     borderWidth: 1,
     color: colors.onSurface,
-    flex: 1,
     fontSize: 16,
     lineHeight: 24,
     maxHeight: 96,
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 16,
+    paddingRight: 52,
     paddingVertical: 10,
   },
   sendBtn: {
     alignItems: 'center',
     backgroundColor: colors.primary,
     borderRadius: radius.full,
-    height: 44,
+    height: 40,
     justifyContent: 'center',
-    width: 44,
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    width: 40,
     ...shadow.level1,
   },
   sendBtnDisabled: {

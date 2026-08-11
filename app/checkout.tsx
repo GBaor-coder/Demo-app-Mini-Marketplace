@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,10 +12,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, EmptyState } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, ScreenHeader, toIconName } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { COD_FEE, PLATFORM_FEE } from '@/src/data/seed';
-import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { colors, radius, shadow } from '@/src/theme/colors';
 import { CartLine, DeliveryMethod, Product } from '@/src/types';
 import { takeAddressDraft } from '@/src/utils/address-draft';
 import { formatCurrency } from '@/src/utils/format';
@@ -85,7 +84,6 @@ export default function CheckoutScreen() {
       return;
     }
     setPlacing(true);
-    // simulate network delay for UX
     setTimeout(() => {
       const count = createOrders(
         {
@@ -107,7 +105,7 @@ export default function CheckoutScreen() {
 
   const emptyState = (
     <EmptyState
-      icon="cart-outline"
+      icon={toIconName('cart_outline')}
       title="Chưa có sản phẩm để thanh toán"
       description="Thêm sản phẩm vào giỏ và chọn chúng để tiến hành đặt hàng."
     >
@@ -117,13 +115,7 @@ export default function CheckoutScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Thanh toán</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title="Thanh toán" />
 
       {lines.length === 0 ? (
         emptyState
@@ -133,7 +125,7 @@ export default function CheckoutScreen() {
             activeOpacity={0.85}
             onPress={() => router.push('/addresses?select=1')}
             style={styles.addressCard}>
-            <Ionicons name="location" size={22} color={colors.primary} style={styles.addressIcon} />
+            <MaterialIcons name="location-on" size={22} color={colors.primary} style={styles.addressIcon} />
             <View style={styles.addressInfo}>
               <Text style={styles.addressLabel}>Địa chỉ nhận hàng</Text>
               {selectedAddress ? (
@@ -150,7 +142,7 @@ export default function CheckoutScreen() {
                 <Text style={styles.addressEmpty}>Chọn địa chỉ nhận hàng</Text>
               )}
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.outline} />
+            <MaterialIcons name="chevron-right" size={20} color={colors.outline} />
           </TouchableOpacity>
 
           {groups.map((group, groupIndex) => {
@@ -161,16 +153,17 @@ export default function CheckoutScreen() {
             return (
               <View key={group.sellerId} style={styles.sellerCard}>
                 <View style={styles.sellerHeader}>
-                  <Ionicons name="storefront-outline" size={20} color={colors.onSurfaceVariant} />
+                  <MaterialIcons name="storefront" size={20} color={colors.onSurfaceVariant} />
                   <Text style={styles.sellerName}>{group.sellerName}</Text>
                 </View>
 
                 {group.items.map(({ line, product }) => (
                   <View key={line.productId} style={styles.productRow}>
-                     <Image
-                       source={{ uri: product.images?.[0] || product.image }}
-                       style={styles.thumb}
-                     />
+                    <Image
+                      contentFit="cover"
+                      source={{ uri: product.images?.[0] || product.image }}
+                      style={styles.thumb}
+                    />
                     <View style={styles.productInfo}>
                       <Text style={styles.productTitle} numberOfLines={2}>
                         {product.title}
@@ -234,7 +227,7 @@ export default function CheckoutScreen() {
 
           <View style={styles.summaryCard}>
             <View style={styles.summaryHeading}>
-              <Ionicons name="receipt-outline" size={20} color={colors.primary} />
+              <MaterialIcons name="receipt-long" size={20} color={colors.primary} />
               <Text style={styles.summaryTitle}>Chi tiết thanh toán</Text>
             </View>
             <View style={styles.summaryRows}>
@@ -284,28 +277,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   body: {
     padding: 20,
     paddingBottom: 32,
@@ -313,7 +284,7 @@ const styles = StyleSheet.create({
   addressCard: {
     alignItems: 'flex-start',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     flexDirection: 'row',
     gap: 12,
     marginBottom: 24,
@@ -352,7 +323,7 @@ const styles = StyleSheet.create({
   },
   sellerCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     marginBottom: 24,
     overflow: 'hidden',
     ...shadow.level1,
@@ -377,7 +348,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   thumb: {
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     height: 80,
     width: 80,
   },
@@ -418,7 +389,7 @@ const styles = StyleSheet.create({
   },
   deliveryRow: {
     alignItems: 'center',
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 8,
@@ -457,7 +428,7 @@ const styles = StyleSheet.create({
   noteInput: {
     backgroundColor: colors.surfaceBright,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     color: colors.onSurface,
     fontSize: 16,
@@ -483,7 +454,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius['2xl'],
+    borderRadius: radius.xl,
     marginBottom: 24,
     padding: 16,
     ...shadow.level1,

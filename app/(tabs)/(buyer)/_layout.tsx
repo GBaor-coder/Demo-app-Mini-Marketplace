@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
+import { IconName, MaterialIcons } from '@/src/components/ui/Icon';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 
@@ -10,9 +10,9 @@ type TabIconProps = {
   focused: boolean;
 };
 
-function tabIcon(name: keyof typeof Ionicons.glyphMap, active: keyof typeof Ionicons.glyphMap) {
+function tabIcon(name: IconName, filled: IconName = name) {
   const TabIcon = ({ color, focused }: TabIconProps) => (
-    <Ionicons name={focused ? active : name} size={24} color={color} />
+    <MaterialIcons name={focused ? filled : name} size={22} color={color} />
   );
   TabIcon.displayName = 'TabIcon';
   return TabIcon;
@@ -37,8 +37,6 @@ export default function BuyerTabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
-        tabBarActiveBackgroundColor: 'rgba(0,74,198,0.10)',
-        tabBarInactiveBackgroundColor: 'transparent',
         tabBarHideOnKeyboard: true,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
@@ -46,26 +44,26 @@ export default function BuyerTabLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Trang chủ', tabBarIcon: tabIcon('home-outline', 'home') }}
+        options={{ title: 'Trang chủ', tabBarIcon: tabIcon('home', 'home') }}
       />
       <Tabs.Screen
         name="explore"
-        options={{ title: 'Khám phá', tabBarIcon: tabIcon('compass-outline', 'compass') }}
+        options={{ title: 'Khám phá', tabBarIcon: tabIcon('explore', 'explore') }}
       />
       <Tabs.Screen
         name="orders"
-        options={{ title: 'Đơn mua', tabBarIcon: tabIcon('receipt-outline', 'receipt') }}
+        options={{ title: 'Đơn mua', tabBarIcon: tabIcon('receipt-long', 'receipt-long') }}
       />
       <Tabs.Screen
         name="notifications"
         options={{
           title: 'Thông báo',
-          tabBarIcon: tabIcon('notifications-outline', 'notifications'),
+          tabBarIcon: tabIcon('notifications', 'notifications'),
         }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: 'Cá nhân', tabBarIcon: tabIcon('person-outline', 'person') }}
+        options={{ title: 'Cá nhân', tabBarIcon: tabIcon('person', 'person') }}
       />
     </Tabs>
   );
@@ -75,8 +73,8 @@ const styles = StyleSheet.create({
   bar: {
     backgroundColor: 'rgba(248,249,255,0.92)',
     borderTopColor: 'rgba(195,198,215,0.2)',
-    borderTopLeftRadius: radius['3xl'],
-    borderTopRightRadius: radius['3xl'],
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
     borderTopWidth: 1,
     height: 80,
     paddingHorizontal: 8,
@@ -84,7 +82,7 @@ const styles = StyleSheet.create({
     ...shadow.level1,
   },
   item: {
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     marginHorizontal: 2,
     marginVertical: 6,
     paddingHorizontal: 6,

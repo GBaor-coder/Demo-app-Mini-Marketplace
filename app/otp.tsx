@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 const OTP_LENGTH = 6;
@@ -102,14 +102,14 @@ export default function OtpScreen() {
 
             <View style={styles.topRow}>
               <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+                <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
               </TouchableOpacity>
               <View style={styles.backBtn} />
             </View>
 
             <View style={styles.header}>
               <View style={styles.iconWrap}>
-                <Ionicons name="lock-open" size={32} color={colors.primary} />
+                <MaterialIcons name="lock-open" size={32} color={colors.primary} />
               </View>
               <Text style={styles.title}>XÁC THỰC - Nhập mã OTP</Text>
               <Text style={styles.subtitle}>
@@ -137,7 +137,7 @@ export default function OtpScreen() {
             </View>
 
             <View style={styles.timerRow}>
-              <Ionicons name="time-outline" size={16} color={colors.onSurfaceVariant} />
+              <MaterialIcons name="schedule" size={16} color={colors.onSurfaceVariant} />
               <Text style={styles.timerText}>{timerText}</Text>
             </View>
             <TouchableOpacity
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 24,
+    borderRadius: radius['2xl'],
     maxWidth: 400,
     overflow: 'hidden',
     padding: 32,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   otpInput: {
     backgroundColor: colors.background,
     borderColor: '#E2E8F0',
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 2,
     color: colors.onSurface,
     fontSize: 24,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     alignItems: 'center',
     backgroundColor: '#2563EB',
-    borderRadius: 16,
+    borderRadius: radius.lg,
     height: 52,
     justifyContent: 'center',
     marginTop: 24,

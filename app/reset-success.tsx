@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Button, MaterialIcons } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 export default function ResetSuccessScreen() {
@@ -23,7 +23,7 @@ export default function ResetSuccessScreen() {
             <View style={styles.iconWrap}>
               <View style={styles.iconPulse} />
               <View style={styles.iconInner}>
-                <Ionicons name="checkmark-circle" size={48} color={colors.onTertiaryContainer} />
+                <MaterialIcons name="check-circle" size={48} color={colors.onTertiaryContainer} />
               </View>
             </View>
 
@@ -33,12 +33,11 @@ export default function ResetSuccessScreen() {
               mới của mình.
             </Text>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <Button
+              title="Quay lại đăng nhập"
+              variant="primaryContainer"
               onPress={() => router.replace('/login')}
-              style={styles.primaryBtn}>
-              <Text style={styles.primaryBtnText}>Quay lại đăng nhập</Text>
-            </TouchableOpacity>
+            />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>
@@ -67,7 +66,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: 'rgba(195,198,215,0.3)',
-    borderRadius: 24,
+    borderRadius: radius['2xl'],
     borderWidth: 1,
     maxWidth: 480,
     overflow: 'hidden',
@@ -137,24 +136,6 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     paddingHorizontal: 16,
     textAlign: 'center',
-  },
-  primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.xl,
-    height: 56,
-    justifyContent: 'center',
-    marginTop: 16,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 3,
-    width: '100%',
-  },
-  primaryBtnText: {
-    ...typography.button,
-    color: colors.onPrimary,
   },
   footer: {
     borderTopColor: 'rgba(195,198,215,0.3)',
