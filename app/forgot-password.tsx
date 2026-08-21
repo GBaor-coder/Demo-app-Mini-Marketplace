@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Input, MaterialIcons } from '@/src/components/ui';
+import { supabase } from '@/src/lib/supabase';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 export default function ForgotPasswordScreen() {
@@ -19,14 +20,38 @@ export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError('');
     if (!email.trim()) {
-      setError('Vui lòng nhập email sinh viên của bạn.');
+      setError('Vui lòng nhập email của bạn.');
       return;
     }
-    router.push({ pathname: '/otp', params: { email: email.trim() } });
+    setLoading(true);
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+      });
+      if (otpError) {
+        const msg = otpError.message.toLowerCase();
+        if (msg.includes('not found') || msg.includes('invalid')) {
+          setError('Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại.');
+        } else if (msg.includes('email') && msg.includes('otp')) {
+          setError(
+            'Chức năng OTP qua email chưa được bật. Vui lòng liên hệ quản trị viên.'
+          );
+        } else {
+          setError(`Lỗi: ${otpError.message}`);
+        }
+        return;
+      }
+      router.push({ pathname: '/otp', params: { email: email.trim() } });
+    } catch {
+      setError('Lỗi kết nối. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,16 +82,16 @@ export default function ForgotPasswordScreen() {
               </View>
               <Text style={styles.title}>Quên mật khẩu?</Text>
               <Text style={styles.subtitle}>
-                Nhập email sinh viên của bạn để nhận mã OTP xác thực.
+                Nhập email của bạn để nhận mã OTP xác thực.
               </Text>
 
               <View style={styles.form}>
                 <Input
-                  label="Email sinh viên"
+                  label="Email"
                   icon="mail"
                   value={email}
                   onChangeText={setEmail}
-                  placeholder="mssv@student.edu.vn"
+                  placeholder="email@côngty.com"
                   autoCapitalize="none"
                   keyboardType="email-address"
                   autoComplete="email"
@@ -75,9 +100,10 @@ export default function ForgotPasswordScreen() {
               </View>
 
               <Button
-                title="Gửi mã OTP"
-                icon="send"
+                title={loading ? 'Đang gửi...' : 'Gửi mã OTP'}
+                icon={loading ? undefined : 'send'}
                 variant="primaryContainer"
+                loading={loading}
                 onPress={handleSubmit}
               />
 

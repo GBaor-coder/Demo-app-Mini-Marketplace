@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,50 +14,67 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { UserRole } from '@/src/types';
-
-type AuthRole = 'buyer' | 'seller';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { login, loginGuest } = useStore();
+  const { login, currentUser } = useStore();
 
-  const [role, setRole] = useState<AuthRole>('buyer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState<AuthRole | null>(null);
 
-  const handleLogin = () => {
-    setError('');
-    if (!email.trim() || !password) {
-      setError('Vui lòng nhập đầy đủ email và mật khẩu.');
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      const ok = login(email, password, role);
-      setLoading(false);
-      if (!ok) {
-        setError('Email hoặc mật khẩu không đúng.');
-        return;
-      }
+  const pendingRoleRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (currentUser && pendingRoleRef.current) {
+      const role = pendingRoleRef.current;
+      pendingRoleRef.current = null;
       router.replace(role === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
-    }, 500);
+    }
+  }, [currentUser, router]);
+
+  const validateEmail = (value: string): string | undefined => {
+    const trimmed = value.trim();
+    if (!trimmed) return 'Vui lòng nhập email.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Email không hợp lệ.';
+    return undefined;
   };
 
-  const handleGuest = (guestRole: AuthRole) => {
+  const validatePassword = (value: string): string | undefined => {
+    if (!value) return 'Vui lòng nhập mật khẩu.';
+    return undefined;
+  };
+
+  const handleLogin = async () => {
     setError('');
-    setDemoLoading(guestRole);
-    setTimeout(() => {
-      loginGuest(guestRole as UserRole);
-      setDemoLoading(null);
-      router.replace(guestRole === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
-    }, 400);
+
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await login(email.trim(), password);
+      pendingRoleRef.current = user.role;
+      if (currentUser) {
+        pendingRoleRef.current = null;
+        router.replace(user.role === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,29 +98,9 @@ export default function LoginScreen() {
               <Text style={styles.subtitle}>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</Text>
             </View>
 
-            <View style={styles.segment}>
-              {(['buyer', 'seller'] as const).map((item) => {
-                const active = role === item;
-                return (
-                  <TouchableOpacity
-                    key={item}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      setRole(item);
-                      setError('');
-                    }}
-                    style={[styles.segmentItem, active && styles.segmentItemActive]}>
-                    <Text style={[styles.segmentText, active && styles.segmentTextActive]}>
-                      {item === 'buyer' ? 'Người mua' : 'Người bán'}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
             <View style={styles.form}>
               <Input
-                label="Email trường học"
+                label="Email"
                 icon="mail"
                 value={email}
                 onChangeText={setEmail}
@@ -132,24 +129,12 @@ export default function LoginScreen() {
                 }
               />
 
-              <View style={styles.row}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setRemember((v) => !v)}
-                  style={styles.remember}>
-                  <View style={[styles.checkbox, remember && styles.checkboxChecked]}>
-                    {remember ? (
-                      <MaterialIcons name="check" size={12} color={colors.onPrimary} />
-                    ) : null}
-                  </View>
-                  <Text style={styles.rememberText}>Nhớ tài khoản</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => router.push('/forgot-password')}>
-                  <Text style={styles.forgot}>Quên mật khẩu?</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/forgot-password')}
+                style={styles.forgotWrap}>
+                <Text style={styles.forgot}>Quên mật khẩu?</Text>
+              </TouchableOpacity>
 
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -160,29 +145,6 @@ export default function LoginScreen() {
                 loading={loading}
                 onPress={handleLogin}
                 style={styles.submitBtn}
-              />
-            </View>
-
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Hoặc</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.demoGroup}>
-              <Button
-                title="Dùng thử vai trò Người mua"
-                icon="shopping-bag"
-                variant="outline"
-                loading={demoLoading === 'buyer'}
-                onPress={() => handleGuest('buyer')}
-              />
-              <Button
-                title="Dùng thử vai trò Người bán"
-                icon="sell"
-                variant="outline"
-                loading={demoLoading === 'seller'}
-                onPress={() => handleGuest('seller')}
               />
             </View>
 
@@ -272,61 +234,12 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     textAlign: 'center',
   },
-  segment: {
-    backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    padding: 4,
-  },
-  segmentItem: {
-    alignItems: 'center',
-    borderRadius: radius.md,
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  segmentItemActive: {
-    backgroundColor: colors.surfaceContainerLowest,
-    ...shadow.level1,
-  },
-  segmentText: {
-    ...typography.labelMd,
-    color: colors.onSurfaceVariant,
-  },
-  segmentTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
   form: {
     gap: 16,
   },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  forgotWrap: {
+    alignItems: 'flex-end',
     marginTop: -8,
-  },
-  remember: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  checkbox: {
-    alignItems: 'center',
-    borderColor: colors.outlineVariant,
-    borderRadius: 4,
-    borderWidth: 1,
-    height: 16,
-    justifyContent: 'center',
-    width: 16,
-  },
-  checkboxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  rememberText: {
-    ...typography.labelMd,
-    color: colors.onSurfaceVariant,
   },
   forgot: {
     ...typography.labelMd,
@@ -341,29 +254,13 @@ const styles = StyleSheet.create({
   submitBtn: {
     marginTop: 8,
   },
-  divider: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 16,
-    marginVertical: 4,
-  },
-  dividerLine: {
-    backgroundColor: 'rgba(195,198,215,0.5)',
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    ...typography.labelMd,
-    color: colors.outline,
-  },
-  demoGroup: {
-    gap: 8,
-  },
   footer: {
     alignItems: 'center',
+    borderTopColor: 'rgba(195,198,215,0.3)',
+    borderTopWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 4,
+    paddingTop: 16,
   },
   footerText: {
     ...typography.bodySm,

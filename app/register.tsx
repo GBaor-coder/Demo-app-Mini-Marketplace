@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -14,19 +14,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { UserRole } from '@/src/types';
 
-const ROLE_OPTIONS: { role: UserRole; label: string; icon: 'shopping-bag' | 'storefront' }[] = [
-  { role: 'buyer', label: 'Người mua', icon: 'shopping-bag' },
-  { role: 'seller', label: 'Người bán', icon: 'storefront' },
+type Requirement = 'length' | 'upper' | 'number';
+
+const PASSWORD_REQUIREMENTS: { key: Requirement; label: string }[] = [
+  { key: 'length', label: 'Ít nhất 8 ký tự' },
+  { key: 'upper', label: 'Ít nhất 1 chữ hoa (A-Z)' },
+  { key: 'number', label: 'Ít nhất 1 chữ số (0-9)' },
 ];
 
 export default function RegisterScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { register } = useStore();
-  const { role } = useLocalSearchParams<{ role?: string }>();
-  const [defaultRole, setDefaultRole] = useState<UserRole>(role === 'seller' ? 'seller' : 'buyer');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -38,43 +38,57 @@ export default function RegisterScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
+  const met: Record<Requirement, boolean> = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+
+  const allPasswordMet = Object.values(met).every(Boolean);
+
+  const validate = (): string | undefined => {
+    if (!name.trim()) return 'Vui lòng nhập họ và tên.';
+    if (!email.trim()) return 'Vui lòng nhập email.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      return 'Email không hợp lệ.';
+    if (!phone.trim()) return 'Vui lòng nhập số điện thoại.';
+    if (!/^0\d{9}$/.test(phone.trim()))
+      return 'Số điện thoại không hợp lệ. Cần 10 chữ số bắt đầu bằng 0.';
+    if (!password) return 'Vui lòng nhập mật khẩu.';
+    if (!allPasswordMet) return 'Mật khẩu chưa đạt yêu cầu. Vui lòng kiểm tra lại.';
+    if (password !== confirm) return 'Xác nhận mật khẩu không khớp.';
+    if (!agree) return 'Vui lòng đồng ý với Điều khoản sử dụng.';
+    return undefined;
+  };
+
+  const handleRegister = async () => {
     setError('');
-    if (!name.trim() || !email.trim() || !phone.trim() || !password || !confirm) {
-      setError('Vui lòng điền đầy đủ tất cả các trường.');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError('Email không hợp lệ.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.');
-      return;
-    }
-    if (password !== confirm) {
-      setError('Xác nhận mật khẩu không khớp.');
-      return;
-    }
-    if (!agree) {
-      setError('Vui lòng đồng ý với Điều khoản sử dụng và Chính sách bảo mật.');
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      try {
-        register(
-          { name, email, phone, password, campus: 'Đại học Bách Khoa TP.HCM' },
-          defaultRole
-        );
-        router.replace(defaultRole === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Đăng ký thất bại.');
-      } finally {
-        setLoading(false);
+    try {
+      const result = await register({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password,
+        campus: 'Đại học Bách Khoa TP.HCM',
+      });
+
+      if (result.needsVerification) {
+        router.replace({ pathname: '/verify-email' as any, params: { email: email.trim() } });
+      } else {
+        router.replace('/(tabs)/(buyer)');
       }
-    }, 500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đăng ký thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -101,15 +115,14 @@ export default function RegisterScreen() {
                 placeholder="Nhập họ và tên của bạn"
               />
               <Input
-                label="Email sinh viên"
+                label="Email"
                 icon="mail"
                 boxRadius={radius.sm}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="example@domain.edu.vn"
+                placeholder="example@domain.com"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                error={email.trim() ? (/\.edu\.vn$/.test(email.trim()) ? undefined : 'Vui lòng sử dụng email có đuôi .edu.vn') : undefined}
               />
               <Input
                 label="Số điện thoại"
@@ -117,7 +130,7 @@ export default function RegisterScreen() {
                 boxRadius={radius.sm}
                 value={phone}
                 onChangeText={setPhone}
-                placeholder="Nhập số điện thoại"
+                placeholder="0xxxxxxxxx"
                 keyboardType="phone-pad"
               />
               <Input
@@ -149,67 +162,53 @@ export default function RegisterScreen() {
                 placeholder="Nhập lại mật khẩu"
                 secureTextEntry
               />
-
-              <View style={styles.roleSection}>
-                <Text style={styles.roleLabel}>Mục đích sử dụng chính</Text>
-                <View style={styles.roleGrid}>
-                  {ROLE_OPTIONS.map((item) => {
-                    const active = defaultRole === item.role;
-                    return (
-                      <TouchableOpacity
-                        key={item.role}
-                        activeOpacity={0.85}
-                        onPress={() => setDefaultRole(item.role)}
-                        style={[styles.roleCard, active && styles.roleCardActive]}>
-                        <MaterialIcons
-                          name={item.icon}
-                          size={32}
-                          color={active ? colors.primary : colors.onSurfaceVariant}
-                        />
-                        <Text
-                          style={[
-                            styles.roleCardText,
-                            active && styles.roleCardTextActive,
-                          ]}>
-                          Tôi muốn là{'\n'}
-                          {item.label}
-                        </Text>
-                        {active ? (
-                          <View style={styles.roleCheck}>
-                            <MaterialIcons name="check-circle" size={20} color={colors.primary} />
-                          </View>
-                        ) : null}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setAgree((v) => !v)}
-                style={styles.terms}>
-                <View style={[styles.checkbox, agree && styles.checkboxChecked]}>
-                  {agree ? (
-                    <MaterialIcons name="check" size={12} color={colors.onPrimary} />
-                  ) : null}
-                </View>
-                <Text style={styles.termsText}>
-                  Tôi đồng ý với các <Text style={styles.termsLink}>Điều khoản sử dụng</Text> và{' '}
-                  <Text style={styles.termsLink}>Chính sách bảo mật</Text> của UniLoop.
-                </Text>
-              </TouchableOpacity>
-
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-
-              <Button
-                title="Đăng ký tài khoản"
-                variant="primary"
-                loading={loading}
-                onPress={handleRegister}
-                style={styles.submitBtn}
-              />
             </View>
+
+            {password.length > 0 && (
+              <View style={styles.criteria}>
+                <Text style={styles.criteriaTitle}>Mật khẩu của bạn phải có:</Text>
+                {PASSWORD_REQUIREMENTS.map((req) => {
+                  const isMet = met[req.key];
+                  return (
+                    <View key={req.key} style={styles.criteriaRow}>
+                      <MaterialIcons
+                        name={isMet ? 'check-circle' : 'radio-button-unchecked'}
+                        size={18}
+                        color={isMet ? colors.primary : colors.outline}
+                      />
+                      <Text style={[styles.criteriaText, isMet && styles.criteriaTextMet]}>
+                        {req.label}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setAgree((v) => !v)}
+              style={styles.terms}>
+              <View style={[styles.checkbox, agree && styles.checkboxChecked]}>
+                {agree ? (
+                  <MaterialIcons name="check" size={12} color={colors.onPrimary} />
+                ) : null}
+              </View>
+              <Text style={styles.termsText}>
+                Tôi đồng ý với <Text style={styles.termsLink}>Điều khoản sử dụng</Text> và{' '}
+                <Text style={styles.termsLink}>Chính sách bảo mật</Text> của UniLoop.
+              </Text>
+            </TouchableOpacity>
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+
+            <Button
+              title="Đăng ký tài khoản"
+              variant="primary"
+              loading={loading}
+              onPress={handleRegister}
+              style={styles.submitBtn}
+            />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Đã có tài khoản? </Text>
@@ -262,8 +261,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   form: {
-    gap: 16,
-    marginTop: 24,
+    gap: 14,
+    marginTop: 8,
+  },
+  criteria: {
+    backgroundColor: 'rgba(211,228,254,0.3)',
+    borderColor: 'rgba(195,198,215,0.3)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: 6,
+    padding: 14,
+  },
+  criteriaTitle: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
+    marginBottom: 2,
+  },
+  criteriaRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  criteriaText: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  criteriaTextMet: {
+    color: colors.onSurface,
   },
   terms: {
     alignItems: 'flex-start',
@@ -294,57 +318,17 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '400',
   },
-  roleSection: {
-    gap: 8,
-  },
-  roleLabel: {
-    ...typography.labelMd,
-    color: colors.onSurface,
-  },
-  roleGrid: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  roleCard: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceBright,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    borderWidth: 2,
-    flex: 1,
-    gap: 8,
-    padding: 16,
-    position: 'relative',
-  },
-  roleCardActive: {
-    backgroundColor: 'rgba(0,74,198,0.05)',
-    borderColor: colors.primary,
-  },
-  roleCardText: {
-    ...typography.labelMd,
-    color: colors.onSurfaceVariant,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  roleCardTextActive: {
-    color: colors.primary,
-  },
-  roleCheck: {
-    position: 'absolute',
-    right: 8,
-    top: 8,
-  },
   error: {
     color: colors.error,
     fontSize: 14,
     lineHeight: 20,
   },
   submitBtn: {
-    marginTop: 8,
+    marginTop: 4,
   },
   footer: {
     alignItems: 'center',
-    borderColor: 'rgba(195,198,215,0.3)',
+    borderTopColor: 'rgba(195,198,215,0.3)',
     borderTopWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',

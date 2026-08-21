@@ -84,8 +84,8 @@ export default function CheckoutScreen() {
       return;
     }
     setPlacing(true);
-    setTimeout(() => {
-      const count = createOrders(
+    try {
+      const count = await createOrders(
         {
           latitude: selectedAddress.location.latitude,
           longitude: selectedAddress.location.longitude,
@@ -94,13 +94,14 @@ export default function CheckoutScreen() {
         note,
         deliveryMethod
       );
-      setPlacing(false);
       if (count > 0) {
         router.replace('/order-success');
       } else {
         Alert.alert('Không thể đặt hàng', 'Có lỗi xảy ra, vui lòng thử lại.');
       }
-    }, 600);
+    } finally {
+      setPlacing(false);
+    }
   };
 
   const emptyState = (

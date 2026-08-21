@@ -1,0 +1,276 @@
+import { supabase } from '@/src/lib/supabase';
+import { Product, ProductCategory, ProductCondition, ProductStatus } from '@/src/types';
+import { getLocationById } from './locations';
+
+export type ProductRow = {
+  id: string;
+  seller_id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: string;
+  stock: number;
+  image: string;
+  images: string[];
+  location_id: string | null;
+  meetup_point: string;
+  allows_meetup: boolean;
+  allows_cod: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function listProducts(filters?: {
+  sellerId?: string;
+  category?: ProductCategory;
+  condition?: ProductCondition;
+  status?: ProductStatus;
+  query?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}): Promise<Product[]> {
+  let query = supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (filters?.sellerId) {
+    query = query.eq('seller_id', filters.sellerId);
+  }
+  if (filters?.category) {
+    query = query.eq('category', filters.category);
+  }
+  if (filters?.condition) {
+    query = query.eq('condition', filters.condition);
+  }
+  if (filters?.status) {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.minPrice !== undefined) {
+    query = query.gte('price', filters.minPrice);
+  }
+  if (filters?.maxPrice !== undefined) {
+    query = query.lte('price', filters.maxPrice);
+  }
+  if (filters?.query) {
+    query = query.or(
+      `title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`
+    );
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data) {
+    return [];
+  }
+
+  const rows = data as ProductRow[];
+  const mapped = await Promise.all(
+    rows.map(async (row) => mapRowToProduct(row))
+  );
+
+  return mapped.filter((p): p is Product => p !== null);
+}
+
+export async function getProductById(id: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const row = data as ProductRow;
+  return await mapRowToProduct(row);
+}
+
+export async function createProduct(input: {
+  sellerId: string;
+  title: string;
+  description: string;
+  price: number;
+  category: ProductCategory;
+  condition: ProductCondition;
+  stock: number;
+  image: string;
+  images: string[];
+  location: { latitude: number; longitude: number; address: string };
+  meetupPoint?: string;
+  allowsMeetup: boolean;
+  allowsCod: boolean;
+  status?: ProductStatus;
+}): Promise<Product> {
+  const locationRow = await createLocationForProduct(input.location);
+
+  const { data, error } = await supabase
+    .from('products')
+    .insert({
+      seller_id: input.sellerId,
+      title: input.title,
+      description: input.description,
+      price: input.price,
+      category: input.category,
+      condition: input.condition,
+      stock: input.stock,
+      image: input.image,
+      images: input.images,
+      location_id: locationRow.id,
+      meetup_point: input.meetupPoint ?? '',
+      allows_meetup: input.allowsMeetup,
+      allows_cod: input.allowsCod,
+      status: input.status ?? 'active',
+    })
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'Không thể tạo sản phẩm.');
+  }
+
+  const product = await mapRowToProduct(data as ProductRow);
+  if (!product) {
+    throw new Error('Không thể ánh xạ sản phẩm.');
+  }
+
+  return product;
+}
+
+export async function updateProduct(
+  id: string,
+  input: {
+    title?: string;
+    description?: string;
+    price?: number;
+    category?: ProductCategory;
+    condition?: ProductCondition;
+    stock?: number;
+    image?: string;
+    images?: string[];
+    location?: { latitude: number; longitude: number; address: string };
+    meetupPoint?: string;
+    allowsMeetup?: boolean;
+    allowsCod?: boolean;
+    status?: ProductStatus;
+  }
+): Promise<Product | null> {
+  const existing = await getProductById(id);
+  if (!existing) return null;
+
+  const patch: Record<string, unknown> = {};
+
+  if (input.title !== undefined) patch.title = input.title;
+  if (input.description !== undefined) patch.description = input.description;
+  if (input.price !== undefined) patch.price = input.price;
+  if (input.category !== undefined) patch.category = input.category;
+  if (input.condition !== undefined) patch.condition = input.condition;
+  if (input.stock !== undefined) patch.stock = input.stock;
+  if (input.image !== undefined) patch.image = input.image;
+  if (input.images !== undefined) patch.images = input.images;
+  if (input.allowsMeetup !== undefined) patch.allows_meetup = input.allowsMeetup;
+  if (input.allowsCod !== undefined) patch.allows_cod = input.allowsCod;
+  if (input.status !== undefined) patch.status = input.status;
+  if (input.meetupPoint !== undefined) patch.meetup_point = input.meetupPoint;
+
+  if (input.location) {
+    const loc = await createLocationForProduct(input.location);
+    patch.location_id = loc.id;
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return await mapRowToProduct(data as ProductRow)!;
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  const { error } = await supabase.from('products').delete().eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function markProductSold(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('products')
+    .update({ stock: 0, status: 'sold' })
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function createLocationForProduct(location: {
+  latitude: number;
+  longitude: number;
+  address: string;
+}) {
+  const { data, error } = await supabase
+    .from('locations')
+    .insert({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      address_text: location.address,
+      label: '',
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'Không thể tạo vị trí sản phẩm.');
+  }
+
+  return data as { id: string };
+}
+
+async function mapRowToProduct(row: ProductRow): Promise<Product | null> {
+  let location = {
+    latitude: 0,
+    longitude: 0,
+    address: '',
+  };
+
+  if (row.location_id) {
+    const loc = await getLocationById(row.location_id);
+    if (loc) {
+      location = {
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        address: loc.address,
+      };
+    }
+  }
+
+  return {
+    id: row.id,
+    sellerId: row.seller_id,
+    title: row.title,
+    description: row.description,
+    price: row.price,
+    category: row.category as ProductCategory,
+    condition: row.condition as ProductCondition,
+    stock: row.stock,
+    image: row.image,
+    images: row.images ?? [],
+    location,
+    meetupPoint: row.meetup_point || undefined,
+    allowsMeetup: row.allows_meetup,
+    allowsCod: row.allows_cod,
+    status: row.status as ProductStatus,
+    createdAt: row.created_at,
+  };
+}

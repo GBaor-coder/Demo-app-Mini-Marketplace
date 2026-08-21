@@ -6,7 +6,7 @@ import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 
 export default function StatusScreen() {
-  const { currentUser } = useStore();
+  const { currentUser, activeRole } = useStore();
 
   if (!currentUser) return null;
 
@@ -31,8 +31,8 @@ export default function StatusScreen() {
     },
     {
       icon: 'storefront' as keyof typeof MaterialIcons.glyphMap,
-      label: 'Vai trò',
-      value: currentUser.role === 'seller' ? 'Người bán' : 'Người mua',
+      label: 'Vai trò hiện tại',
+      value: activeRole === 'seller' ? 'Người bán' : 'Người mua',
       tone: colors.primaryContainer,
     },
     {

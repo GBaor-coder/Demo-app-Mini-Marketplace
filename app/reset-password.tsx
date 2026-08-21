@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Input, MaterialIcons } from '@/src/components/ui';
+import { supabase } from '@/src/lib/supabase';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 type Requirement = 'length' | 'upper' | 'number';
@@ -38,7 +39,7 @@ export default function ResetPasswordScreen() {
     number: /[0-9]/.test(newPassword),
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError('');
     if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
       setError('Mật khẩu chưa đạt yêu cầu. Vui lòng kiểm tra lại.');
@@ -49,10 +50,20 @@ export default function ResetPasswordScreen() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (updateError) {
+        setError('Không thể cập nhật mật khẩu. Vui lòng thử lại sau.');
+        return;
+      }
       router.replace('/reset-success');
-    }, 800);
+    } catch {
+      setError('Lỗi kết nối. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

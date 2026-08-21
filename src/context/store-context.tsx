@@ -6,23 +6,42 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
+import { supabase } from '@/src/lib/supabase';
 import {
-  DEMO_USERS,
-  INITIAL_ADDRESSES,
-  INITIAL_CHATS,
-  INITIAL_NOTIFICATIONS,
-  INITIAL_ORDERS,
-  INITIAL_PRODUCTS,
-  INITIAL_REVIEWS,
-  PLATFORM_FEE,
-} from '@/src/data/seed';
+  listProducts,
+  createProduct as repoCreateProduct,
+  updateProduct as repoUpdateProduct,
+  deleteProduct as repoDeleteProduct,
+  markProductSold as repoMarkProductSold,
+} from '@/src/lib/repo/products';
+import {
+  listOrdersForBuyer,
+  listOrdersForSeller,
+  createOrder as repoCreateOrder,
+  updateOrderStatus as repoUpdateOrderStatus,
+} from '@/src/lib/repo/orders';
+import { listCartLines, upsertCartLine, deleteCartLine } from '@/src/lib/repo/cart';
+import { toggleFavorite as repoToggleFavorite } from '@/src/lib/repo/favorites';
+import {
+  listAddresses,
+  createAddress as repoCreateAddress,
+  updateAddress as repoUpdateAddress,
+  deleteAddress as repoDeleteAddress,
+} from '@/src/lib/repo/addresses';
+import {
+  listChatThreads,
+  createChatThread as repoCreateChatThread,
+  sendMessage as repoSendMessage,
+} from '@/src/lib/repo/chat';
+import { listNotifications, markAllNotificationsRead as repoMarkAllNotificationsRead } from '@/src/lib/repo/notifications';
+import { createReview as repoCreateReview } from '@/src/lib/repo/reviews';
 import {
   AppNotification,
   CartLine,
-  ChatMessage,
   ChatThread,
   DeliveryMethod,
   LocationPoint,
@@ -39,20 +58,14 @@ import {
 const STORAGE_KEY = '@uniloop/demo-state-v1';
 
 type PersistedState = {
-  currentUserId: string | null;
-  products: Product[];
-  cart: CartLine[];
-  orders: Order[];
   favoriteIds: string[];
-  addresses: SavedAddress[];
-  notifications: AppNotification[];
-  chats: ChatThread[];
-  reviews: Review[];
 };
 
 type StoreContextValue = {
   hydrated: boolean;
   currentUser: User | null;
+  activeRole: UserRole;
+  switchRole: (role: UserRole) => void;
   products: Product[];
   cart: CartLine[];
   orders: Order[];
@@ -61,112 +74,150 @@ type StoreContextValue = {
   notifications: AppNotification[];
   chats: ChatThread[];
   reviews: Review[];
-  login: (email: string, password: string, role?: UserRole) => boolean;
-  loginGuest: (role?: UserRole) => User;
+  login: (email: string, password: string) => Promise<User>;
   register: (
-    input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>,
-    role: UserRole
-  ) => User;
-  logout: () => void;
+    input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>
+  ) => Promise<{ needsVerification: boolean }>;
+  logout: () => Promise<void>;
   getUserById: (id: string) => User | undefined;
-  addToCart: (productId: string) => boolean;
-  changeCartQuantity: (productId: string, quantity: number) => void;
-  toggleCartSelected: (productId: string, selected?: boolean) => void;
-  selectAllCart: (selected: boolean) => void;
-  removeFromCart: (productId: string) => void;
-  toggleFavorite: (productId: string) => void;
-  addProduct: (input: ProductInput) => Product | null;
-  updateProduct: (id: string, input: ProductInput) => boolean;
-  deleteProduct: (id: string) => void;
-  markProductSold: (id: string) => void;
+  addToCart: (productId: string) => Promise<boolean>;
+  changeCartQuantity: (productId: string, quantity: number) => Promise<void>;
+  toggleCartSelected: (productId: string, selected?: boolean) => Promise<void>;
+  selectAllCart: (selected: boolean) => Promise<void>;
+  removeFromCart: (productId: string) => Promise<void>;
+  toggleFavorite: (productId: string) => Promise<void>;
+  addProduct: (input: ProductInput) => Promise<Product | null>;
+  updateProduct: (id: string, input: ProductInput) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<void>;
+  markProductSold: (id: string) => Promise<void>;
   createOrders: (
     location: LocationPoint,
     note: string,
     deliveryMethod: DeliveryMethod,
     sellerIds?: string[]
-  ) => number;
-  updateOrderStatus: (id: string, status: OrderStatus, reason?: string) => void;
-  addAddress: (address: Omit<SavedAddress, 'id'>) => void;
-  updateAddress: (id: string, address: Partial<SavedAddress>) => void;
-  deleteAddress: (id: string) => void;
-  markNotificationsRead: () => void;
+  ) => Promise<number>;
+  updateOrderStatus: (id: string, status: OrderStatus, reason?: string) => Promise<void>;
+  addAddress: (address: Omit<SavedAddress, 'id'>) => Promise<void>;
+  updateAddress: (id: string, address: Partial<SavedAddress>) => Promise<void>;
+  deleteAddress: (id: string) => Promise<void>;
+  markNotificationsRead: () => Promise<void>;
   unreadCount: number;
-  sendMessage: (threadId: string, text: string, offerLocation?: LocationPoint) => void;
-  startChat: (sellerId: string, productId: string) => string;
-  addReview: (review: Omit<Review, 'id' | 'createdAt'>) => void;
-  resetDemoData: () => void;
+  sendMessage: (threadId: string, text: string, offerLocation?: LocationPoint) => Promise<void>;
+  startChat: (sellerId: string, productId: string) => Promise<string>;
+  addReview: (review: Omit<Review, 'id' | 'createdAt'>) => Promise<void>;
+  refreshProducts: () => Promise<void>;
+  refreshOrders: () => Promise<void>;
+  refreshCart: () => Promise<void>;
+  refreshAddresses: () => Promise<void>;
+  refreshNotifications: () => Promise<void>;
+  refreshChats: () => Promise<void>;
 };
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
-function normalizeProducts(list: unknown): Product[] {
-  if (!Array.isArray(list)) {
-    return [];
-  }
-  return list.flatMap((raw) => {
-    if (!raw || typeof raw !== 'object') {
-      return [];
-    }
-    const product = raw as Product;
-    const images = Array.isArray(product.images)
-      ? product.images.filter(
-          (uri): uri is string => typeof uri === 'string' && uri.trim().length > 0
-        )
-      : [];
-    const image =
-      typeof product.image === 'string' && product.image.trim().length > 0
-        ? product.image
-        : images[0] ?? '';
-    return [
-      {
-        ...product,
-        image,
-        images: images.length > 0 ? images : image ? [image] : [],
-      },
-    ];
-  });
+function mapProfileToUser(profile: Record<string, unknown>): User {
+  return {
+    id: profile.id as string,
+    name: (profile.name as string) || '',
+    email: (profile.email as string) || '',
+    password: '',
+    role: ((profile.role as string) || 'buyer') as UserRole,
+    phone: (profile.phone as string) || '',
+    avatar:
+      (profile.avatar as string) ||
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300',
+    campus:
+      (profile.campus as string) || 'Đại học Bách Khoa TP.HCM',
+    verified: (profile.verified as boolean) || false,
+    rating: (profile.rating as number) || 0,
+    reviewCount: (profile.review_count as number) || 0,
+    bio: profile.bio as string | undefined,
+    sellerSince: profile.seller_since as string | undefined,
+  };
 }
 
 export function StoreProvider({ children }: PropsWithChildren) {
   const [hydrated, setHydrated] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [addresses, setAddresses] = useState<SavedAddress[]>(INITIAL_ADDRESSES);
-  const [notifications, setNotifications] =
-    useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
-  const [chats, setChats] = useState<ChatThread[]>(INITIAL_CHATS);
-  const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [chats, setChats] = useState<ChatThread[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [activeRole, setActiveRole] = useState<UserRole>('buyer');
 
-  useEffect(() => {
-    async function hydrate() {
+  const mountedRef = useRef(true);
+
+  const fetchUserProfile = useCallback(async (userId: string, retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw) as PersistedState;
-          setCurrentUserId(saved.currentUserId);
-          setProducts(
-            saved.products?.length ? normalizeProducts(saved.products) : INITIAL_PRODUCTS
-          );
-          setCart(saved.cart ?? []);
-          setOrders(saved.orders ?? INITIAL_ORDERS);
-          setFavoriteIds(saved.favoriteIds ?? []);
-          setAddresses(saved.addresses ?? INITIAL_ADDRESSES);
-          setNotifications(saved.notifications ?? INITIAL_NOTIFICATIONS);
-          setChats(saved.chats ?? INITIAL_CHATS);
-          setReviews(saved.reviews ?? INITIAL_REVIEWS);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (data && !error && mountedRef.current) {
+          setUserProfile(mapProfileToUser(data));
+          return data;
+        }
+
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+          continue;
         }
       } catch {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+          continue;
+        }
+      }
+      break;
+    }
+    return null;
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    async function init() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user && mountedRef.current) {
+          await fetchUserProfile(session.user.id);
+        }
+      } catch {
+        // ignore
       } finally {
-        setHydrated(true);
+        if (mountedRef.current) {
+          setHydrated(true);
+        }
       }
     }
 
-    void hydrate();
-  }, []);
+    void init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mountedRef.current) return;
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          await fetchUserProfile(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setUserProfile(null);
+        }
+      }
+    );
+
+    return () => {
+      mountedRef.current = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchUserProfile]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -174,246 +225,345 @@ export function StoreProvider({ children }: PropsWithChildren) {
     }
 
     const state: PersistedState = {
-      currentUserId,
-      products,
-      cart,
-      orders,
       favoriteIds,
-      addresses,
-      notifications,
-      chats,
-      reviews,
     };
     void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [
-    addresses,
-    cart,
-    chats,
-    currentUserId,
-    favoriteIds,
-    hydrated,
-    notifications,
-    orders,
-    products,
-    reviews,
-  ]);
+  }, [favoriteIds, hydrated]);
 
-  const currentUser = useMemo(() => {
-    const user = DEMO_USERS.find((item) => item.id === currentUserId) ?? null;
-    return user;
-  }, [currentUserId]);
-
-  const login = useCallback((email: string, password: string, role?: UserRole) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = DEMO_USERS.find(
-      (item) => item.email.toLowerCase() === normalizedEmail && item.password === password
-    );
-
-    if (!user) {
-      return false;
+  useEffect(() => {
+    async function hydrateData() {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as PersistedState;
+          setFavoriteIds(saved.favoriteIds ?? []);
+        }
+      } catch {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+      }
     }
 
-    if (role && user.role !== role) {
-      return false;
+    void hydrateData();
+  }, []);
+
+  const currentUser = useMemo(() => userProfile, [userProfile]);
+
+  const refreshProducts = useCallback(async () => {
+    const items = await listProducts({ status: 'active' });
+    setProducts(items);
+  }, []);
+
+  const refreshOrders = useCallback(async () => {
+    if (!currentUser) return;
+    const buyerOrders = await listOrdersForBuyer(currentUser.id);
+    const sellerOrders = await listOrdersForSeller(currentUser.id);
+    const merged = [...buyerOrders, ...sellerOrders];
+    const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
+    unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setOrders(unique);
+  }, [currentUser]);
+
+  const refreshCart = useCallback(async () => {
+    if (!currentUser) return;
+    const lines = await listCartLines(currentUser.id);
+    setCart(lines);
+  }, [currentUser]);
+
+  const refreshAddresses = useCallback(async () => {
+    if (!currentUser) return;
+    const items = await listAddresses(currentUser.id);
+    setAddresses(items);
+  }, [currentUser]);
+
+  const refreshNotifications = useCallback(async () => {
+    if (!currentUser) return;
+    const items = await listNotifications(currentUser.id);
+    setNotifications(items);
+  }, [currentUser]);
+
+  const refreshChats = useCallback(async () => {
+    if (!currentUser) return;
+    const threads = await listChatThreads(currentUser.id);
+    setChats(threads);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setProducts([]);
+      setCart([]);
+      setOrders([]);
+      setAddresses([]);
+      setNotifications([]);
+      setChats([]);
+      setReviews([]);
+      return;
     }
 
-    setCurrentUserId(user.id);
-    setCart([]);
-    return true;
-  }, []);
+    let cancelled = false;
 
-  const loginGuest = useCallback((role: UserRole = 'buyer') => {
-    const guest =
-      DEMO_USERS.find((user) => user.role === role) ?? DEMO_USERS.find((user) => user.id === 'buyer-1') ?? DEMO_USERS[0];
-    setCurrentUserId(guest.id);
-    setCart([]);
-    return guest;
-  }, []);
+    async function load() {
+      if (!currentUser) return;
+      const [prods, cartLines, addrs, notifs, chatThreads] = await Promise.all([
+        listProducts({ status: 'active' }),
+        listCartLines(currentUser.id),
+        listAddresses(currentUser.id),
+        listNotifications(currentUser.id),
+        listChatThreads(currentUser.id),
+      ]);
 
-  const register = useCallback(
-    (input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>, role: UserRole) => {
-      const existing = DEMO_USERS.find(
-        (item) => item.email.toLowerCase() === input.email.trim().toLowerCase()
-      );
-      if (existing) {
-        throw new Error('Email này đã được sử dụng.');
+      if (!cancelled) {
+        setProducts(prods);
+        setCart(cartLines);
+        setAddresses(addrs);
+        setNotifications(notifs);
+        setChats(chatThreads);
       }
 
-      const user: User = {
-        id: `user-${Date.now()}`,
-        name: input.name.trim(),
-        email: input.email.trim().toLowerCase(),
+      const buyerOrders = await listOrdersForBuyer(currentUser.id);
+      const sellerOrders = await listOrdersForSeller(currentUser.id);
+      const merged = [...buyerOrders, ...sellerOrders];
+      const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
+      unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      if (!cancelled) {
+        setOrders(unique);
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
+  const login = useCallback(
+    async (email: string, password: string): Promise<User> => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error(
+            'Email chưa được xác thực. Vui lòng kiểm tra hộp thư và nhấn vào liên kết xác thực để kích hoạt tài khoản.'
+          );
+        }
+        throw new Error('Email hoặc mật khẩu không đúng.');
+      }
+
+      if (data.user) {
+        const profile = await fetchUserProfile(data.user.id);
+        if (profile) {
+          return mapProfileToUser(profile);
+        }
+      }
+
+      throw new Error('Không thể tải thông tin tài khoản. Vui lòng thử lại.');
+    },
+    [fetchUserProfile]
+  );
+
+  const register = useCallback(
+    async (input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>) => {
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email.trim(),
         password: input.password,
-        phone: input.phone.trim(),
-        avatar:
-          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300',
-        campus: input.campus.trim() || 'Đại học Bách Khoa TP.HCM',
-        verified: false,
-        role,
-        rating: 0,
-        reviewCount: 0,
-      };
-      DEMO_USERS.push(user);
-      setCurrentUserId(user.id);
-      setCart([]);
-      return user;
+        options: {
+          data: {
+            name: input.name.trim(),
+            phone: input.phone.trim(),
+            campus: input.campus,
+          },
+          emailRedirectTo: 'uniloop://verify-email',
+        },
+      });
+
+      if (error) {
+        const message = error.message.toLowerCase();
+        if (
+          message.includes('already registered') ||
+          message.includes('already been registered') ||
+          message.includes('user already registered') ||
+          message.includes('email already exists') ||
+          message.includes('duplicate key') ||
+          message.includes('email_address_not_authorized')
+        ) {
+          throw new Error('Email này đã được sử dụng.');
+        }
+        if (message.includes('password')) {
+          throw new Error('Mật khẩu không đạt yêu cầu.');
+        }
+        if (message.includes('invalid email') || message.includes('email')) {
+          throw new Error('Email không hợp lệ.');
+        }
+        if (message.includes('rate limit') || message.includes('too many requests')) {
+          throw new Error('Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng thử lại sau.');
+        }
+        throw new Error(`Đăng ký thất bại: ${error.message}`);
+      }
+
+      if (!data.user) {
+        throw new Error('Đăng ký thất bại. Vui lòng thử lại.');
+      }
+
+      if (!data.session) {
+        return { needsVerification: true };
+      }
+
+      return { needsVerification: false };
     },
     []
   );
 
-  const logout = useCallback(() => {
-    setCurrentUserId(null);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUserProfile(null);
     setCart([]);
   }, []);
 
   const getUserById = useCallback(
-    (id: string) => DEMO_USERS.find((user) => user.id === id),
-    []
+    (id: string) => {
+      if (currentUser?.id === id) return currentUser;
+      return undefined;
+    },
+    [currentUser]
   );
 
   const addToCart = useCallback(
-    (productId: string) => {
-      if (currentUser?.role !== 'buyer') {
-        return false;
-      }
-
+    async (productId: string) => {
       const product = products.find((item) => item.id === productId);
-      if (!product || product.status !== 'active' || product.stock <= 0) {
+      if (!product || product.status !== 'active' || product.stock <= 0 || !currentUser) {
         return false;
       }
 
-      setCart((current) => {
-        const line = current.find((item) => item.productId === productId);
-        if (!line) {
-          return [...current, { productId, quantity: 1, selected: true }];
-        }
+      const existing = cart.find((item) => item.productId === productId);
+      const nextQuantity = existing ? existing.quantity + 1 : 1;
+      const finalQuantity = Math.min(nextQuantity, product.stock);
 
-        return current.map((item) =>
-          item.productId === productId
-            ? {
-                ...item,
-                quantity: Math.min(item.quantity + 1, product.stock),
-                selected: true,
-              }
-            : item
-        );
-      });
+      await upsertCartLine(currentUser.id, productId, finalQuantity, true);
+      await refreshCart();
       return true;
     },
-    [currentUser?.role, products]
+    [cart, currentUser, products, refreshCart]
   );
 
   const changeCartQuantity = useCallback(
-    (productId: string, quantity: number) => {
+    async (productId: string, quantity: number) => {
+      if (!currentUser) return;
       const stock = products.find((item) => item.id === productId)?.stock ?? 0;
+
       if (quantity <= 0) {
-        setCart((current) => current.filter((item) => item.productId !== productId));
-        return;
+        await deleteCartLine(currentUser.id, productId);
+      } else {
+        await upsertCartLine(currentUser.id, productId, Math.min(quantity, stock), true);
       }
 
-      setCart((current) =>
-        current.map((item) =>
-          item.productId === productId
-            ? { ...item, quantity: Math.min(quantity, stock) }
-            : item
-        )
-      );
+      await refreshCart();
     },
-    [products]
+    [currentUser, products, refreshCart]
   );
 
-  const toggleCartSelected = useCallback((productId: string, selected?: boolean) => {
-    setCart((current) =>
-      current.map((item) =>
-        item.productId === productId
-          ? { ...item, selected: selected ?? !item.selected }
-          : item
+  const toggleCartSelected = useCallback(async (productId: string, selected?: boolean) => {
+    if (!currentUser) return;
+    const line = cart.find((item) => item.productId === productId);
+    if (!line) return;
+
+    await upsertCartLine(currentUser.id, productId, line.quantity, selected ?? !line.selected);
+    await refreshCart();
+  }, [cart, currentUser, refreshCart]);
+
+  const selectAllCart = useCallback(async (selected: boolean) => {
+    if (!currentUser) return;
+    await Promise.all(
+      cart.map((line) =>
+        upsertCartLine(currentUser.id, line.productId, line.quantity, selected)
       )
     );
-  }, []);
+    await refreshCart();
+  }, [cart, currentUser, refreshCart]);
 
-  const selectAllCart = useCallback((selected: boolean) => {
-    setCart((current) => current.map((item) => ({ ...item, selected })));
-  }, []);
+  const removeFromCart = useCallback(async (productId: string) => {
+    if (!currentUser) return;
+    await deleteCartLine(currentUser.id, productId);
+    await refreshCart();
+  }, [currentUser, refreshCart]);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setCart((current) => current.filter((item) => item.productId !== productId));
-  }, []);
-
-  const toggleFavorite = useCallback((productId: string) => {
+  const toggleFavorite = useCallback(async (productId: string) => {
+    if (!currentUser) return;
+    const next = await repoToggleFavorite(currentUser.id, productId);
     setFavoriteIds((current) =>
-      current.includes(productId)
-        ? current.filter((id) => id !== productId)
-        : [...current, productId]
+      next
+        ? [...current, productId]
+        : current.filter((id) => id !== productId)
     );
-  }, []);
+  }, [currentUser]);
 
   const addProduct = useCallback(
-    (input: ProductInput) => {
-      if (currentUser?.role !== 'seller') {
+    async (input: ProductInput) => {
+      if (!currentUser) {
         return null;
       }
 
-      const product: Product = {
-        ...input,
-        id: `product-${Date.now()}`,
-        sellerId: currentUser.id,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-      };
-      setProducts((current) => [product, ...current]);
-      return product;
+      try {
+        const product = await repoCreateProduct({
+          ...input,
+          sellerId: currentUser.id,
+        });
+        setProducts((current) => [product, ...current]);
+        return product;
+      } catch {
+        return null;
+      }
     },
     [currentUser]
   );
 
   const updateProduct = useCallback(
-    (id: string, input: ProductInput) => {
+    async (id: string, input: ProductInput) => {
       const product = products.find((item) => item.id === id);
       if (!product || product.sellerId !== currentUser?.id) {
         return false;
       }
 
+      const updated = await repoUpdateProduct(id, input);
+      if (!updated) return false;
+
       setProducts((current) =>
-        current.map((item) => (item.id === id ? { ...item, ...input } : item))
+        current.map((item) => (item.id === id ? updated : item))
       );
       return true;
     },
     [currentUser?.id, products]
   );
 
-  const deleteProduct = useCallback(
-    (id: string) => {
-      setProducts((current) =>
-        current.filter((item) => item.id !== id || item.sellerId !== currentUser?.id)
-      );
-      setCart((current) => current.filter((item) => item.productId !== id));
-    },
-    [currentUser?.id]
-  );
+  const deleteProduct = useCallback(async (id: string) => {
+    await repoDeleteProduct(id);
+    setProducts((current) => current.filter((item) => item.id !== id));
+    setCart((current) => current.filter((item) => item.productId !== id));
+  }, []);
 
-  const markProductSold = useCallback(
-    (id: string) => {
-      setProducts((current) =>
-        current.map((item) =>
-          item.id === id && item.sellerId === currentUser?.id
-            ? { ...item, stock: 0, status: 'sold' }
-            : item
-        )
-      );
-      setCart((current) => current.filter((item) => item.productId !== id));
-    },
-    [currentUser?.id]
-  );
+  const markProductSold = useCallback(async (id: string) => {
+    await repoMarkProductSold(id);
+    setProducts((current) =>
+      current.map((item) =>
+        item.id === id && item.sellerId === currentUser?.id
+          ? { ...item, stock: 0, status: 'sold' }
+          : item
+      )
+    );
+    setCart((current) => current.filter((item) => item.productId !== id));
+  }, [currentUser?.id]);
 
   const createOrders = useCallback(
-    (
+    async (
       location: LocationPoint,
       note: string,
       deliveryMethod: DeliveryMethod,
       sellerIds?: string[]
     ) => {
-      if (currentUser?.role !== 'buyer' || cart.length === 0) {
+      if (!currentUser || cart.length === 0) {
         return 0;
       }
 
@@ -439,38 +589,35 @@ export function StoreProvider({ children }: PropsWithChildren) {
       });
 
       const now = Date.now();
-      const newOrders: Order[] = Array.from(grouped.entries()).map(
-        ([sellerId, lines], index) => {
-          const items = lines.map(({ product, quantity }) => ({
-            productId: product.id,
-            title: product.title,
-            image: product.image,
-            price: product.price,
-            quantity,
-            condition: product.condition,
-          }));
-          const shippingFee = deliveryMethod === 'cod' ? 15000 : 0;
-          const subtotal = items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
+      const newOrders: Order[] = [];
 
-          return {
-            id: `UL${String(now).slice(-7)}${index + 1}`,
-            buyerId: currentUser.id,
-            sellerId,
-            items,
-            shippingFee,
-            platformFee: PLATFORM_FEE,
-            total: subtotal + shippingFee + PLATFORM_FEE,
-            status: 'pending',
-            deliveryMethod,
-            deliveryLocation: location,
-            note: note.trim(),
-            createdAt: new Date().toISOString(),
-          };
-        }
-      );
+      for (const [sellerId, lines] of grouped.entries()) {
+        const items = lines.map(({ product, quantity }) => ({
+          productId: product.id,
+          title: product.title,
+          image: product.image,
+          price: product.price,
+          quantity,
+          condition: product.condition,
+        }));
+        const shippingFee = deliveryMethod === 'cod' ? 15000 : 0;
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+        const order = await repoCreateOrder({
+          orderCode: `UL${String(now).slice(-7)}${newOrders.length + 1}`,
+          buyerId: currentUser.id,
+          sellerId,
+          items,
+          shippingFee,
+          platformFee: 0,
+          total: subtotal + shippingFee,
+          deliveryMethod,
+          deliveryLocation: location,
+          note: note.trim(),
+        });
+
+        newOrders.push(order);
+      }
 
       setProducts((current) =>
         current.map((product) => {
@@ -482,73 +629,69 @@ export function StoreProvider({ children }: PropsWithChildren) {
           return { ...product, stock, status: stock === 0 ? 'sold' : 'active' };
         })
       );
+
       setOrders((current) => [...newOrders, ...current]);
-      setCart((current) =>
-        current.filter((line) => line.selected === false || !filtered.some((f) => f.product.id === line.productId))
-      );
+
+      if (currentUser) {
+        const purchasedIds = filtered.map((f) => f.product.id);
+        setCart((current) =>
+          current.filter(
+            (line) =>
+              line.selected === false ||
+              !purchasedIds.includes(line.productId)
+          )
+        );
+      }
+
       return newOrders.length;
     },
     [cart, currentUser, products]
   );
 
   const updateOrderStatus = useCallback(
-    (id: string, status: OrderStatus, reason?: string) => {
-      setOrders((current) =>
-        current.map((order) => {
-          if (order.id !== id) {
-            return order;
-          }
-          const patch: Partial<Order> = { status };
-          if (status === 'cancelled' || status === 'rejected') {
-            patch.cancelReason = reason;
-            patch.cancelledAt = new Date().toISOString();
-          }
-          if (status === 'completed') {
-            patch.completedAt = new Date().toISOString();
-          }
-          return { ...order, ...patch };
-        })
-      );
+    async (id: string, status: OrderStatus, reason?: string) => {
+      const updated = await repoUpdateOrderStatus(id, status, reason);
+      if (updated) {
+        setOrders((current) =>
+          current.map((order) => (order.id === id ? updated : order))
+        );
+      }
     },
     []
   );
 
-  const addAddress = useCallback((address: Omit<SavedAddress, 'id'>) => {
+  const addAddress = useCallback(async (address: Omit<SavedAddress, 'id'>) => {
+    if (!currentUser) return;
+    const saved = await repoCreateAddress({ ...address, userId: currentUser.id });
     setAddresses((current) => {
-      const next = [
-        ...current.map((item) =>
-          address.isDefault ? { ...item, isDefault: false } : item
-        ),
-        { ...address, id: `address-${Date.now()}` },
-      ];
-      return next;
+      const next = current.map((item) =>
+        address.isDefault ? { ...item, isDefault: false } : item
+      );
+      return [saved, ...next];
     });
+  }, [currentUser]);
+
+  const updateAddress = useCallback(async (id: string, patch: Partial<SavedAddress>) => {
+    const updated = await repoUpdateAddress(id, patch);
+    if (updated) {
+      setAddresses((current) =>
+        current.map((item) => (item.id === id ? updated : item))
+      );
+    }
   }, []);
 
-  const updateAddress = useCallback((id: string, patch: Partial<SavedAddress>) => {
-    setAddresses((current) =>
-      current.map((item) => {
-        if (item.id !== id) {
-          return item;
-        }
-        const next = { ...item, ...patch };
-        if (patch.isDefault) {
-          return { ...next, isDefault: true };
-        }
-        return next;
-      })
-    );
-  }, []);
-
-  const deleteAddress = useCallback((id: string) => {
+  const deleteAddress = useCallback(async (id: string) => {
+    await repoDeleteAddress(id);
     setAddresses((current) => current.filter((item) => item.id !== id));
   }, []);
 
-  const markNotificationsRead = useCallback(() => {
+  const markNotificationsRead = useCallback(async () => {
+    if (!currentUser) return;
+    await repoMarkAllNotificationsRead(currentUser.id);
     setNotifications((current) =>
       current.map((item) => ({ ...item, read: true }))
     );
-  }, []);
+  }, [currentUser]);
 
   const unreadCount = useMemo(
     () => notifications.filter((item) => !item.read).length,
@@ -556,25 +699,21 @@ export function StoreProvider({ children }: PropsWithChildren) {
   );
 
   const sendMessage = useCallback(
-    (threadId: string, text: string, offerLocation?: LocationPoint) => {
-      if (!currentUser) {
-        return;
-      }
-      const message: ChatMessage = {
-        id: `msg-${Date.now()}`,
+    async (threadId: string, text: string, offerLocation?: LocationPoint) => {
+      if (!currentUser) return;
+      const message = await repoSendMessage({
+        threadId,
         senderId: currentUser.id,
         text,
-        createdAt: new Date().toISOString(),
-        read: false,
         offerLocation,
-      };
+      });
       setChats((current) =>
         current.map((thread) =>
           thread.id === threadId
             ? {
                 ...thread,
                 messages: [...thread.messages, message],
-                updatedAt: new Date().toISOString(),
+                updatedAt: message.createdAt,
               }
             : thread
         )
@@ -583,56 +722,46 @@ export function StoreProvider({ children }: PropsWithChildren) {
     [currentUser]
   );
 
-  const startChat = useCallback(
-    (sellerId: string, productId: string) => {
-      if (!currentUser) {
-        return '';
-      }
-      const existing = chats.find(
-        (thread) =>
-          thread.participants.includes(sellerId) &&
-          thread.participants.includes(currentUser.id) &&
-          thread.productId === productId
-      );
-      if (existing) {
-        return existing.id;
-      }
-      const threadId = `chat-${Date.now()}`;
-      const thread: ChatThread = {
-        id: threadId,
-        participants: [currentUser.id, sellerId],
-        productId,
-        messages: [],
-        updatedAt: new Date().toISOString(),
-      };
-      setChats((current) => [thread, ...current]);
-      return threadId;
-    },
-    [chats, currentUser]
-  );
+  const startChat = useCallback(async (sellerId: string, productId: string) => {
+    if (!currentUser) {
+      return '';
+    }
 
-  const addReview = useCallback((review: Omit<Review, 'id' | 'createdAt'>) => {
-    setReviews((current) => [
-      { ...review, id: `review-${Date.now()}`, createdAt: new Date().toISOString() },
-      ...current,
-    ]);
+    const existing = chats.find(
+      (thread) =>
+        thread.participants.includes(sellerId) &&
+        thread.participants.includes(currentUser.id) &&
+        thread.productId === productId
+    );
+    if (existing) {
+      return existing.id;
+    }
+
+    const thread = await repoCreateChatThread({
+      participant1: currentUser.id,
+      participant2: sellerId,
+      productId,
+    });
+
+    setChats((current) => [thread, ...current]);
+    return thread.id;
+  }, [chats, currentUser]);
+
+  const addReview = useCallback(async (review: Omit<Review, 'id' | 'createdAt'>) => {
+    const created = await repoCreateReview(review);
+    setReviews((current) => [created, ...current]);
   }, []);
 
-  const resetDemoData = useCallback(() => {
-    setProducts(INITIAL_PRODUCTS);
-    setCart([]);
-    setOrders(INITIAL_ORDERS);
-    setFavoriteIds([]);
-    setAddresses(INITIAL_ADDRESSES);
-    setNotifications(INITIAL_NOTIFICATIONS);
-    setChats(INITIAL_CHATS);
-    setReviews(INITIAL_REVIEWS);
+  const switchRole = useCallback((role: UserRole) => {
+    setActiveRole(role);
   }, []);
 
   const value = useMemo<StoreContextValue>(
     () => ({
       hydrated,
       currentUser,
+      activeRole,
+      switchRole,
       products,
       cart,
       orders,
@@ -642,7 +771,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
       chats,
       reviews,
       login,
-      loginGuest,
       register,
       logout,
       getUserById,
@@ -666,45 +794,56 @@ export function StoreProvider({ children }: PropsWithChildren) {
       sendMessage,
       startChat,
       addReview,
-      resetDemoData,
+      refreshProducts,
+      refreshOrders,
+      refreshCart,
+      refreshAddresses,
+      refreshNotifications,
+      refreshChats,
     }),
     [
-      addAddress,
-      addProduct,
-      addReview,
-      addToCart,
-      addresses,
-      cart,
-      changeCartQuantity,
-      chats,
-      createOrders,
-      currentUser,
-      deleteAddress,
-      deleteProduct,
-      favoriteIds,
-      getUserById,
       hydrated,
-      login,
-      loginGuest,
-      logout,
-      markNotificationsRead,
-      markProductSold,
-      notifications,
-      orders,
+      currentUser,
+      activeRole,
+      switchRole,
       products,
-      register,
-      removeFromCart,
-      resetDemoData,
+      cart,
+      orders,
+      favoriteIds,
+      addresses,
+      notifications,
+      chats,
       reviews,
+      login,
+      register,
+      logout,
+      getUserById,
+      addToCart,
+      changeCartQuantity,
+      toggleCartSelected,
       selectAllCart,
+      removeFromCart,
+      toggleFavorite,
+      addProduct,
+      updateProduct,
+      deleteProduct,
+      markProductSold,
+      createOrders,
+      updateOrderStatus,
+      addAddress,
+      updateAddress,
+      deleteAddress,
+      markNotificationsRead,
+      unreadCount,
       sendMessage,
       startChat,
-      toggleCartSelected,
-      toggleFavorite,
-      unreadCount,
-      updateAddress,
-      updateOrderStatus,
-      updateProduct,
+      addReview,
+      refreshProducts,
+      refreshOrders,
+      refreshCart,
+      refreshAddresses,
+      refreshNotifications,
+      refreshChats,
     ]
   );
 

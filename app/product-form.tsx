@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -17,6 +17,7 @@ import { LocationPicker } from '@/src/components/location-picker';
 import { UploadProgress, UploadProgressItem } from '@/src/components/UploadProgress';
 import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
+import { uploadProductImage } from '@/src/lib/image-upload';
 import { CATEGORIES, DEFAULT_LOCATION } from '@/src/data/seed';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { ProductCondition, ProductInput } from '@/src/types';
@@ -27,7 +28,7 @@ export default function ProductFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const { currentUser, products, addProduct, updateProduct } = useStore();
+  const { currentUser, activeRole, products, addProduct, updateProduct } = useStore();
 
   const editing = id ? products.find((p) => p.id === id) : undefined;
 
@@ -54,15 +55,6 @@ export default function ProductFormScreen() {
     })) ?? []
   );
   const [submitting, setSubmitting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
 
   const doneUris = uploads.filter((u) => u.status === 'done').map((u) => u.uri);
 
@@ -91,25 +83,20 @@ export default function ProductFormScreen() {
 
     setUploads((current) => [...current, ...added]);
 
-    added.forEach((item) => {
-      let progress = 0;
-      const timer = setInterval(() => {
-        progress += Math.random() * 18 + 8;
-        if (progress >= 100) {
-          progress = 100;
-          if (timerRef.current) clearInterval(timer);
-          setUploads((current) =>
-            current.map((u) => (u.id === item.id ? { ...u, progress: 100, status: 'done' } : u))
-          );
-          if (timerRef.current) timerRef.current = null;
-        } else {
-          setUploads((current) =>
-            current.map((u) => (u.id === item.id ? { ...u, progress } : u))
-          );
-        }
-      }, 120);
-      timerRef.current = timer;
-    });
+    if (!currentUser) return;
+
+    for (const item of added) {
+      try {
+        const publicUrl = await uploadProductImage(item.uri, currentUser.id);
+        setUploads((current) =>
+          current.map((u) => (u.id === item.id ? { ...u, progress: 100, status: 'done', uri: publicUrl } : u))
+        );
+      } catch {
+        setUploads((current) =>
+          current.map((u) => (u.id === item.id ? { ...u, status: 'error' } : u))
+        );
+      }
+    }
   }
 
   function retry(id: string) {
@@ -117,30 +104,26 @@ export default function ProductFormScreen() {
       current.map((u) => (u.id === id ? { ...u, status: 'uploading', progress: 0 } : u))
     );
     const item = uploads.find((u) => u.id === id);
-    if (!item) return;
-    let progress = 0;
-    const timer = setInterval(() => {
-      progress += Math.random() * 18 + 8;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(timer);
+    if (!item || !currentUser) return;
+
+    uploadProductImage(item.uri, currentUser.id)
+      .then((publicUrl) => {
         setUploads((current) =>
-          current.map((u) => (u.id === id ? { ...u, progress: 100, status: 'done' } : u))
+          current.map((u) => (u.id === id ? { ...u, progress: 100, status: 'done', uri: publicUrl } : u))
         );
-      } else {
+      })
+      .catch(() => {
         setUploads((current) =>
-          current.map((u) => (u.id === id ? { ...u, progress } : u))
+          current.map((u) => (u.id === id ? { ...u, status: 'error' } : u))
         );
-      }
-    }, 120);
-    timerRef.current = timer;
+      });
   }
 
   function removeUpload(id: string) {
     setUploads((current) => current.filter((u) => u.id !== id));
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const parsedPrice = Number(price.replace(/\D/g, ''));
     const parsedStock = Number(stock);
 
@@ -160,6 +143,7 @@ export default function ProductFormScreen() {
       Alert.alert('Tồn kho chưa hợp lệ', 'Số lượng phải là số nguyên lớn hơn 0.');
       return;
     }
+    const doneUris = uploads.filter((u) => u.status === 'done').map((u) => u.uri);
     if (doneUris.length === 0) {
       Alert.alert('Chưa có ảnh', 'Vui lòng thêm ít nhất một ảnh sản phẩm.');
       return;
@@ -185,23 +169,32 @@ export default function ProductFormScreen() {
     };
 
     setSubmitting(true);
-    setTimeout(() => {
+    try {
       if (editing) {
-        updateProduct(editing.id, input);
-        Alert.alert('Đã lưu thay đổi', 'Thông tin sản phẩm đã được cập nhật.', [
-          { text: 'Xong', onPress: () => router.back() },
-        ]);
+        const ok = await updateProduct(editing.id, input);
+        if (ok) {
+          Alert.alert('Đã lưu thay đổi', 'Thông tin sản phẩm đã được cập nhật.', [
+            { text: 'Xong', onPress: () => router.back() },
+          ]);
+        } else {
+          Alert.alert('Lỗi', 'Không thể cập nhật sản phẩm.');
+        }
       } else {
-        addProduct(input);
-        Alert.alert('Đăng tin thành công!', 'Sản phẩm của bạn đang được hiển thị cho người mua.', [
-          { text: 'Xem ngay', onPress: () => router.replace('/(tabs)/(seller)') },
-        ]);
+        const product = await addProduct(input);
+        if (product) {
+          Alert.alert('Đăng tin thành công!', 'Sản phẩm của bạn đang được hiển thị cho người mua.', [
+            { text: 'Xem ngay', onPress: () => router.replace('/(tabs)/(seller)') },
+          ]);
+        } else {
+          Alert.alert('Lỗi', 'Không thể đăng sản phẩm.');
+        }
       }
+    } finally {
       setSubmitting(false);
-    }, 700);
+    }
   }
 
-  if (!currentUser || currentUser.role !== 'seller') {
+  if (!currentUser || activeRole !== 'seller') {
     return (
       <View style={styles.screen}>
         <EmptyState

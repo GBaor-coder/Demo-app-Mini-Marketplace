@@ -14,10 +14,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MaterialIcons } from '@/src/components/ui';
+import { supabase } from '@/src/lib/supabase';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
 const OTP_LENGTH = 6;
-const RESEND_SECONDS = 120;
+const RESEND_SECONDS = 30;
+const OTP_EXPIRY_SECONDS = 60;
 
 export default function OtpScreen() {
   const router = useRouter();
@@ -25,7 +27,8 @@ export default function OtpScreen() {
   const { email } = useLocalSearchParams<{ email?: string }>();
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState(OTP_EXPIRY_SECONDS);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const inputsRef = useRef<(TextInput | null)[]>([]);
@@ -33,6 +36,7 @@ export default function OtpScreen() {
   useEffect(() => {
     const interval = setInterval(() => {
       setSecondsLeft((current) => (current > 0 ? current - 1 : 0));
+      setResendCountdown((current) => (current > 0 ? current - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -61,30 +65,61 @@ export default function OtpScreen() {
     }
   };
 
-  const handleResend = () => {
-    if (secondsLeft > 0) return;
-    setSecondsLeft(RESEND_SECONDS);
-    setDigits(Array(OTP_LENGTH).fill(''));
+  const handleResend = async () => {
+    if (resendCountdown > 0) return;
     setError('');
+    setDigits(Array(OTP_LENGTH).fill(''));
     inputsRef.current[0]?.focus();
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: email!,
+      });
+      if (otpError) {
+        const msg = otpError.message.toLowerCase();
+        if (msg.includes('email') && msg.includes('otp')) {
+          setError('Chức năng OTP qua email chưa được bật. Vui lòng liên hệ quản trị viên.');
+        } else {
+          setError(`Không thể gửi lại mã. ${otpError.message}`);
+        }
+        return;
+      }
+      setSecondsLeft(OTP_EXPIRY_SECONDS);
+      setResendCountdown(RESEND_SECONDS);
+    } catch {
+      setError('Lỗi kết nối. Vui lòng thử lại sau.');
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const code = digits.join('');
     if (code.length < OTP_LENGTH) {
       setError('Vui lòng nhập đủ 6 chữ số của mã xác thực.');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: email!,
+        token: code,
+        type: 'email',
+      });
+      if (verifyError) {
+        setError('Mã xác thực không đúng hoặc đã hết hạn. Vui lòng thử lại.');
+        return;
+      }
       router.push('/reset-password');
-    }, 800);
+    } catch {
+      setError('Lỗi kết nối. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const timerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const canResend = resendCountdown === 0;
 
   return (
     <KeyboardAvoidingView
@@ -138,14 +173,14 @@ export default function OtpScreen() {
 
             <View style={styles.timerRow}>
               <MaterialIcons name="schedule" size={16} color={colors.onSurfaceVariant} />
-              <Text style={styles.timerText}>{timerText}</Text>
+              <Text style={styles.timerText}>Mã hết hạn: {timerText}</Text>
             </View>
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={handleResend}
-              disabled={secondsLeft > 0}>
-              <Text style={[styles.resend, secondsLeft > 0 && styles.resendDisabled]}>
-                Gửi lại mã
+              disabled={!canResend}>
+              <Text style={[styles.resend, !canResend && styles.resendDisabled]}>
+                {canResend ? 'Gửi lại mã' : `Gửi lại sau ${resendCountdown}s`}
               </Text>
             </TouchableOpacity>
 

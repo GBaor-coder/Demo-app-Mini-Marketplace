@@ -19,7 +19,7 @@ function tabIcon(name: IconName, filled: IconName = name) {
 }
 
 export default function BuyerTabLayout() {
-  const { currentUser, hydrated } = useStore();
+  const { currentUser, activeRole, hydrated } = useStore();
 
   if (!hydrated) {
     return null;
@@ -27,7 +27,7 @@ export default function BuyerTabLayout() {
   if (!currentUser) {
     return <Redirect href="/login" />;
   }
-  if (currentUser.role !== 'buyer') {
+  if (activeRole !== 'buyer') {
     return <Redirect href="/(tabs)/(seller)" />;
   }
 

@@ -1,11 +1,51 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { StoreProvider } from '@/src/context/store-context';
+import { supabase } from '@/src/lib/supabase';
 import { colors } from '@/src/theme/colors';
 
 export default function RootLayout() {
+  useEffect(() => {
+    const handleAuthUrl = async (urlString: string) => {
+      if (!urlString) return;
+
+      try {
+        const hashIndex = urlString.indexOf('#');
+        if (hashIndex === -1) return;
+
+        const fragment = urlString.substring(hashIndex + 1);
+        if (fragment.includes('access_token')) {
+          const params = new URLSearchParams(fragment);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+
+          if (accessToken && refreshToken) {
+            await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleAuthUrl(url);
+    });
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleAuthUrl(url);
+    });
+
+    return () => subscription.remove();
+  }, []);
+
   return (
     <StoreProvider>
       <StatusBar backgroundColor={colors.background} style="dark" />
@@ -23,6 +63,9 @@ export default function RootLayout() {
         <Stack.Screen name="otp" />
         <Stack.Screen name="reset-password" />
         <Stack.Screen name="reset-success" />
+        <Stack.Screen name="verify-email" options={{ animation: 'fade' }} />
+        <Stack.Screen name="change-password" />
+        <Stack.Screen name="delete-account" />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="search" />
         <Stack.Screen name="search-results" />

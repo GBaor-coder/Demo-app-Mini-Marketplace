@@ -11,7 +11,7 @@ import { formatCurrency } from '@/src/utils/format';
 
 export default function SellerStoreTab() {
   const router = useRouter();
-  const { currentUser, products, orders, logout } = useStore();
+  const { currentUser, products, orders, logout, switchRole } = useStore();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   if (!currentUser) {
@@ -125,6 +125,32 @@ export default function SellerStoreTab() {
         }
         ListFooterComponent={
           <View style={styles.logoutWrap}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => switchRole('buyer')}
+              style={styles.switchRole}>
+              <MaterialIcons name="shopping-bag" size={20} color={colors.primary} />
+              <Text style={styles.switchRoleText}>Chuyển sang chế độ mua hàng</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/change-password' as any)}
+              style={styles.accountAction}>
+              <MaterialIcons name="lock" size={20} color={colors.primary} />
+              <Text style={styles.accountActionText}>Đổi mật khẩu</Text>
+              <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/delete-account' as any)}
+              style={styles.deleteAction}>
+              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+              <Text style={styles.deleteActionText}>Xóa tài khoản</Text>
+              <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+            </TouchableOpacity>
+
             <Button
               title="Đăng xuất"
               variant="outline"
@@ -140,9 +166,9 @@ export default function SellerStoreTab() {
       <LogoutModal
         visible={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setLogoutOpen(false);
-          logout();
+          await logout();
         }}
       />
     </View>
@@ -334,6 +360,55 @@ const styles = StyleSheet.create({
     color: colors.onPrimary,
   },
   logoutWrap: {
+    gap: 12,
     marginTop: 24,
+  },
+  switchRole: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.06)',
+    borderColor: 'rgba(0,74,198,0.2)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  switchRoleText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  accountAction: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    ...shadow.level1,
+  },
+  accountActionText: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+    flex: 1,
+  },
+  deleteAction: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(186,26,26,0.05)',
+    borderColor: 'rgba(186,26,26,0.15)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  deleteActionText: {
+    ...typography.bodyMd,
+    color: colors.error,
+    flex: 1,
   },
 });

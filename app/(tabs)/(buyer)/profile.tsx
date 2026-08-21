@@ -16,7 +16,7 @@ type MenuItem = {
 
 export default function BuyerProfileScreen() {
   const router = useRouter();
-  const { currentUser, logout, unreadCount } = useStore();
+  const { currentUser, logout, unreadCount, switchRole } = useStore();
   const [showLogout, setShowLogout] = useState(false);
 
   if (!currentUser) {
@@ -46,6 +46,10 @@ export default function BuyerProfileScreen() {
     },
     { icon: 'settings', label: 'Cài đặt', route: '/status' },
     { icon: 'report', label: 'Trợ giúp & Báo cáo', route: '/report' },
+  ];
+
+  const group3: MenuItem[] = [
+    { icon: 'lock', label: 'Đổi mật khẩu', route: '/change-password' },
   ];
 
   const renderGroup = (items: MenuItem[]) => (
@@ -104,6 +108,23 @@ export default function BuyerProfileScreen() {
 
         {renderGroup(group1)}
         {renderGroup(group2)}
+        {renderGroup(group3)}
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => switchRole('seller')}
+          style={styles.switchRole}>
+          <MaterialIcons name="storefront" size={20} color={colors.primary} />
+          <Text style={styles.switchRoleText}>Chuyển sang chế độ bán hàng</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push('/delete-account' as any)}
+          style={styles.deleteAccount}>
+          <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+          <Text style={styles.deleteAccountText}>Xóa tài khoản</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.8} onPress={() => setShowLogout(true)} style={styles.logout}>
           <MaterialIcons name="logout" size={20} color={colors.error} />
@@ -114,9 +135,9 @@ export default function BuyerProfileScreen() {
       <LogoutModal
         visible={showLogout}
         onClose={() => setShowLogout(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setShowLogout(false);
-          logout();
+          await logout();
           router.replace('/login');
         }}
       />
@@ -248,6 +269,40 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   logoutText: {
+    color: colors.error,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  switchRole: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.06)',
+    borderColor: 'rgba(0,74,198,0.2)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 12,
+    paddingVertical: 14,
+  },
+  switchRoleText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  deleteAccount: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(186,26,26,0.05)',
+    borderColor: 'rgba(186,26,26,0.15)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 16,
+    paddingVertical: 14,
+  },
+  deleteAccountText: {
     color: colors.error,
     fontSize: 16,
     fontWeight: '500',

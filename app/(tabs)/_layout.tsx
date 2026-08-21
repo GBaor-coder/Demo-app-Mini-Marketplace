@@ -4,7 +4,7 @@ import { useStore } from '@/src/context/store-context';
 import { colors } from '@/src/theme/colors';
 
 export default function TabGroupLayout() {
-  const { currentUser, hydrated } = useStore();
+  const { currentUser, activeRole, hydrated } = useStore();
 
   if (!hydrated) {
     return null;
@@ -20,8 +20,11 @@ export default function TabGroupLayout() {
         animation: 'fade',
         contentStyle: { backgroundColor: colors.background },
       }}>
-      <Stack.Screen name="(buyer)" />
-      <Stack.Screen name="(seller)" />
+      {activeRole === 'buyer' ? (
+        <Stack.Screen name="(buyer)" />
+      ) : (
+        <Stack.Screen name="(seller)" />
+      )}
     </Stack>
   );
 }
