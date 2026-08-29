@@ -11,12 +11,19 @@ export type LocationRow = {
   created_at: string;
 };
 
+export async function getCurrentUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user?.id ?? null;
+}
+
 export async function createLocation(input: {
   latitude: number;
   longitude: number;
   address_text: string;
   label?: string;
 }): Promise<{ id: string; latitude: number; longitude: number; address: string }> {
+  const createdBy = await getCurrentUserId();
+
   const { data, error } = await supabase
     .from('locations')
     .insert({
@@ -24,6 +31,7 @@ export async function createLocation(input: {
       longitude: input.longitude,
       address_text: input.address_text,
       label: input.label ?? '',
+      created_by: createdBy,
     })
     .select('id, latitude, longitude, address_text')
     .single();

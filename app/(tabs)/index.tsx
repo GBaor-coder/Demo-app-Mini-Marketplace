@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/src/components/ProductCard';
-import { MaterialIcons, SkeletonCard } from '@/src/components/ui';
+import { Button, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product, ProductCategory } from '@/src/types';
@@ -55,12 +55,15 @@ const HOME_CATEGORIES: {
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { products, favoriteIds, toggleFavorite, cart } = useStore();
+  const { products, favoriteIds, toggleFavorite, cart, currentUser } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
   const activeProducts = products.filter((p) => p.status === 'active');
+  const myProducts = currentUser
+    ? products.filter((p) => p.sellerId === currentUser.id && p.status === 'active')
+    : [];
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -74,23 +77,16 @@ export default function HomeScreen() {
         favorite={favoriteIds.includes(item.id)}
         onToggleFavorite={() => toggleFavorite(item.id)}
         onPress={() => router.push(`/product/${item.id}`)}
+        showLocation
       />
     ),
     [favoriteIds, router, toggleFavorite]
-  );
-
-  const renderSkeleton = useCallback(
-    () => <SkeletonCard style={styles.skeletonCard} />,
-    []
   );
 
   return (
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View style={styles.headerRow}>
-          <TouchableOpacity activeOpacity={0.8} style={styles.headerBtn}>
-            <MaterialIcons name="menu" size={24} color={colors.primary} />
-          </TouchableOpacity>
           <Text style={styles.brand}>UniLoop</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity
@@ -142,7 +138,9 @@ export default function HomeScreen() {
                 <Text style={styles.bannerTitle}>Chào năm học mới! Giảm 50% giáo trình</Text>
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.push('/search')}
+                  onPress={() =>
+                    router.push({ pathname: '/search-results', params: { category: 'Giáo trình' } })
+                  }
                   style={styles.bannerButton}>
                   <Text style={styles.bannerButtonText}>Mua ngay</Text>
                 </TouchableOpacity>
@@ -151,7 +149,7 @@ export default function HomeScreen() {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Danh mục</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/(buyer)/explore')}>
+              <TouchableOpacity onPress={() => router.push('/')}>
                 <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
@@ -177,18 +175,46 @@ export default function HomeScreen() {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Gợi ý hôm nay</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/(buyer)/explore')}>
+              <TouchableOpacity onPress={() => router.push('/')}>
                 <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
+
+            {myProducts.length > 0 && (
+              <View style={styles.sellerBanner}>
+                <View style={styles.sellerBannerInfo}>
+                  <MaterialIcons name="storefront" size={20} color={colors.primary} />
+                  <View style={styles.sellerBannerText}>
+                    <Text style={styles.sellerBannerTitle}>Cửa hàng của bạn</Text>
+                    <Text style={styles.sellerBannerSub}>
+                      {myProducts.length} sản phẩm đang bán
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.sellerBannerActions}>
+                  <TouchableOpacity onPress={() => router.push('/products')}>
+                    <Text style={styles.sellerBannerLink}>Quản lý</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push('/create')}>
+                    <Text style={styles.sellerBannerLink}>Đăng thêm</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
         }
-        renderItem={refreshing ? renderSkeleton : renderCard}
+        renderItem={renderCard}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <MaterialIcons name="storefront" size={48} color={colors.outline} />
             <Text style={styles.emptyTitle}>Chưa có sản phẩm nào</Text>
             <Text style={styles.emptyText}>Hãy là người đầu tiên đăng bán nhé!</Text>
+            <Button
+              title="Đăng sản phẩm"
+              icon="add"
+              onPress={() => router.push('/create')}
+              style={styles.emptyBtn}
+            />
           </View>
         }
         showsVerticalScrollIndicator={false}
@@ -252,7 +278,7 @@ const styles = StyleSheet.create({
   brand: {
     ...typography.headlineMd,
     color: colors.primary,
-    fontSize: 22,
+    fontSize: 24,
   },
   searchBar: {
     alignItems: 'center',
@@ -281,6 +307,7 @@ const styles = StyleSheet.create({
   row: {
     gap: 12,
     justifyContent: 'space-between',
+    marginBottom: 16,
   },
   banner: {
     backgroundColor: colors.surfaceContainer,
@@ -384,10 +411,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  skeletonCard: {
-    flex: 1,
-    maxWidth: '48.5%',
-  },
   emptyWrap: {
     alignItems: 'center',
     paddingVertical: 48,
@@ -401,5 +424,49 @@ const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
     marginTop: 4,
+  },
+  emptyBtn: {
+    marginTop: 16,
+  },
+  sellerBanner: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: 'rgba(0,74,198,0.15)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    padding: 14,
+  },
+  sellerBannerInfo: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: 10,
+  },
+  sellerBannerText: {
+    flex: 1,
+    gap: 2,
+  },
+  sellerBannerTitle: {
+    ...typography.labelMd,
+    color: colors.onSurface,
+    fontWeight: '600',
+  },
+  sellerBannerSub: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  sellerBannerActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  sellerBannerLink: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

@@ -33,7 +33,7 @@ export default function OrderDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, products, getUserById, updateOrderStatus, startChat } = useStore();
+  const { orders, products, getUserById, updateOrderStatus } = useStore();
   const [updating, setUpdating] = useState(false);
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
@@ -54,13 +54,14 @@ export default function OrderDetailScreen() {
 
   const product = products.find((p) => p.id === order.items[0]?.productId);
   const canCancel = ['pending', 'confirmed'].includes(order.status);
-  const canConfirm = order.status === 'confirmed';
+  const canConfirm = order.status === 'in_transaction';
   const canTrack = ['in_transaction', 'completed'].includes(order.status);
+  const canRate = order.status === 'completed';
 
   const confirmReceipt = () => {
     Alert.alert(
       'Xác nhận đã nhận hàng',
-      'Sau khi xác nhận, đơn hàng sẽ được đánh dấu là hoàn tất và người bán sẽ nhận được thanh toán.',
+      'Bạn đã nhận đủ hàng từ người bán chưa? Xác nhận để hoàn tất đơn hàng và chuyển thanh toán cho người bán.',
       [
         { text: 'Để sau', style: 'cancel' },
         {
@@ -79,11 +80,6 @@ export default function OrderDetailScreen() {
 
   const cancelOrder = () => {
     router.push(`/order-cancel?id=${order.id}`);
-  };
-
-  const chat = () => {
-    const thread = startChat(seller?.id ?? order.sellerId, order.id);
-    router.push(`/chat/${thread}`);
   };
 
   const deliveryLabel =
@@ -106,7 +102,7 @@ export default function OrderDetailScreen() {
               : order.status === 'confirmed'
                 ? 'Người bán đã xác nhận. Chờ hoàn tất giao dịch.'
                 : order.status === 'in_transaction'
-                  ? 'Giao dịch đang diễn ra.'
+                  ? 'Người bán đang bàn giao. Đã nhận đủ hàng chưa? Chạm "Đã nhận được hàng" để hoàn tất.'
                   : order.status === 'completed'
                     ? 'Đơn hàng hoàn tất. Cảm ơn bạn!'
                     : `Đơn hàng ${ORDER_STATUS_LABELS[order.status].toLowerCase()}.`}
@@ -155,9 +151,6 @@ export default function OrderDetailScreen() {
                 {seller?.campus ?? 'Người bán'}
               </Text>
             </View>
-            <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.chatBtn}>
-              <MaterialIcons name={toIconName('chat')} size={19} color={colors.primary} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -219,9 +212,16 @@ export default function OrderDetailScreen() {
         ) : null}
         {canConfirm ? (
           <Button title="Đã nhận được hàng" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
-        ) : (
-          <Button title="Liên hệ người bán" icon="forum" onPress={chat} style={styles.footerBtn} />
-        )}
+        ) : null}
+        {canRate ? (
+          <Button
+            title="Đánh giá"
+            icon="star"
+            variant="primaryContainer"
+            onPress={() => router.push(`/order-rate?id=${order.id}`)}
+            style={styles.footerBtn}
+          />
+          ) : null}
       </View>
     </View>
   );

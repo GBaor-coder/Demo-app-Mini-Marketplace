@@ -1,6 +1,6 @@
 import { supabase } from '@/src/lib/supabase';
 import { Product, ProductCategory, ProductCondition, ProductStatus } from '@/src/types';
-import { getLocationById } from './locations';
+import { getCurrentUserId, getLocationById } from './locations';
 
 export type ProductRow = {
   id: string;
@@ -106,30 +106,56 @@ export async function createProduct(input: {
   status?: ProductStatus;
 }): Promise<Product> {
   const locationRow = await createLocationForProduct(input.location);
+  const sellerId = await getCurrentUserId();
+  console.log('[createProduct] sellerId from getCurrentUserId:', sellerId);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('[createProduct] auth.getUser() id:', user?.id);
+
+  if (!sellerId || !user?.id || sellerId !== user.id) {
+    throw new Error('Xác thực người dùng không hợp lệ.');
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', sellerId)
+    .single();
+
+  console.log('[createProduct] profile exists:', !!profile, 'error:', profileError?.message);
+
+  const payload = {
+    seller_id: sellerId,
+    title: input.title,
+    description: input.description,
+    price: input.price,
+    category: input.category,
+    condition: input.condition,
+    stock: input.stock,
+    image: input.image,
+    images: input.images,
+    location_id: locationRow.id,
+    meetup_point: input.meetupPoint ?? '',
+    allows_meetup: input.allowsMeetup,
+    allows_cod: input.allowsCod,
+    status: input.status ?? 'active',
+  };
+
+  console.log('[createProduct] payload seller_id:', payload.seller_id);
 
   const { data, error } = await supabase
     .from('products')
-    .insert({
-      seller_id: input.sellerId,
-      title: input.title,
-      description: input.description,
-      price: input.price,
-      category: input.category,
-      condition: input.condition,
-      stock: input.stock,
-      image: input.image,
-      images: input.images,
-      location_id: locationRow.id,
-      meetup_point: input.meetupPoint ?? '',
-      allows_meetup: input.allowsMeetup,
-      allows_cod: input.allowsCod,
-      status: input.status ?? 'active',
-    })
+    .insert(payload)
     .select('*')
     .single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('[createProduct] insert error:', error);
     throw new Error(error?.message ?? 'Không thể tạo sản phẩm.');
+  }
+
+  if (!data) {
+    throw new Error('Không thể tạo sản phẩm.');
   }
 
   const product = await mapRowToProduct(data as ProductRow);
@@ -219,6 +245,8 @@ async function createLocationForProduct(location: {
   longitude: number;
   address: string;
 }) {
+  const createdBy = await getCurrentUserId();
+
   const { data, error } = await supabase
     .from('locations')
     .insert({
@@ -226,6 +254,7 @@ async function createLocationForProduct(location: {
       longitude: location.longitude,
       address_text: location.address,
       label: '',
+      created_by: createdBy,
     })
     .select('id')
     .single();

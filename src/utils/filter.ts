@@ -18,7 +18,7 @@ export const DEFAULT_FILTERS: SearchFilters = {
   sort: 'newest',
 };
 
-const DEFAULT_LOCATION = { latitude: 10.762622, longitude: 106.660172 };
+const DEFAULT_LOCATION = { latitude: 10.420556, longitude: 105.643333 };
 
 export function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
   const R = 6371;
@@ -34,6 +34,12 @@ export function haversineKm(aLat: number, aLng: number, bLat: number, bLng: numb
 
 export function distanceFromCenter(lat: number, lng: number) {
   return haversineKm(DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude, lat, lng);
+}
+
+export const MAX_MEETUP_DISTANCE_KM = 8;
+
+export function distanceFromSchoolKm(lat: number, lng: number) {
+  return distanceFromCenter(lat, lng);
 }
 
 export function applyFilters(products: Product[], filters: SearchFilters): Product[] {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
-import { IconButton, LogoutModal, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Button, EmptyState, IconButton, LogoutModal, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
@@ -14,14 +14,27 @@ type MenuItem = {
   badge?: number;
 };
 
-export default function BuyerProfileScreen() {
+export default function ProfileScreen() {
   const router = useRouter();
-  const { currentUser, logout, unreadCount, switchRole } = useStore();
+  const { currentUser, logout, products, orders } = useStore();
   const [showLogout, setShowLogout] = useState(false);
 
   if (!currentUser) {
-    return null;
+    return (
+      <View style={styles.screen}>
+        <EmptyState
+          icon="person"
+          title="Vui lòng đăng nhập"
+          description="Bạn cần đăng nhập để xem hồ sơ.">
+          <Button title="Đăng nhập" onPress={() => router.push('/login')} />
+        </EmptyState>
+      </View>
+    );
   }
+
+  const myProducts = products.filter((p) => p.sellerId === currentUser.id);
+  const myOrdersCount = orders.filter((o) => o.buyerId === currentUser.id).length;
+  const sellerOrdersCount = orders.filter((o) => o.sellerId === currentUser.id).length;
 
   const group1: MenuItem[] = [
     {
@@ -29,27 +42,23 @@ export default function BuyerProfileScreen() {
       label: 'Sản phẩm yêu thích',
       route: '/favorites',
     },
-    { icon: 'location-on', label: 'Địa chỉ đã lưu', route: '/addresses' },
     {
       icon: 'shopping-bag',
       label: 'Lịch sử mua hàng',
-      route: '/(tabs)/(buyer)/orders',
+      route: '/(tabs)/orders',
     },
   ];
 
   const group2: MenuItem[] = [
-    {
-      icon: 'notifications',
-      label: 'Thông báo',
-      route: '/(tabs)/(buyer)/notifications',
-      badge: unreadCount,
-    },
-    { icon: 'settings', label: 'Cài đặt', route: '/status' },
-    { icon: 'report', label: 'Trợ giúp & Báo cáo', route: '/report' },
+    { icon: 'lock', label: 'Đổi mật khẩu', route: '/change-password' },
   ];
 
-  const group3: MenuItem[] = [
-    { icon: 'lock', label: 'Đổi mật khẩu', route: '/change-password' },
+  const sellerGroup: MenuItem[] = [
+    {
+      icon: 'inventory-2',
+      label: 'Quản lý sản phẩm',
+      route: '/products',
+    },
   ];
 
   const renderGroup = (items: MenuItem[]) => (
@@ -99,23 +108,39 @@ export default function BuyerProfileScreen() {
             <Text style={styles.school}>{currentUser.campus}</Text>
           </View>
           <View style={styles.ratingChip}>
-            <MaterialIcons name="star" size={18} color={colors.tertiaryContainer} />
+            <MaterialIcons name="star" size={18} color={colors.star} />
             <Text style={styles.ratingValue}>{currentUser.rating?.toFixed(1) ?? '5.0'}/5</Text>
             <Text style={styles.ratingSep}>•</Text>
             <Text style={styles.ratingCount}>{currentUser.reviewCount ?? 0} Đánh giá</Text>
           </View>
         </View>
 
+        {myProducts.length > 0 && (
+          <View style={styles.statsCard}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{myProducts.length}</Text>
+              <Text style={styles.statLabel}>Sản phẩm đang bán</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{sellerOrdersCount}</Text>
+              <Text style={styles.statLabel}>Đơn bán</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{myOrdersCount}</Text>
+              <Text style={styles.statLabel}>Đơn mua</Text>
+            </View>
+          </View>
+        )}
+
+        {myProducts.length > 0 && renderGroup(sellerGroup)}
         {renderGroup(group1)}
         {renderGroup(group2)}
-        {renderGroup(group3)}
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => switchRole('seller')}
-          style={styles.switchRole}>
-          <MaterialIcons name="storefront" size={20} color={colors.primary} />
-          <Text style={styles.switchRoleText}>Chuyển sang chế độ bán hàng</Text>
+        <TouchableOpacity activeOpacity={1} onPress={() => setShowLogout(true)} style={styles.logout}>
+          <MaterialIcons name="logout" size={20} color={colors.error} />
+          <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -124,11 +149,6 @@ export default function BuyerProfileScreen() {
           style={styles.deleteAccount}>
           <MaterialIcons name="delete-forever" size={20} color={colors.error} />
           <Text style={styles.deleteAccountText}>Xóa tài khoản</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowLogout(true)} style={styles.logout}>
-          <MaterialIcons name="logout" size={20} color={colors.error} />
-          <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -215,6 +235,34 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontSize: 14,
   },
+  statsCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    marginBottom: 24,
+    paddingVertical: 16,
+    ...shadow.level1,
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 2,
+  },
+  statValue: {
+    ...typography.headlineMd,
+    color: colors.onSurface,
+    fontSize: 20,
+  },
+  statLabel: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  statDivider: {
+    backgroundColor: 'rgba(195,198,215,0.4)',
+    height: 32,
+    width: 1,
+  },
   menuCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius.lg,
@@ -273,23 +321,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  switchRole: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.06)',
-    borderColor: 'rgba(0,74,198,0.2)',
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'center',
-    marginBottom: 12,
-    paddingVertical: 14,
-  },
-  switchRoleText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '500',
-  },
   deleteAccount: {
     alignItems: 'center',
     backgroundColor: 'rgba(186,26,26,0.05)',
@@ -299,6 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
+    marginTop: 12,
     marginBottom: 16,
     paddingVertical: 14,
   },

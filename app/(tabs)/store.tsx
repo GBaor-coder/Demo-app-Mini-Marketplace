@@ -11,7 +11,7 @@ import { formatCurrency } from '@/src/utils/format';
 
 export default function SellerStoreTab() {
   const router = useRouter();
-  const { currentUser, products, orders, logout, switchRole } = useStore();
+  const { currentUser, products, orders, logout } = useStore();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   if (!currentUser) {
@@ -117,7 +117,7 @@ export default function SellerStoreTab() {
             </Text>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/(tabs)/(seller)/create')}
+               onPress={() => router.push('/create')}
               style={styles.emptyBtn}>
               <Text style={styles.emptyBtnText}>Đăng sản phẩm</Text>
             </TouchableOpacity>
@@ -125,14 +125,6 @@ export default function SellerStoreTab() {
         }
         ListFooterComponent={
           <View style={styles.logoutWrap}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => switchRole('buyer')}
-              style={styles.switchRole}>
-              <MaterialIcons name="shopping-bag" size={20} color={colors.primary} />
-              <Text style={styles.switchRoleText}>Chuyển sang chế độ mua hàng</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push('/change-password' as any)}
@@ -362,23 +354,6 @@ const styles = StyleSheet.create({
   logoutWrap: {
     gap: 12,
     marginTop: 24,
-  },
-  switchRole: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.06)',
-    borderColor: 'rgba(0,74,198,0.2)',
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  switchRoleText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '500',
   },
   accountAction: {
     alignItems: 'center',

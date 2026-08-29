@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -20,12 +21,14 @@ export default function AddressesScreen() {
   const insets = useSafeAreaInsets();
   const { select } = useLocalSearchParams<{ select?: string }>();
   const { addresses, deleteAddress } = useStore();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const renderItem = ({ item }: { item: SavedAddress }) => (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => {
         if (select === '1') {
+          setSelectedId(item.id);
           setAddressDraft(item.id);
           router.back();
         }
@@ -43,8 +46,8 @@ export default function AddressesScreen() {
           ) : null}
         </View>
         {select === '1' ? (
-          <View style={[styles.radio, styles.radioActive]}>
-            <View style={styles.radioDot} />
+          <View style={[styles.radio, selectedId === item.id && styles.radioActive]}>
+            {selectedId === item.id ? <View style={styles.radioDot} /> : null}
           </View>
         ) : null}
       </View>

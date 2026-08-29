@@ -37,8 +37,17 @@ import {
   createChatThread as repoCreateChatThread,
   sendMessage as repoSendMessage,
 } from '@/src/lib/repo/chat';
-import { listNotifications, markAllNotificationsRead as repoMarkAllNotificationsRead } from '@/src/lib/repo/notifications';
+import {
+  listNotifications,
+  createNotification as repoCreateNotification,
+  markAllNotificationsRead as repoMarkAllNotificationsRead,
+} from '@/src/lib/repo/notifications';
 import { createReview as repoCreateReview } from '@/src/lib/repo/reviews';
+import {
+  getProfileById as repoGetProfileById,
+  getProfilesByIds as repoGetProfilesByIds,
+} from '@/src/lib/repo/profiles';
+import { DEMO_USERS } from '@/src/data/seed';
 import {
   AppNotification,
   CartLine,
@@ -51,10 +60,10 @@ import {
   ProductInput,
   Review,
   SavedAddress,
-  User,
-  UserRole,
-} from '@/src/types';
 
+  User,
+
+} from '@/src/types';
 const STORAGE_KEY = '@uniloop/demo-state-v1';
 
 type PersistedState = {
@@ -64,8 +73,7 @@ type PersistedState = {
 type StoreContextValue = {
   hydrated: boolean;
   currentUser: User | null;
-  activeRole: UserRole;
-  switchRole: (role: UserRole) => void;
+
   products: Product[];
   cart: CartLine[];
   orders: Order[];
@@ -80,6 +88,8 @@ type StoreContextValue = {
   ) => Promise<{ needsVerification: boolean }>;
   logout: () => Promise<void>;
   getUserById: (id: string) => User | undefined;
+  ensureProfile: (id: string) => Promise<void>;
+  ensureProfiles: (ids: string[]) => Promise<void>;
   addToCart: (productId: string) => Promise<boolean>;
   changeCartQuantity: (productId: string, quantity: number) => Promise<void>;
   toggleCartSelected: (productId: string, selected?: boolean) => Promise<void>;
@@ -121,13 +131,12 @@ function mapProfileToUser(profile: Record<string, unknown>): User {
     name: (profile.name as string) || '',
     email: (profile.email as string) || '',
     password: '',
-    role: ((profile.role as string) || 'buyer') as UserRole,
     phone: (profile.phone as string) || '',
     avatar:
       (profile.avatar as string) ||
       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300',
     campus:
-      (profile.campus as string) || 'Đại học Bách Khoa TP.HCM',
+      (profile.campus as string) || 'Trường Đại học Đồng Tháp',
     verified: (profile.verified as boolean) || false,
     rating: (profile.rating as number) || 0,
     reviewCount: (profile.review_count as number) || 0,
@@ -147,7 +156,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [chats, setChats] = useState<ChatThread[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [activeRole, setActiveRole] = useState<UserRole>('buyer');
+  const [users, setUsers] = useState<Record<string, User>>({});
 
   const mountedRef = useRef(true);
 
@@ -248,10 +257,56 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const currentUser = useMemo(() => userProfile, [userProfile]);
 
+  useEffect(() => {
+    setUsers((prev) => {
+      const seeded: Record<string, User> = { ...prev };
+      for (const u of DEMO_USERS) {
+        if (!seeded[u.id]) seeded[u.id] = u;
+      }
+      return { ...prev, ...seeded };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    setUsers((prev) => ({ ...prev, [currentUser.id]: currentUser }));
+  }, [currentUser]);
+
+  const ensureProfile = useCallback(
+    async (id: string) => {
+      if (!id) return;
+      if (currentUser?.id === id || users[id]) return;
+      const profile = await repoGetProfileById(id);
+      if (profile && mountedRef.current) {
+        setUsers((prev) => ({ ...prev, [id]: profile }));
+      }
+    },
+    [currentUser, users]
+  );
+
+  const ensureProfiles = useCallback(
+    async (ids: string[]) => {
+      const needed = Array.from(
+        new Set(ids.filter((id) => id && id !== currentUser?.id && !users[id]))
+      );
+      if (needed.length === 0) return;
+      const fetched = await repoGetProfilesByIds(needed);
+      if (fetched.length > 0 && mountedRef.current) {
+        setUsers((prev) => {
+          const next = { ...prev };
+          for (const u of fetched) next[u.id] = u;
+          return next;
+        });
+      }
+    },
+    [currentUser, users]
+  );
+
   const refreshProducts = useCallback(async () => {
     const items = await listProducts({ status: 'active' });
     setProducts(items);
-  }, []);
+    void ensureProfiles(items.map((p) => p.sellerId));
+  }, [ensureProfiles]);
 
   const refreshOrders = useCallback(async () => {
     if (!currentUser) return;
@@ -261,7 +316,12 @@ export function StoreProvider({ children }: PropsWithChildren) {
     const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
     unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     setOrders(unique);
-  }, [currentUser]);
+    const ids: string[] = [];
+    for (const o of unique) {
+      ids.push(o.buyerId, o.sellerId);
+    }
+    void ensureProfiles(ids);
+  }, [currentUser, ensureProfiles]);
 
   const refreshCart = useCallback(async () => {
     if (!currentUser) return;
@@ -285,7 +345,12 @@ export function StoreProvider({ children }: PropsWithChildren) {
     if (!currentUser) return;
     const threads = await listChatThreads(currentUser.id);
     setChats(threads);
-  }, [currentUser]);
+    const ids: string[] = [];
+    for (const t of threads) {
+      ids.push(...t.participants);
+    }
+    void ensureProfiles(ids);
+  }, [currentUser, ensureProfiles]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -426,9 +491,9 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const getUserById = useCallback(
     (id: string) => {
       if (currentUser?.id === id) return currentUser;
-      return undefined;
+      return users[id];
     },
-    [currentUser]
+    [currentUser, users]
   );
 
   const addToCart = useCallback(
@@ -617,6 +682,14 @@ export function StoreProvider({ children }: PropsWithChildren) {
         });
 
         newOrders.push(order);
+
+        void repoCreateNotification({
+          userId: sellerId,
+          type: 'order',
+          title: 'Bạn có đơn hàng mới',
+          body: `Đơn hàng #${order.id} vừa được đặt. Vui lòng xác nhận đơn.`,
+          icon: 'receipt_long',
+        });
       }
 
       setProducts((current) =>
@@ -655,6 +728,48 @@ export function StoreProvider({ children }: PropsWithChildren) {
         setOrders((current) =>
           current.map((order) => (order.id === id ? updated : order))
         );
+
+        const actorIsSeller =
+          status === 'confirmed' || status === 'in_transaction' || status === 'rejected';
+        const recipientId = actorIsSeller ? updated.buyerId : updated.sellerId;
+
+        const content: Record<string, { title: string; body: string; icon: string }> = {
+          confirmed: {
+            title: 'Đơn hàng đã được xác nhận',
+            body: `Đơn hàng #${updated.id} của bạn đã được người bán xác nhận.`,
+            icon: 'check_circle',
+          },
+          in_transaction: {
+            title: 'Đơn hàng đang được giao',
+            body: `Đơn hàng #${updated.id} đang trên đường đến điểm hẹn giao dịch.`,
+            icon: 'local_shipping',
+          },
+          completed: {
+            title: 'Người mua đã nhận hàng',
+            body: `Đơn hàng #${updated.id} đã hoàn tất. Thanh toán đang được chuyển đến bạn.`,
+            icon: 'task_alt',
+          },
+          cancelled: {
+            title: 'Người mua đã hủy đơn hàng',
+            body: `Đơn hàng #${updated.id} đã bị hủy.${reason ? ` Lý do: ${reason}` : ''}`,
+            icon: 'cancel',
+          },
+          rejected: {
+            title: 'Đơn hàng đã bị từ chối',
+            body: `Đơn hàng #${updated.id} đã bị người bán từ chối.${reason ? ` Lý do: ${reason}` : ''}`,
+            icon: 'do_not_disturb',
+          },
+        };
+
+        if (content[status]) {
+          void repoCreateNotification({
+            userId: recipientId,
+            type: 'order',
+            title: content[status].title,
+            body: content[status].body,
+            icon: content[status].icon,
+          });
+        }
       }
     },
     []
@@ -718,8 +833,20 @@ export function StoreProvider({ children }: PropsWithChildren) {
             : thread
         )
       );
+
+      const thread = chats.find((t) => t.id === threadId);
+      const recipientId = thread?.participants.find((p) => p !== currentUser.id);
+      if (recipientId) {
+        void repoCreateNotification({
+          userId: recipientId,
+          type: 'message',
+          title: `${currentUser.name} đã nhắn tin cho bạn`,
+          body: text,
+          icon: 'chat',
+        });
+      }
     },
-    [currentUser]
+    [chats, currentUser]
   );
 
   const startChat = useCallback(async (sellerId: string, productId: string) => {
@@ -752,16 +879,10 @@ export function StoreProvider({ children }: PropsWithChildren) {
     setReviews((current) => [created, ...current]);
   }, []);
 
-  const switchRole = useCallback((role: UserRole) => {
-    setActiveRole(role);
-  }, []);
-
   const value = useMemo<StoreContextValue>(
     () => ({
       hydrated,
       currentUser,
-      activeRole,
-      switchRole,
       products,
       cart,
       orders,
@@ -774,6 +895,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
       register,
       logout,
       getUserById,
+      ensureProfile,
+      ensureProfiles,
       addToCart,
       changeCartQuantity,
       toggleCartSelected,
@@ -804,8 +927,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
     [
       hydrated,
       currentUser,
-      activeRole,
-      switchRole,
       products,
       cart,
       orders,
@@ -818,6 +939,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
       register,
       logout,
       getUserById,
+      ensureProfile,
+      ensureProfiles,
       addToCart,
       changeCartQuantity,
       toggleCartSelected,

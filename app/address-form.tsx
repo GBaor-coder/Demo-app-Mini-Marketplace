@@ -17,23 +17,12 @@ import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
 import { takeLocationDraft } from '@/src/utils/location-draft';
 
-const PROVINCES = ['TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng'];
+const PROVINCES = ['Đồng Tháp'];
 const DISTRICTS: Record<string, string[]> = {
-  'TP. Hồ Chí Minh': ['Quận 1', 'Quận 3', 'Quận 5', 'Quận 10', 'Quận Bình Thạnh', 'Quận Thủ Đức', 'Quận 7', 'Huyện Nhà Bè'],
-  'Hà Nội': ['Cầu Giấy', 'Đống Đa', 'Hai Bà Trưng', 'Hoàn Kiếm', 'Thanh Xuân', 'Bắc Từ Liêm'],
-  'Đà Nẵng': ['Hải Châu', 'Thanh Khê', 'Sơn Trà', 'Liên Chiểu'],
-  'Cần Thơ': ['Ninh Kiều', 'Bình Thủy', 'Cái Răng'],
-  'Hải Phòng': ['Hồng Bàng', 'Lê Chân', 'Ngô Quyền'],
+  'Đồng Tháp': ['Thành phố Cao Lãnh'],
 };
 const WARDS: Record<string, string[]> = {
-  'Quận 1': ['Phường Bến Nghé', 'Phường Đa Kao', 'Phường Nguyễn Thái Bình', 'Phường Tân Định'],
-  'Quận 3': ['Phường 1', 'Phường 2', 'Phường 7', 'Phường 9'],
-  'Quận 5': ['Phường 1', 'Phường 2', 'Phường 4', 'Phường 5'],
-  'Quận 10': ['Phường 4', 'Phường 6', 'Phường 8', 'Phường 12'],
-  'Quận Bình Thạnh': ['Phường 2', 'Phường 5', 'Phường 6', 'Phường 11'],
-  'Quận Thủ Đức': ['Phường Hiệp Bình Phước', 'Phường Linh Chiểu', 'Phường Linh Trung', 'Phường Tam Bình'],
-  'Quận 7': ['Phường Bình Thuận', 'Phường Phú Mỹ', 'Phường Tân Phong', 'Phường Tân Thuận Đông'],
-  'Huyện Nhà Bè': ['Xã Phú Xuân', 'Xã Hiệp Phước', 'Thị trấn Nhà Bè'],
+  'Thành phố Cao Lãnh': ['Phường Cao Lãnh', 'Phường Mỹ Ngãi', 'Phường Mỹ Trà'],
 };
 
 const LABEL_OPTIONS: { label: string; icon: IconName }[] = [

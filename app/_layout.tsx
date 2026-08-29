@@ -58,7 +58,6 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="register" options={{ animation: 'fade' }} />
-        <Stack.Screen name="role-select" options={{ animation: 'fade' }} />
         <Stack.Screen name="forgot-password" />
         <Stack.Screen name="otp" />
         <Stack.Screen name="reset-password" />

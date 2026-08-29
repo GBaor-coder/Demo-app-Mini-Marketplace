@@ -28,7 +28,7 @@ export default function ProductFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const { currentUser, activeRole, products, addProduct, updateProduct } = useStore();
+  const { currentUser, products, addProduct, updateProduct } = useStore();
 
   const editing = id ? products.find((p) => p.id === id) : undefined;
 
@@ -183,7 +183,7 @@ export default function ProductFormScreen() {
         const product = await addProduct(input);
         if (product) {
           Alert.alert('Đăng tin thành công!', 'Sản phẩm của bạn đang được hiển thị cho người mua.', [
-            { text: 'Xem ngay', onPress: () => router.replace('/(tabs)/(seller)') },
+            { text: 'Xem ngay', onPress: () => router.replace('/(tabs)') },
           ]);
         } else {
           Alert.alert('Lỗi', 'Không thể đăng sản phẩm.');
@@ -194,13 +194,13 @@ export default function ProductFormScreen() {
     }
   }
 
-  if (!currentUser || activeRole !== 'seller') {
+  if (!currentUser) {
     return (
       <View style={styles.screen}>
         <EmptyState
           icon="storefront"
-          title="Chỉ người bán mới có thể đăng sản phẩm"
-          description="Chuyển sang chế độ người bán để bắt đầu đăng tin."
+          title="Vui lòng đăng nhập"
+          description="Bạn cần đăng nhập để đăng sản phẩm."
         />
       </View>
     );

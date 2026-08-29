@@ -1,4 +1,3 @@
-export type UserRole = 'buyer' | 'seller';
 
 export type ProductCategory =
   | 'Giáo trình'
@@ -31,7 +30,6 @@ export type User = {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
   phone: string;
   avatar: string;
   campus: string;

@@ -1,10 +1,18 @@
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { useCallback } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MaterialIcons } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, SkeletonCard } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product, ProductCategory } from '@/src/types';
@@ -21,14 +29,37 @@ const EXPLORE_CATEGORIES: {
   { category: 'Handmade', icon: 'brush' },
 ];
 
+function isNewProduct(createdAt: string): boolean {
+  const diff = Date.now() - new Date(createdAt).getTime();
+  return diff < 3 * 24 * 60 * 60 * 1000;
+}
+
 export default function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { products, favoriteIds, toggleFavorite, cart } = useStore();
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<ProductCategory | null>(null);
+  const [loading, setLoading] = useState(true);
+  const loadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
-  const activeProducts = products.filter((p) => p.status === 'active');
+  const activeProducts = selectedCategory
+    ? products.filter((p) => p.status === 'active' && p.category === selectedCategory)
+    : products.filter((p) => p.status === 'active');
+
+  const switchCategory = useCallback((cat: ProductCategory | null) => {
+    if (loadingTimer.current) clearTimeout(loadingTimer.current);
+    setLoading(true);
+    setSelectedCategory(cat);
+    loadingTimer.current = setTimeout(() => setLoading(false), 400);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
 
   const renderCard = useCallback(
     ({ item }: { item: Product }) => (
@@ -42,7 +73,7 @@ export default function ExploreScreen() {
             source={{ uri: item.images?.[0] || item.image }}
             style={styles.image}
           />
-          {item.stock <= 1 ? (
+          {isNewProduct(item.createdAt) ? (
             <View style={styles.newBadge}>
               <Text style={styles.newBadgeText}>MỚI</Text>
             </View>
@@ -74,55 +105,63 @@ export default function ExploreScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>Khám phá</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/search')}
+              style={styles.headerBtn}>
+              <MaterialIcons name="search" size={24} color={colors.onSurfaceVariant} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/cart')}
+              style={styles.cartBtn}>
+              <MaterialIcons name="shopping-cart" size={24} color={colors.onSurfaceVariant} />
+              {cartCount > 0 ? (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          </View>
+        </View>
         <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.back()}
-          style={styles.headerBtn}>
-          <MaterialIcons name="arrow-back" size={24} color={colors.onSurfaceVariant} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
+          activeOpacity={0.85}
           onPress={() => router.push('/search')}
           style={styles.searchBar}>
           <MaterialIcons name="search" size={19} color={colors.outline} />
           <Text style={styles.searchPlaceholder}>Tìm kiếm sách, đồ dùng...</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/cart')}
-          style={styles.cartBtn}>
-          <MaterialIcons name="shopping-cart" size={24} color={colors.onSurfaceVariant} />
-          {cartCount > 0 ? (
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
-            </View>
-          ) : null}
-        </TouchableOpacity>
       </View>
 
       <FlatList
-        data={activeProducts}
+        data={loading ? [] : activeProducts}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+        }
         ListHeaderComponent={
           <View>
             <Text style={styles.sectionTitle}>Danh mục</Text>
-            <View style={styles.categoryStrip}>
-              {EXPLORE_CATEGORIES.map((item, index) => {
-                const active = index === 0;
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryStrip}>
+              {EXPLORE_CATEGORIES.map((item) => {
+                const active = selectedCategory === item.category;
                 return (
                   <TouchableOpacity
                     key={item.category}
                     activeOpacity={0.8}
                     onPress={() =>
-                      router.push({
-                        pathname: '/search-results',
-                        params: { category: item.category },
-                      })
+                      switchCategory(active ? null : item.category)
                     }
                     style={styles.categoryItem}>
                     <View
@@ -133,11 +172,13 @@ export default function ExploreScreen() {
                         color={active ? colors.onPrimaryContainer : colors.onSurface}
                       />
                     </View>
-                    <Text style={styles.categoryLabel}>{item.category}</Text>
+                    <Text style={[styles.categoryLabel, active && styles.categoryLabelActive]}>
+                      {item.category}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
-            </View>
+            </ScrollView>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Gợi ý cho bạn</Text>
               <TouchableOpacity onPress={() => router.push('/search-results')}>
@@ -147,6 +188,33 @@ export default function ExploreScreen() {
           </View>
         }
         renderItem={renderCard}
+        ListEmptyComponent={
+          loading ? (
+            <View style={styles.skeletonGrid}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonCard key={i} imageHeight={160} style={styles.skeletonCard} />
+              ))}
+            </View>
+          ) : (
+            <EmptyState
+              icon="search-off"
+              title="Chưa có sản phẩm nào"
+              description={
+                selectedCategory
+                  ? `Không có sản phẩm trong danh mục "${selectedCategory}".`
+                  : 'Hãy là người đầu tiên đăng bán nhé!'
+              }
+            >
+              <Button
+                title={selectedCategory ? 'Xóa bộ lọc' : 'Đăng sản phẩm'}
+                variant={selectedCategory ? 'outline' : 'primary'}
+                onPress={() =>
+                  selectedCategory ? switchCategory(null) : router.push('/create')
+                }
+              />
+            </EmptyState>
+          )
+        }
       />
     </View>
   );
@@ -158,36 +226,51 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    alignItems: 'center',
     backgroundColor: 'rgba(248,249,255,0.92)',
+    gap: 12,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    ...shadow.level1,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerTitle: {
+    ...typography.headlineMd,
+    color: colors.onSurface,
+    fontSize: 22,
+  },
+  headerActions: {
+    alignItems: 'center',
     flexDirection: 'row',
     gap: 4,
-    paddingBottom: 8,
-    paddingHorizontal: 12,
   },
   headerBtn: {
     alignItems: 'center',
-    height: 44,
+    height: 40,
     justifyContent: 'center',
     width: 40,
   },
   searchBar: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: radius.full,
-    flex: 1,
+    borderWidth: 1,
     flexDirection: 'row',
     gap: 10,
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: 16,
   },
   searchPlaceholder: {
     color: colors.outline,
-    fontSize: 14,
+    fontSize: 15,
   },
   cartBtn: {
     alignItems: 'center',
-    height: 44,
+    height: 40,
     justifyContent: 'center',
     position: 'relative',
     width: 40,
@@ -196,12 +279,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.error,
     borderRadius: radius.full,
-    height: 16,
     justifyContent: 'center',
     minWidth: 16,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
     position: 'absolute',
     right: 2,
-    top: 4,
+    top: 2,
   },
   cartBadgeText: {
     color: colors.onError,
@@ -224,7 +308,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   categoryStrip: {
-    flexDirection: 'row',
     gap: 14,
     marginBottom: 4,
     paddingBottom: 6,
@@ -251,6 +334,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  categoryLabelActive: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
   sectionHeaderRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -261,6 +348,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginTop: 20,
+  },
+  skeletonGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginTop: 8,
+  },
+  skeletonCard: {
+    flex: 1,
+    minWidth: '45%',
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

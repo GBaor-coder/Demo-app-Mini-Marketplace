@@ -47,13 +47,13 @@ export default function OrderSuccessScreen() {
           <View style={styles.actions}>
             <Button
               title="Xem đơn hàng"
-              onPress={() => router.replace('/(tabs)/(buyer)/orders')}
+              onPress={() => router.replace('/(tabs)/orders')}
               style={styles.primaryBtn}
             />
             <Button
               title="Tiếp tục mua sắm"
               variant="outline"
-              onPress={() => router.replace('/(tabs)/(buyer)')}
+               onPress={() => router.replace('/(tabs)')}
               style={styles.secondaryBtn}
             />
           </View>

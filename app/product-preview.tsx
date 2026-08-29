@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,8 +24,10 @@ export default function ProductPreviewScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { products, currentUser, getUserById, deleteProduct, markProductSold } = useStore();
+  const { width } = useWindowDimensions();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
 
   const product = products.find((p) => p.id === id);
   const seller = product ? getUserById(product.sellerId) : undefined;
@@ -38,8 +41,8 @@ export default function ProductPreviewScreen() {
     );
   }
 
-  const image = product.images?.[0] || product.image;
-  const imageCount = Math.max(1, product.images?.length ?? 0);
+  const images = product.images?.length ? product.images : [product.image];
+  const imageCount = images.length;
   const isSold = product.status === 'sold';
   const isSelf = seller?.id === currentUser?.id;
 
@@ -68,13 +71,24 @@ export default function ProductPreviewScreen() {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.imageWrap}>
-          <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) => {
+              const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+              setImageIndex(Math.min(Math.max(idx, 0), images.length - 1));
+            }}>
+            {images.map((uri) => (
+              <Image key={uri} source={{ uri }} style={{ width, height: 400 }} contentFit="cover" />
+            ))}
+          </ScrollView>
           <View style={styles.counter}>
-            <Text style={styles.counterText}>1 / {imageCount}</Text>
+            <Text style={styles.counterText}>{imageIndex + 1} / {imageCount}</Text>
           </View>
           <View style={styles.dots}>
             {Array.from({ length: imageCount }).map((_, i) => (
-              <View key={i} style={[styles.dot, i === 0 && styles.dotActive]} />
+              <View key={i} style={[styles.dot, i === imageIndex && styles.dotActive]} />
             ))}
           </View>
           {isSold ? (

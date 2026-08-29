@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
     flexDirection: 'row',
+    flexShrink: 0,
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 9,

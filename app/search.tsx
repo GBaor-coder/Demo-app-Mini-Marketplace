@@ -262,7 +262,7 @@ function FilterSheet({ visible, onClose, initial, resultCount, onApply }: Filter
                 style={styles.sliderTouch}
                 onPress={(e) => {
                   const x = e.nativeEvent.locationX;
-                  const pct = Math.min(Math.max(x / 280, 0.05), 1);
+                  const pct = Math.min(Math.max(x / 340, 0.05), 1);
                   setDistance(Math.round((pct * 20) / 1) * 1);
                 }}
               />

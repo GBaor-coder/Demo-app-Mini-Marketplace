@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,8 +30,6 @@ export default function ProductDetailScreen() {
     favoriteIds,
     toggleFavorite,
     addToCart,
-    startChat,
-    currentUser,
   } = useStore();
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -50,18 +49,8 @@ export default function ProductDetailScreen() {
   const sold = product.status === 'sold';
 
   const handleBuyNow = () => {
-    if (currentUser?.role !== 'buyer') {
-      return;
-    }
     addToCart(product.id);
     router.push('/cart');
-  };
-
-  const handleChat = () => {
-    const threadId = startChat(product.sellerId, product.id);
-    if (threadId) {
-      router.push(`/chat/${threadId}`);
-    }
   };
 
   return (
@@ -80,7 +69,7 @@ export default function ProductDetailScreen() {
             <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerButton}>
               <MaterialIcons name="search" size={22} color={colors.onSurface} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerButton}>
+            <TouchableOpacity onPress={() => Alert.alert('Chia sẻ', 'Tính năng chia sẻ đang được phát triển.')} style={styles.headerButton}>
               <MaterialIcons name="share" size={22} color={colors.onSurface} />
             </TouchableOpacity>
           </View>
@@ -123,10 +112,7 @@ export default function ProductDetailScreen() {
             </View>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleChat}
-            style={styles.sellerCard}>
+          <View style={styles.sellerCard}>
             <Avatar uri={seller?.avatar} name={seller?.name} size={56} />
             <View style={styles.sellerInfo}>
               <View style={styles.sellerNameRow}>
@@ -141,8 +127,7 @@ export default function ProductDetailScreen() {
                 <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
               </View>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color={colors.outline} />
-          </TouchableOpacity>
+          </View>
 
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeading}>
@@ -179,14 +164,6 @@ export default function ProductDetailScreen() {
               </View>
             </View>
           ) : null}
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/report')}
-            style={styles.reportBtn}>
-            <MaterialIcons name="flag" size={16} color={colors.outline} />
-            <Text style={styles.reportText}>Báo cáo tin đăng này</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -205,9 +182,6 @@ export default function ProductDetailScreen() {
               color={favorite ? colors.error : colors.onSurface}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleChat} style={styles.chatButton}>
-            <MaterialIcons name="chat" size={22} color={colors.primary} />
-          </TouchableOpacity>
           <Button
             title="Thêm giỏ"
             icon="add-shopping-cart"
@@ -215,9 +189,6 @@ export default function ProductDetailScreen() {
             size="sm"
             style={styles.addCartButton}
             onPress={() => {
-              if (currentUser?.role !== 'buyer') {
-                return;
-              }
               addToCart(product.id);
               router.push('/cart');
             }}

@@ -34,6 +34,41 @@ export async function listNotifications(userId: string): Promise<AppNotification
   }));
 }
 
+export async function createNotification(input: {
+  userId: string;
+  type: AppNotification['type'];
+  title: string;
+  body: string;
+  icon: string;
+}): Promise<AppNotification | null> {
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert({
+      user_id: input.userId,
+      type: input.type,
+      title: input.title,
+      body: input.body,
+      icon: input.icon,
+      read: false,
+    })
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    type: data.type as AppNotification['type'],
+    title: data.title,
+    body: data.body,
+    createdAt: data.created_at,
+    read: data.read,
+    icon: data.icon,
+  };
+}
+
 export async function markNotificationRead(id: string): Promise<void> {
   const { error } = await supabase
     .from('notifications')

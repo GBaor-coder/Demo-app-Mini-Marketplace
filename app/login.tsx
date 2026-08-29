@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -26,13 +26,9 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const pendingRoleRef = useRef<string | null>(null);
-
   useEffect(() => {
-    if (currentUser && pendingRoleRef.current) {
-      const role = pendingRoleRef.current;
-      pendingRoleRef.current = null;
-      router.replace(role === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
+    if (currentUser) {
+      router.replace('/(tabs)');
     }
   }, [currentUser, router]);
 
@@ -64,11 +60,9 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const user = await login(email.trim(), password);
-      pendingRoleRef.current = user.role;
+      await login(email.trim(), password);
       if (currentUser) {
-        pendingRoleRef.current = null;
-        router.replace(user.role === 'seller' ? '/(tabs)/(seller)' : '/(tabs)/(buyer)');
+        router.replace('/(tabs)');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.');

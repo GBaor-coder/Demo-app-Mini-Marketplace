@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import {
   Chip,
@@ -39,7 +39,7 @@ export default function SellerNotificationsScreen() {
   }, []);
 
   const renderItem = ({ item }: { item: AppNotification }) => (
-    <View style={[styles.card, item.read && styles.cardRead]}>
+    <TouchableOpacity activeOpacity={0.8} onPress={() => {}} style={[styles.card, item.read && styles.cardRead]}>
       {!item.read ? <View style={styles.unreadDot} /> : null}
       <View style={[styles.iconWrap, item.read && styles.iconWrapRead]}>
         <MaterialIcons
@@ -57,7 +57,7 @@ export default function SellerNotificationsScreen() {
         </Text>
         <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

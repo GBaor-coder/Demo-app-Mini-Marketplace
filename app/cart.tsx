@@ -104,7 +104,7 @@ export default function CartScreen() {
       <FlatList
         data={groups}
         keyExtractor={(group) => group.sellerId}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -112,7 +112,7 @@ export default function CartScreen() {
             title="Giỏ hàng của bạn còn trống"
             description="Thêm ngay những món đồ bạn thích vào giỏ để mua chúng nhé."
           >
-            <Button title="Tiếp tục khám phá" onPress={() => router.push('/(tabs)/(buyer)/explore')} />
+            <Button title="Tiếp tục khám phá" onPress={() => router.push('/')} />
           </EmptyState>
         }
         renderItem={({ item: group }) => {
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   list: {
-    paddingBottom: 16,
+    paddingBottom: 100,
     paddingHorizontal: 20,
   },
   sellerCard: {

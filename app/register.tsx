@@ -82,7 +82,7 @@ export default function RegisterScreen() {
       if (result.needsVerification) {
         router.replace({ pathname: '/verify-email' as any, params: { email: email.trim() } });
       } else {
-        router.replace('/(tabs)/(buyer)');
+        router.replace('/(tabs)');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng ký thất bại. Vui lòng thử lại.');

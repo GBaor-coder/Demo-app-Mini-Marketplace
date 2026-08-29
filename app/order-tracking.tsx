@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
 import { LocationPreview } from '@/src/components/location-preview';
@@ -46,7 +46,7 @@ const CANCEL_INDEX = 2;
 export default function OrderTrackingScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, getUserById, startChat } = useStore();
+  const { orders, getUserById } = useStore();
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
   const seller = order ? getUserById(order.sellerId) : undefined;
@@ -64,10 +64,6 @@ export default function OrderTrackingScreen() {
   const statusIndex = cancelled ? CANCEL_INDEX : STEPS.findIndex((s) => s.key === order.status);
   const displayIndex = cancelled ? -1 : STEPS.length - 1 - statusIndex;
   const firstItem = order.items[0];
-  const chat = () => {
-    const thread = startChat(order.sellerId, order.items[0]?.productId ?? '');
-    router.push(`/chat/${thread}`);
-  };
 
   return (
     <View style={styles.screen}>
@@ -207,25 +203,18 @@ export default function OrderTrackingScreen() {
                 </View>
               ) : null}
             </View>
-            <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.chatBtn}>
-              <MaterialIcons name={toIconName('chat')} size={19} color={colors.onSecondaryContainer} />
-            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.actions}>
-          <Button
-            title="Hủy đơn"
-            variant="outline"
-            onPress={() => router.push(`/order-cancel?id=${order.id}`)}
-            style={styles.actionBtn}
-          />
-          <Button
-            title="Liên hệ người bán"
-            variant="primaryContainer"
-            onPress={chat}
-            style={styles.actionBtn}
-          />
+          {(order.status === 'pending' || order.status === 'confirmed') ? (
+            <Button
+              title="Hủy đơn"
+              variant="outline"
+              onPress={() => router.push(`/order-cancel?id=${order.id}`)}
+              style={styles.actionBtn}
+            />
+          ) : null}
         </View>
         <View style={styles.spacer} />
       </ScrollView>

@@ -6,7 +6,7 @@ import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 
 export default function StatusScreen() {
-  const { currentUser, activeRole } = useStore();
+  const { currentUser } = useStore();
 
   if (!currentUser) return null;
 
@@ -28,12 +28,6 @@ export default function StatusScreen() {
       label: 'Đánh giá',
       value: currentUser.rating ? `${currentUser.rating} / 5 (${currentUser.reviewCount ?? 0} đánh giá)` : 'Chưa có',
       tone: colors.star,
-    },
-    {
-      icon: 'storefront' as keyof typeof MaterialIcons.glyphMap,
-      label: 'Vai trò hiện tại',
-      value: activeRole === 'seller' ? 'Người bán' : 'Người mua',
-      tone: colors.primaryContainer,
     },
     {
       icon: 'calendar-today' as keyof typeof MaterialIcons.glyphMap,

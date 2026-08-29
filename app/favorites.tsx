@@ -84,7 +84,7 @@ export default function FavoritesScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>Yêu thích</Text>
         <TouchableOpacity
-          onPress={() => router.push('/(tabs)/(buyer)/explore')}
+          onPress={() => router.push('/')}
           style={styles.headerBtn}>
           <MaterialIcons name="search" size={22} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function FavoritesScreen() {
             <Button
               title="Khám phá ngay"
               icon="explore"
-              onPress={() => router.push('/(tabs)/(buyer)/explore')}
+              onPress={() => router.push('/')}
             />
           </EmptyState>
         }

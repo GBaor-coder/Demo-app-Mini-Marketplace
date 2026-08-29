@@ -15,6 +15,7 @@ type ProductCardProps = {
   onToggleFavorite?: () => void;
   compact?: boolean;
   showSeller?: boolean;
+  showLocation?: boolean;
   imageHeight?: number;
   badge?: string;
 };
@@ -26,6 +27,7 @@ export function ProductCard({
   onToggleFavorite,
   compact,
   showSeller,
+  showLocation,
   imageHeight = 160,
   badge,
 }: ProductCardProps) {
@@ -79,6 +81,11 @@ export function ProductCard({
         <Text numberOfLines={2} style={styles.title}>
           {product.title}
         </Text>
+        {showLocation ? (
+          <Text numberOfLines={1} style={styles.location}>
+            {product.location?.address ?? '---'}
+          </Text>
+        ) : null}
         <Text style={styles.price}>{formatCurrency(product.price)}</Text>
         {showSeller ? (
           <View style={styles.meta}>
@@ -106,14 +113,14 @@ export function ProductCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     flex: 1,
     maxWidth: '48.5%',
     overflow: 'hidden',
     ...shadow.level1,
   },
   imageWrap: {
-    backgroundColor: colors.surfaceVariant,
+    backgroundColor: colors.surfaceContainerLow,
     position: 'relative',
     width: '100%',
   },
@@ -167,7 +174,7 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderRadius: radius.full,
     height: 32,
     justifyContent: 'center',
@@ -216,10 +223,16 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     fontWeight: '500',
     lineHeight: 20,
+    minHeight: 40,
+  },
+  location: {
+    color: colors.onSurfaceVariant,
+    fontSize: 14,
+    marginTop: 6,
   },
   price: {
     color: colors.primary,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     marginTop: 4,
   },

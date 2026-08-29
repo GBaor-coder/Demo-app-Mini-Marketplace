@@ -48,7 +48,7 @@ export default function OnboardingScreen() {
           <View style={styles.actions}>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/role-select')}
+              onPress={() => router.push('/register')}
               style={styles.primaryCta}>
               <Text style={styles.primaryCtaText}>Bắt đầu ngay</Text>
               <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimaryContainer} />

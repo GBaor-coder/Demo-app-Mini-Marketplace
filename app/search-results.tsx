@@ -119,7 +119,7 @@ export default function SearchResultsScreen() {
             description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem thêm kết quả nhé."
           >
             <Button title="Thử lại" variant="outline" onPress={reset} />
-            <Button title="Khám phá thêm" onPress={() => router.push('/(tabs)/(buyer)/explore')} />
+            <Button title="Khám phá thêm" onPress={() => router.push('/')} />
           </EmptyState>
         }
       />

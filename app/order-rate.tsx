@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { Button, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, ScreenHeader, toIconName } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
@@ -74,6 +74,15 @@ export default function OrderRateScreen() {
       ]);
     }, 600);
   };
+
+  if (!order || !item) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader brand />
+        <EmptyState icon={toIconName('receipt_outline')} title="Không tìm thấy đơn hàng" description="Đơn hàng này có thể đã bị xóa." />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>

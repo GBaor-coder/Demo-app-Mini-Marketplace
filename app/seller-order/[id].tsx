@@ -26,7 +26,7 @@ export default function SellerOrderDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, products, getUserById, updateOrderStatus, startChat } = useStore();
+  const { orders, products, getUserById, updateOrderStatus } = useStore();
   const [updating, setUpdating] = useState<string | null>(null);
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
@@ -57,7 +57,11 @@ export default function SellerOrderDetailScreen() {
       }
       return 'Đã xác nhận đơn';
     }
-    if (state === 'current') return 'Đang tiến hành giao dịch';
+    if (state === 'current') {
+      if (order.status === 'confirmed') return 'Đã xác nhận. Chạm "Bàn giao" để giao cho người mua.';
+      if (order.status === 'in_transaction') return 'Đã bàn giao. Chờ người mua xác nhận nhận hàng.';
+      return 'Đang tiến hành giao dịch';
+    }
     if (state === 'done') return 'Đã hoàn tất';
     return '';
   };
@@ -150,11 +154,6 @@ export default function SellerOrderDetailScreen() {
     );
   };
 
-  const chat = () => {
-    const thread = startChat(buyer?.id ?? order.buyerId, order.items[0]?.productId ?? '');
-    router.push(`/chat/${thread}`);
-  };
-
   const canConfirm = order.status === 'pending';
   const canReject = ['pending', 'confirmed'].includes(order.status);
   const canDeliver = order.status === 'confirmed';
@@ -173,7 +172,7 @@ export default function SellerOrderDetailScreen() {
         </View>
 
         {buyer ? (
-          <TouchableOpacity activeOpacity={0.85} onPress={chat} style={styles.buyerCard}>
+          <View style={styles.buyerCard}>
             <Avatar uri={buyer.avatar} name={buyer.name} size={56} />
             <View style={styles.buyerInfo}>
               <Text style={styles.buyerName}>{buyer.name}</Text>
@@ -191,10 +190,7 @@ export default function SellerOrderDetailScreen() {
                 </View>
               ) : null}
             </View>
-            <View style={styles.chatIcon}>
-              <MaterialIcons name="chat" size={20} color={colors.secondaryContainer} />
-            </View>
-          </TouchableOpacity>
+          </View>
         ) : null}
 
         <View style={styles.card}>
@@ -308,14 +304,11 @@ export default function SellerOrderDetailScreen() {
         ) : null}
         {canDeliver ? (
           <Button
-            title="Bắt đầu giao hàng"
+            title="Bàn giao cho người mua"
             loading={updating === 'in_transaction'}
             onPress={() => runUpdate('in_transaction', 'Đang giao dịch')}
             style={styles.footerBtn}
           />
-        ) : null}
-        {order.status === 'in_transaction' ? (
-          <Button title="Liên hệ người mua" variant="outline" onPress={chat} style={styles.footerBtn} />
         ) : null}
       </View>
     </View>
