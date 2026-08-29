@@ -66,10 +66,10 @@ export default function RootLayout() {
         <Stack.Screen name="change-password" />
         <Stack.Screen name="delete-account" />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="search" />
+        <Stack.Screen name="search" options={{ presentation: 'formSheet' }} />
         <Stack.Screen name="search-results" />
         <Stack.Screen name="product/[id]" />
-        <Stack.Screen name="product-form" />
+        <Stack.Screen name="product-form" options={{ presentation: 'formSheet' }} />
         <Stack.Screen name="product-preview" />
         <Stack.Screen name="cart" />
         <Stack.Screen name="checkout" />
@@ -77,12 +77,12 @@ export default function RootLayout() {
         <Stack.Screen name="order-success" />
         <Stack.Screen name="order/[id]" />
         <Stack.Screen name="order-tracking" />
-        <Stack.Screen name="order-cancel" />
-        <Stack.Screen name="order-rate" />
+        <Stack.Screen name="order-cancel" options={{ presentation: 'formSheet' }} />
+        <Stack.Screen name="order-rate" options={{ presentation: 'formSheet' }} />
         <Stack.Screen name="seller-order/[id]" />
         <Stack.Screen name="favorites" />
         <Stack.Screen name="addresses" />
-        <Stack.Screen name="address-form" />
+        <Stack.Screen name="address-form" options={{ presentation: 'formSheet' }} />
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="chats" />
         <Stack.Screen name="seller-chats" />
