@@ -1,9 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Chip, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Chip, EmptyState, IconButton, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { ChatThread } from '@/src/types';
@@ -17,10 +25,17 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'answered', label: 'Đã trả lời' },
 ];
 
-export default function SellerChatsScreen() {
+function messagePreview(message: ChatThread['messages'][number]) {
+  if (message.imageUrl && !message.text) return '🖼️ [Ảnh]';
+  if (message.offerLocation) return `📍 ${message.offerLocation.address}`;
+  return message.text || '[Ảnh]';
+}
+
+export default function ChatsScreen() {
   const router = useRouter();
-  const { chats, currentUser, getUserById, products } = useStore();
+  const { chats, currentUser, getUserById, products, refreshChats } = useStore();
   const [filter, setFilter] = useState<Filter>('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   const myChats = useMemo(
     () =>
@@ -46,11 +61,17 @@ export default function SellerChatsScreen() {
     });
   }, [myChats, filter, currentUser?.id]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshChats();
+    setRefreshing(false);
+  };
+
   const renderItem = ({ item }: { item: ChatThread }) => {
     const otherId =
       item.participants.find((p) => p !== currentUser?.id) ?? item.participants[0];
     const other = getUserById(otherId);
-    const product = products.find((p) => p.id === item.productId);
+    const product = products.find((p) => p?.id === item.productId);
     const lastMessage = item.messages[item.messages.length - 1];
     const unread = item.messages.filter(
       (m) => m.senderId !== currentUser?.id && !m.read
@@ -64,11 +85,13 @@ export default function SellerChatsScreen() {
         style={styles.chatRow}>
         <View style={styles.avatarWrap}>
           <Avatar uri={other?.avatar} name={other?.name ?? '?'} size={56} />
-          <View style={[styles.onlineDot, unread > 0 ? styles.online : styles.offline]} />
+          {unread > 0 ? <View style={styles.unreadDot} /> : null}
         </View>
         <View style={styles.chatInfo}>
           <View style={styles.chatTop}>
-            <Text numberOfLines={1} style={[styles.peerName, unread > 0 && styles.peerNameUnread]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.peerName, unread > 0 && styles.peerNameUnread]}>
               {other?.name ?? 'Người dùng'}
             </Text>
             <Text style={[styles.time, unread > 0 && styles.timeUnread]}>
@@ -77,24 +100,28 @@ export default function SellerChatsScreen() {
           </View>
           {product ? (
             <View style={styles.productRow}>
-              <MaterialIcons name="sell" size={16} color={colors.outline} />
+              <MaterialIcons name="sell" size={15} color={colors.outline} />
               <Text numberOfLines={1} style={styles.productName}>
                 {product.title}
               </Text>
             </View>
           ) : null}
-          <Text
-            numberOfLines={1}
-            style={[styles.preview, unread > 0 && styles.previewUnread]}>
-            {lastMessage?.text ?? 'Bắt đầu cuộc trò chuyện'}
-          </Text>
-        </View>
-        <View style={styles.chatRight}>
-          {unread > 0 ? (
-            <View style={styles.unreadDot} />
-          ) : answered ? (
-            <MaterialIcons name="done-all" size={18} color={colors.primary} />
-          ) : null}
+          <View style={styles.chatBottom}>
+            <Text
+              numberOfLines={1}
+              style={[styles.preview, unread > 0 && styles.previewUnread]}>
+              {lastMessage ? messagePreview(lastMessage) : 'Bắt đầu cuộc trò chuyện'}
+            </Text>
+            <View style={styles.chatRight}>
+              {unread > 0 ? (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>{unread > 9 ? '9+' : unread}</Text>
+                </View>
+              ) : answered ? (
+                <MaterialIcons name="done-all" size={18} color={colors.primary} />
+              ) : null}
+            </View>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -102,7 +129,11 @@ export default function SellerChatsScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader title="Trò chuyện" />
+      <ScreenHeader
+        title="Tin nhắn"
+        showBack={false}
+        right={<IconButton name="search" onPress={() => router.push('/search')} />}
+      />
 
       <ScrollView
         horizontal
@@ -123,12 +154,25 @@ export default function SellerChatsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            icon="chat-bubble-outline"
-            title="Chưa có cuộc trò chuyện nào"
-            description="Khi người mua nhắn tin với bạn, các cuộc trò chuyện sẽ xuất hiện tại đây."
+            icon="chat"
+            title={
+              filter === 'unread'
+                ? 'Không có tin nhắn chưa đọc'
+                : filter === 'answered'
+                  ? 'Chưa trả lời hội thoại nào'
+                  : 'Chưa có cuộc trò chuyện nào'
+            }
+            description={
+              filter === 'all'
+                ? 'Khi bạn nhắn tin với người bán, các cuộc trò chuyện sẽ xuất hiện tại đây.'
+                : 'Tắt bộ lọc để xem toàn bộ hội thoại.'
+            }
           />
         }
       />
@@ -162,9 +206,10 @@ const styles = StyleSheet.create({
   avatarWrap: {
     position: 'relative',
   },
-  onlineDot: {
-    borderRadius: radius.full,
+  unreadDot: {
+    backgroundColor: colors.primaryContainer,
     borderColor: colors.surfaceContainerLowest,
+    borderRadius: radius.full,
     borderWidth: 2,
     bottom: 0,
     height: 14,
@@ -172,15 +217,9 @@ const styles = StyleSheet.create({
     right: 0,
     width: 14,
   },
-  online: {
-    backgroundColor: colors.tertiaryFixedDim,
-  },
-  offline: {
-    backgroundColor: colors.outline,
-  },
   chatInfo: {
     flex: 1,
-    gap: 2,
+    gap: 3,
   },
   chatTop: {
     alignItems: 'center',
@@ -212,13 +251,19 @@ const styles = StyleSheet.create({
   },
   productName: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: colors.outline,
     flex: 1,
+    fontSize: 12,
+  },
+  chatBottom: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   preview: {
     ...typography.bodySm,
     color: colors.onSurfaceVariant,
-    marginTop: 2,
+    flex: 1,
   },
   previewUnread: {
     color: colors.onSurface,
@@ -229,10 +274,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 20,
   },
-  unreadDot: {
-    backgroundColor: colors.primaryContainer,
+  unreadBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
     borderRadius: radius.full,
-    height: 10,
-    width: 10,
+    height: 20,
+    justifyContent: 'center',
+    minWidth: 20,
+    paddingHorizontal: 6,
+  },
+  unreadBadgeText: {
+    color: colors.onError,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

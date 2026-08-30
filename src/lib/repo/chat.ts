@@ -6,7 +6,7 @@ export type ChatThreadRow = {
   id: string;
   participant_1: string;
   participant_2: string;
-  product_id: string;
+  product_id: string | null;
   updated_at: string;
   created_at: string;
 };
@@ -18,6 +18,7 @@ export type ChatMessageRow = {
   text: string;
   read: boolean;
   offer_location_id: string | null;
+  image_url: string | null;
   created_at: string;
 };
 
@@ -59,14 +60,14 @@ export async function getChatThread(id: string): Promise<ChatThread | null> {
 export async function createChatThread(input: {
   participant1: string;
   participant2: string;
-  productId: string;
+  productId?: string | null;
 }): Promise<ChatThread> {
   const { data, error } = await supabase
     .from('chat_threads')
     .insert({
       participant_1: input.participant1,
       participant_2: input.participant2,
-      product_id: input.productId,
+      product_id: input.productId ?? null,
     })
     .select('*')
     .single();
@@ -96,6 +97,7 @@ export async function sendMessage(input: {
   threadId: string;
   senderId: string;
   text: string;
+  imageUrl?: string;
   offerLocation?: { latitude: number; longitude: number; address: string };
 }): Promise<ChatMessage> {
   let offerLocationId: string | null = null;
@@ -116,6 +118,7 @@ export async function sendMessage(input: {
       sender_id: input.senderId,
       text: input.text,
       read: false,
+      image_url: input.imageUrl ?? null,
       offer_location_id: offerLocationId,
     })
     .select('*')
@@ -164,5 +167,10 @@ async function mapRowToMessage(row: ChatMessageRow): Promise<ChatMessage> {
     createdAt: row.created_at,
     read: row.read,
     offerLocation,
+    imageUrl: row.image_url ?? undefined,
   };
+}
+
+export async function markThreadRead(threadId: string): Promise<void> {
+  await supabase.rpc('mark_thread_read', { p_thread_id: threadId });
 }

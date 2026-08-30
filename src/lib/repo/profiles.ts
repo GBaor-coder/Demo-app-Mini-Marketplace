@@ -1,5 +1,5 @@
 import { supabase } from '@/src/lib/supabase';
-import { User } from '@/src/types';
+import { ProfileUpdateInput, User } from '@/src/types';
 
 type ProfileRow = {
   id: string;
@@ -64,4 +64,34 @@ export async function getProfilesByIds(userIds: string[]): Promise<User[]> {
   }
 
   return (data as ProfileRow[]).map(mapProfileToUser);
+}
+
+export async function updateProfile(
+  userId: string,
+  patch: ProfileUpdateInput
+): Promise<User | null> {
+  const updates: Record<string, unknown> = {};
+
+  if (patch.name !== undefined) updates.name = patch.name.trim();
+  if (patch.phone !== undefined) updates.phone = patch.phone.trim();
+  if (patch.avatar !== undefined) updates.avatar = patch.avatar;
+  if (patch.campus !== undefined) updates.campus = patch.campus.trim();
+  if (patch.bio !== undefined) updates.bio = patch.bio.trim() || null;
+
+  if (Object.keys(updates).length === 0) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select('*')
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return mapProfileToUser(data as ProfileRow);
 }

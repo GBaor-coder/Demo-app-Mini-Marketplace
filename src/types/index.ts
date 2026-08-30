@@ -40,6 +40,14 @@ export type User = {
   sellerSince?: string;
 };
 
+export type ProfileUpdateInput = {
+  name?: string;
+  phone?: string;
+  avatar?: string;
+  campus?: string;
+  bio?: string;
+};
+
 export type ProductImage = {
   uri: string;
   name: string;
@@ -125,6 +133,7 @@ export type AppNotification = {
   createdAt: string;
   read: boolean;
   icon: string;
+  link?: string;
 };
 
 export type ChatMessage = {
@@ -134,12 +143,13 @@ export type ChatMessage = {
   createdAt: string;
   read: boolean;
   offerLocation?: LocationPoint;
+  imageUrl?: string;
 };
 
 export type ChatThread = {
   id: string;
   participants: [string, string];
-  productId: string;
+  productId?: string | null;
   messages: ChatMessage[];
   updatedAt: string;
 };

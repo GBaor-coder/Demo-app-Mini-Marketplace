@@ -28,6 +28,18 @@ function detectImageType(bytes: Uint8Array): DetectedImageType {
 }
 
 export async function uploadProductImage(uri: string, userId: string): Promise<string> {
+  return uploadImage(uri, userId, 'products');
+}
+
+export async function uploadChatImage(uri: string, userId: string): Promise<string> {
+  return uploadImage(uri, userId, 'chat-images');
+}
+
+export async function uploadAvatar(uri: string, userId: string): Promise<string> {
+  return uploadImage(uri, userId, 'avatars');
+}
+
+async function uploadImage(uri: string, userId: string, bucket: 'products' | 'chat-images' | 'avatars'): Promise<string> {
   try {
     const response = await fetch(uri);
     if (!response.ok) {
@@ -44,7 +56,7 @@ export async function uploadProductImage(uri: string, userId: string): Promise<s
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
     const path = `${userId}/${filename}`;
 
-    const { error } = await supabase.storage.from('products').upload(path, arrayBuffer, {
+    const { error } = await supabase.storage.from(bucket).upload(path, arrayBuffer, {
       contentType: mime,
       upsert: false,
     });
@@ -54,29 +66,38 @@ export async function uploadProductImage(uri: string, userId: string): Promise<s
     }
 
     const { data: publicUrlData } = supabase.storage
-      .from('products')
+      .from(bucket)
       .getPublicUrl(path);
 
     return publicUrlData.publicUrl;
   } catch (err) {
-    console.warn('[uploadProductImage] Tải ảnh lên thất bại:', uri, err);
+    console.warn(`[uploadImage:${bucket}] Tải ảnh lên thất bại:`, uri, err);
     throw new Error(err instanceof Error ? err.message : 'Không thể tải ảnh lên.');
   }
 }
 
 export async function deleteProductImage(url: string): Promise<void> {
+  await deleteStoredFile(url, 'products');
+}
+
+export async function deleteAvatarFile(url: string): Promise<void> {
+  await deleteStoredFile(url, 'avatars');
+}
+
+async function deleteStoredFile(url: string, bucket: 'products' | 'avatars'): Promise<void> {
   try {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
-    const bucketIndex = pathname.indexOf('/products/');
+    const token = `/${bucket}/`;
+    const bucketIndex = pathname.indexOf(token);
     if (bucketIndex === -1) return;
 
-    const filePath = pathname.slice(bucketIndex + '/products/'.length);
+    const filePath = pathname.slice(bucketIndex + token.length);
 
-    const { error } = await supabase.storage.from('products').remove([filePath]);
+    const { error } = await supabase.storage.from(bucket).remove([filePath]);
 
     if (error) {
-      console.warn('Không thể xóa ảnh cũ:', error.message);
+      console.warn(`Không thể xóa ảnh cũ trong bucket ${bucket}:`, error.message);
     }
   } catch {
     console.warn('Không thể parse URL ảnh để xóa.');

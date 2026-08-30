@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -26,6 +27,7 @@ const TABS: { key: NotificationType; label: string }[] = [
 ];
 
 export default function SellerNotificationsScreen() {
+  const router = useRouter();
   const { notifications, markNotificationsRead } = useStore();
   const [tab, setTab] = useState<NotificationType>('order');
 
@@ -39,7 +41,14 @@ export default function SellerNotificationsScreen() {
   }, []);
 
   const renderItem = ({ item }: { item: AppNotification }) => (
-    <TouchableOpacity activeOpacity={0.8} onPress={() => {}} style={[styles.card, item.read && styles.cardRead]}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => {
+        if (item.type === 'message' && item.link) {
+          router.push(`/chat/${item.link}`);
+        }
+      }}
+      style={[styles.card, item.read && styles.cardRead]}>
       {!item.read ? <View style={styles.unreadDot} /> : null}
       <View style={[styles.iconWrap, item.read && styles.iconWrapRead]}>
         <MaterialIcons

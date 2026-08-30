@@ -40,27 +40,37 @@ export default function BuyerNotificationsScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderItem = ({ item }: { item: AppNotification }) => (
-    <View style={[styles.card, item.read && styles.cardRead]}>
-      {!item.read ? <View style={styles.unreadDot} /> : null}
-      <View style={[styles.iconWrap, item.read && styles.iconWrapRead]}>
-        <MaterialIcons
-          name={toIconName(item.icon) ?? ICONS[item.type]}
-          size={22}
-          color={item.read ? colors.onSurfaceVariant : colors.onPrimaryContainer}
-        />
-      </View>
-      <View style={styles.info}>
-        <Text style={styles.titleText} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.body} numberOfLines={2}>
-          {item.body}
-        </Text>
-        <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
-      </View>
-    </View>
-  );
+  const renderItem = ({ item }: { item: AppNotification }) => {
+    const onPress = () => {
+      if (item.type === 'message' && item.link) {
+        router.push(`/chat/${item.link}`);
+      }
+    };
+    return (
+      <TouchableOpacity
+        activeOpacity={item.type === 'message' && item.link ? 0.8 : 1}
+        onPress={onPress}
+        style={[styles.card, item.read && styles.cardRead]}>
+        {!item.read ? <View style={styles.unreadDot} /> : null}
+        <View style={[styles.iconWrap, item.read && styles.iconWrapRead]}>
+          <MaterialIcons
+            name={toIconName(item.icon) ?? ICONS[item.type]}
+            size={22}
+            color={item.read ? colors.onSurfaceVariant : colors.onPrimaryContainer}
+          />
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.titleText} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.body} numberOfLines={2}>
+            {item.body}
+          </Text>
+          <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.screen}>

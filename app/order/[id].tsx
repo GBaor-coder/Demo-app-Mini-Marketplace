@@ -33,7 +33,7 @@ export default function OrderDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, products, getUserById, updateOrderStatus } = useStore();
+  const { orders, products, getUserById, updateOrderStatus, startChat } = useStore();
   const [updating, setUpdating] = useState(false);
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
@@ -85,6 +85,13 @@ export default function OrderDetailScreen() {
   const deliveryLabel =
     order.deliveryMethod === 'meetup' ? 'Gặp mặt trực tiếp' : 'Giao tận nơi (COD)';
   const itemTotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const openChat = async () => {
+    const threadId = await startChat(order.sellerId, product?.id ?? undefined);
+    if (threadId) {
+      router.push(`/chat/${threadId}`);
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -151,6 +158,9 @@ export default function OrderDetailScreen() {
                 {seller?.campus ?? 'Người bán'}
               </Text>
             </View>
+            <TouchableOpacity onPress={openChat} style={styles.chatBtn}>
+              <MaterialIcons name="chat" size={20} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         </View>
 

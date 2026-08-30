@@ -24,12 +24,15 @@ function createIcon({ color }: { color: string }) {
 }
 
 export default function TabLayout() {
-  const { hydrated } = useStore();
+  const { hydrated, unreadChatCount } = useStore();
   const insets = useSafeAreaInsets();
 
   if (!hydrated) {
     return null;
   }
+
+  const chatBadge =
+    unreadChatCount > 0 ? (unreadChatCount > 9 ? '9+' : unreadChatCount) : undefined;
 
   return (
     <Tabs
@@ -52,6 +55,15 @@ export default function TabLayout() {
         options={{
           title: 'Đăng bán',
           tabBarIcon: createIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="chats"
+        options={{
+          title: 'Tin nhắn',
+          tabBarIcon: tabIcon('chat', 'chat'),
+          tabBarBadge: chatBadge,
+          tabBarBadgeStyle: styles.badge,
         }}
       />
       <Tabs.Screen
@@ -90,5 +102,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontWeight: '500',
+  },
+  badge: {
+    backgroundColor: colors.error,
+    color: colors.onError,
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

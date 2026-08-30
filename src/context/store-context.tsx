@@ -34,8 +34,10 @@ import {
 } from '@/src/lib/repo/addresses';
 import {
   listChatThreads,
+  getChatThread as repoGetChatThread,
   createChatThread as repoCreateChatThread,
   sendMessage as repoSendMessage,
+  markThreadRead as repoMarkThreadRead,
 } from '@/src/lib/repo/chat';
 import {
   listNotifications,
@@ -46,6 +48,7 @@ import { createReview as repoCreateReview } from '@/src/lib/repo/reviews';
 import {
   getProfileById as repoGetProfileById,
   getProfilesByIds as repoGetProfilesByIds,
+  updateProfile as repoUpdateProfile,
 } from '@/src/lib/repo/profiles';
 import { DEMO_USERS } from '@/src/data/seed';
 import {
@@ -56,13 +59,13 @@ import {
   LocationPoint,
   Order,
   OrderStatus,
-  Product,
+Product,
   ProductInput,
+  ProfileUpdateInput,
   Review,
   SavedAddress,
 
   User,
-
 } from '@/src/types';
 const STORAGE_KEY = '@uniloop/demo-state-v1';
 
@@ -82,10 +85,12 @@ type StoreContextValue = {
   notifications: AppNotification[];
   chats: ChatThread[];
   reviews: Review[];
+  unreadChatCount: number;
   login: (email: string, password: string) => Promise<User>;
   register: (
     input: Pick<User, 'name' | 'email' | 'phone' | 'password' | 'campus'>
   ) => Promise<{ needsVerification: boolean }>;
+  updateProfile: (input: ProfileUpdateInput) => Promise<void>;
   logout: () => Promise<void>;
   getUserById: (id: string) => User | undefined;
   ensureProfile: (id: string) => Promise<void>;
@@ -112,8 +117,14 @@ type StoreContextValue = {
   deleteAddress: (id: string) => Promise<void>;
   markNotificationsRead: () => Promise<void>;
   unreadCount: number;
-  sendMessage: (threadId: string, text: string, offerLocation?: LocationPoint) => Promise<void>;
-  startChat: (sellerId: string, productId: string) => Promise<string>;
+  markThreadRead: (threadId: string) => Promise<void>;
+  sendMessage: (
+    threadId: string,
+    text: string,
+    offerLocation?: LocationPoint,
+    imageUrl?: string
+  ) => Promise<void>;
+  startChat: (otherId: string, productId?: string | null) => Promise<string>;
   addReview: (review: Omit<Review, 'id' | 'createdAt'>) => Promise<void>;
   refreshProducts: () => Promise<void>;
   refreshOrders: () => Promise<void>;
@@ -124,6 +135,12 @@ type StoreContextValue = {
 };
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
+
+function sortThreads(threads: ChatThread[]): ChatThread[] {
+  return threads.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+}
 
 function mapProfileToUser(profile: Record<string, unknown>): User {
   return {
@@ -344,13 +361,92 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const refreshChats = useCallback(async () => {
     if (!currentUser) return;
     const threads = await listChatThreads(currentUser.id);
-    setChats(threads);
+    setChats(sortThreads(threads));
     const ids: string[] = [];
     for (const t of threads) {
       ids.push(...t.participants);
     }
     void ensureProfiles(ids);
   }, [currentUser, ensureProfiles]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const channel = supabase
+      .channel(`chat-realtime-${currentUser.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_threads' },
+        async (payload) => {
+          const thread = await repoGetChatThread(payload.new.id);
+          if (!thread || !mountedRef.current) return;
+          setChats((current) =>
+            sortThreads([thread, ...current.filter((t) => t.id !== thread.id)])
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat_threads' },
+        (payload) => {
+          if (!mountedRef.current) return;
+          setChats((current) =>
+            sortThreads(
+              current.map((t) =>
+                t.id === payload.new.id
+                  ? { ...t, updatedAt: payload.new.updated_at }
+                  : t
+              )
+            )
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'chat_threads' },
+        (payload) => {
+          if (!mountedRef.current) return;
+          setChats((current) => current.filter((t) => t.id !== payload.old.id));
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        async (payload) => {
+          if (!mountedRef.current) return;
+          const thread = await repoGetChatThread(payload.new.thread_id);
+          if (!thread || !mountedRef.current) return;
+          setChats((current) =>
+            sortThreads(current.map((t) => (t.id === thread.id ? thread : t)))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
+        (payload) => {
+          if (!mountedRef.current) return;
+          const row = payload.new;
+          setChats((current) =>
+            current.map((t) => {
+              if (t.id !== row.thread_id) return t;
+              return {
+                ...t,
+                messages: t.messages.map((m) =>
+                  m.id === row.id ? { ...m, read: row.read } : m
+                ),
+              };
+            })
+          );
+        }
+      );
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -480,6 +576,38 @@ export function StoreProvider({ children }: PropsWithChildren) {
       return { needsVerification: false };
     },
     []
+  );
+
+  const updateProfile = useCallback(
+    async (input: ProfileUpdateInput) => {
+      if (!currentUser) {
+        throw new Error('Bạn cần đăng nhập để chỉnh sửa hồ sơ.');
+      }
+
+      const updated = await repoUpdateProfile(currentUser.id, input);
+      if (!updated) {
+        throw new Error('Không thể cập nhật hồ sơ. Vui lòng thử lại.');
+      }
+
+      const authData: Record<string, string> = {};
+      if (input.name !== undefined) authData.name = input.name.trim();
+      if (input.phone !== undefined) authData.phone = input.phone.trim();
+      if (input.campus !== undefined) authData.campus = input.campus.trim();
+      if (input.avatar !== undefined) authData.avatar = input.avatar;
+
+      if (Object.keys(authData).length > 0) {
+        const { error: metaError } = await supabase.auth.updateUser({
+          data: authData,
+        });
+        if (metaError) {
+          console.warn('Không thể đồng bộ auth metadata:', metaError.message);
+        }
+      }
+
+      setUserProfile(updated);
+      setUsers((prev) => ({ ...prev, [updated.id]: updated }));
+    },
+    [currentUser]
   );
 
   const logout = useCallback(async () => {
@@ -813,14 +941,30 @@ export function StoreProvider({ children }: PropsWithChildren) {
     [notifications]
   );
 
+  const unreadChatCount = useMemo(() => {
+    if (!currentUser) return 0;
+    return chats.reduce(
+      (sum, thread) =>
+        sum +
+        thread.messages.filter((m) => m.senderId !== currentUser.id && !m.read).length,
+      0
+    );
+  }, [chats, currentUser]);
+
   const sendMessage = useCallback(
-    async (threadId: string, text: string, offerLocation?: LocationPoint) => {
+    async (
+      threadId: string,
+      text: string,
+      offerLocation?: LocationPoint,
+      imageUrl?: string
+    ) => {
       if (!currentUser) return;
       const message = await repoSendMessage({
         threadId,
         senderId: currentUser.id,
         text,
         offerLocation,
+        imageUrl,
       });
       setChats((current) =>
         current.map((thread) =>
@@ -841,38 +985,69 @@ export function StoreProvider({ children }: PropsWithChildren) {
           userId: recipientId,
           type: 'message',
           title: `${currentUser.name} đã nhắn tin cho bạn`,
-          body: text,
+          body: imageUrl && !text ? '[Ảnh]' : text,
           icon: 'chat',
+          link: threadId,
         });
       }
     },
     [chats, currentUser]
   );
 
-  const startChat = useCallback(async (sellerId: string, productId: string) => {
-    if (!currentUser) {
-      return '';
-    }
+  const markThreadRead = useCallback(
+    async (threadId: string) => {
+      if (!currentUser) return;
+      const thread = chats.find((t) => t.id === threadId);
+      if (!thread) return;
+      const hasUnread = thread.messages.some(
+        (m) => m.senderId !== currentUser.id && !m.read
+      );
+      if (!hasUnread) return;
 
-    const existing = chats.find(
-      (thread) =>
-        thread.participants.includes(sellerId) &&
-        thread.participants.includes(currentUser.id) &&
-        thread.productId === productId
-    );
-    if (existing) {
-      return existing.id;
-    }
+      await repoMarkThreadRead(threadId);
+      setChats((current) =>
+        current.map((t) =>
+          t.id === threadId
+            ? {
+                ...t,
+                messages: t.messages.map((m) =>
+                  m.senderId !== currentUser.id ? { ...m, read: true } : m
+                ),
+              }
+            : t
+        )
+      );
+    },
+    [chats, currentUser]
+  );
 
-    const thread = await repoCreateChatThread({
-      participant1: currentUser.id,
-      participant2: sellerId,
-      productId,
-    });
+  const startChat = useCallback(
+    async (otherId: string, productId?: string | null) => {
+      if (!currentUser || !otherId) {
+        return '';
+      }
 
-    setChats((current) => [thread, ...current]);
-    return thread.id;
-  }, [chats, currentUser]);
+      const existing = chats.find(
+        (thread) =>
+          thread.participants.includes(otherId) &&
+          thread.participants.includes(currentUser.id) &&
+          (thread.productId ?? null) === (productId ?? null)
+      );
+      if (existing) {
+        return existing.id;
+      }
+
+      const thread = await repoCreateChatThread({
+        participant1: currentUser.id,
+        participant2: otherId,
+        productId,
+      });
+
+      setChats((current) => sortThreads([thread, ...current]));
+      return thread.id;
+    },
+    [chats, currentUser]
+  );
 
   const addReview = useCallback(async (review: Omit<Review, 'id' | 'createdAt'>) => {
     const created = await repoCreateReview(review);
@@ -893,6 +1068,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       reviews,
       login,
       register,
+      updateProfile,
       logout,
       getUserById,
       ensureProfile,
@@ -914,6 +1090,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
       deleteAddress,
       markNotificationsRead,
       unreadCount,
+      markThreadRead,
+      unreadChatCount,
       sendMessage,
       startChat,
       addReview,
@@ -937,6 +1115,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       reviews,
       login,
       register,
+      updateProfile,
       logout,
       getUserById,
       ensureProfile,
@@ -958,6 +1137,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
       deleteAddress,
       markNotificationsRead,
       unreadCount,
+      markThreadRead,
+      unreadChatCount,
       sendMessage,
       startChat,
       addReview,

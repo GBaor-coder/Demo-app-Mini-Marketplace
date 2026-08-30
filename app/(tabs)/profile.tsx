@@ -38,6 +38,11 @@ export default function ProfileScreen() {
 
   const group1: MenuItem[] = [
     {
+      icon: 'chat',
+      label: 'Tin nhắn',
+      route: '/chats',
+    },
+    {
       icon: 'favorite',
       label: 'Sản phẩm yêu thích',
       route: '/favorites',
@@ -96,6 +101,12 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.profileCard}>
+          <IconButton
+            name="edit"
+            onPress={() => router.push('/edit-profile' as any)}
+            style={styles.editBtn}
+            accessibilityLabel="Chỉnh sửa hồ sơ"
+          />
           <View style={styles.avatarWrap}>
             <Avatar uri={currentUser.avatar} name={currentUser.name} size={96} />
             <View style={styles.verified}>
@@ -107,6 +118,7 @@ export default function ProfileScreen() {
             <MaterialIcons name="school" size={16} color={colors.onSurfaceVariant} />
             <Text style={styles.school}>{currentUser.campus}</Text>
           </View>
+          {currentUser.bio ? <Text style={styles.bio}>{currentUser.bio}</Text> : null}
           <View style={styles.ratingChip}>
             <MaterialIcons name="star" size={18} color={colors.star} />
             <Text style={styles.ratingValue}>{currentUser.rating?.toFixed(1) ?? '5.0'}/5</Text>
@@ -181,7 +193,26 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: 16,
     padding: 24,
+    position: 'relative',
     ...shadow.level1,
+  },
+  editBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderRadius: radius.full,
+    height: 36,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    width: 36,
+  },
+  bio: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    lineHeight: 22,
+    marginTop: 12,
+    textAlign: 'center',
   },
   avatarWrap: {
     position: 'relative',

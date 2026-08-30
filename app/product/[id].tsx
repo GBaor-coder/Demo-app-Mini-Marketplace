@@ -26,10 +26,12 @@ export default function ProductDetailScreen() {
   const { width } = useWindowDimensions();
   const {
     products,
+    currentUser,
     getUserById,
     favoriteIds,
     toggleFavorite,
     addToCart,
+    startChat,
   } = useStore();
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -51,6 +53,21 @@ export default function ProductDetailScreen() {
   const handleBuyNow = () => {
     addToCart(product.id);
     router.push('/cart');
+  };
+
+  const handleChat = async () => {
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+    if (currentUser.id === product.sellerId) {
+      Alert.alert('Đây là tin của bạn', 'Bạn không thể nhắn tin với chính mình.');
+      return;
+    }
+    const threadId = await startChat(product.sellerId, product.id);
+    if (threadId) {
+      router.push(`/chat/${threadId}`);
+    }
   };
 
   return (
@@ -113,20 +130,26 @@ export default function ProductDetailScreen() {
           </View>
 
           <View style={styles.sellerCard}>
-            <Avatar uri={seller?.avatar} name={seller?.name} size={56} />
-            <View style={styles.sellerInfo}>
-              <View style={styles.sellerNameRow}>
-                <Text style={styles.sellerName}>{seller?.name ?? 'Người bán'}</Text>
-                {seller?.verified ? (
-                  <MaterialIcons name="verified" size={18} color={colors.primary} />
-                ) : null}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push(`/store?userId=${product.sellerId}`)}
+              style={styles.sellerCardInner}>
+              <Avatar uri={seller?.avatar} name={seller?.name} size={56} />
+              <View style={styles.sellerInfo}>
+                <View style={styles.sellerNameRow}>
+                  <Text style={styles.sellerName}>{seller?.name ?? 'Người bán'}</Text>
+                  {seller?.verified ? (
+                    <MaterialIcons name="verified" size={18} color={colors.primary} />
+                  ) : null}
+                </View>
+                <Text style={styles.sellerUni}>{seller?.campus ?? ''}</Text>
+                <View style={styles.sellerTrust}>
+                  <MaterialIcons name="star" size={13} color={colors.star} />
+                  <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
+                </View>
               </View>
-              <Text style={styles.sellerUni}>{seller?.campus ?? ''}</Text>
-              <View style={styles.sellerTrust}>
-                <MaterialIcons name="star" size={13} color={colors.star} />
-                <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
-              </View>
-            </View>
+              <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.sectionCard}>
@@ -173,6 +196,11 @@ export default function ProductDetailScreen() {
         </View>
       ) : (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
+          <TouchableOpacity
+            onPress={handleChat}
+            style={styles.chatButton}>
+            <MaterialIcons name="chat" size={22} color={colors.primary} />
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => toggleFavorite(product.id)}
             style={[styles.roundButton, favorite && styles.roundButtonActive]}>
@@ -324,15 +352,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sellerCard: {
-    alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: 'rgba(195,198,215,0.3)',
     borderRadius: radius.md,
     borderWidth: 1,
-    flexDirection: 'row',
-    gap: 12,
     padding: 16,
     ...shadow.level1,
+  },
+  sellerCardInner: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
   },
   sellerInfo: {
     flex: 1,

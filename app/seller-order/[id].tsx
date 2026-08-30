@@ -26,7 +26,7 @@ export default function SellerOrderDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, products, getUserById, updateOrderStatus } = useStore();
+  const { orders, products, getUserById, updateOrderStatus, startChat } = useStore();
   const [updating, setUpdating] = useState<string | null>(null);
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
@@ -158,6 +158,13 @@ export default function SellerOrderDetailScreen() {
   const canReject = ['pending', 'confirmed'].includes(order.status);
   const canDeliver = order.status === 'confirmed';
 
+  const openChat = async () => {
+    const threadId = await startChat(order.buyerId, product?.id ?? undefined);
+    if (threadId) {
+      router.push(`/chat/${threadId}`);
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <ScreenHeader title={`#${order.id}`} />
@@ -190,6 +197,9 @@ export default function SellerOrderDetailScreen() {
                 </View>
               ) : null}
             </View>
+            <TouchableOpacity onPress={openChat} style={styles.chatIcon}>
+              <MaterialIcons name="chat" size={22} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         ) : null}
 

@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
@@ -11,22 +11,59 @@ import { formatCurrency } from '@/src/utils/format';
 
 export default function SellerStoreTab() {
   const router = useRouter();
-  const { currentUser, products, orders, logout } = useStore();
+  const { userId } = useLocalSearchParams<{ userId?: string }>();
+  const { currentUser, products, orders, logout, getUserById, ensureProfile, startChat } =
+    useStore();
   const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const visitingOther = Boolean(userId && currentUser && userId !== currentUser.id);
+
+  const otherOwner = useMemo(
+    () => (visitingOther && userId ? getUserById(userId) : undefined),
+    [visitingOther, userId, getUserById]
+  );
+
+  useEffect(() => {
+    if (userId && currentUser && userId !== currentUser.id) {
+      void ensureProfile(userId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, currentUser?.id]);
 
   if (!currentUser) {
     return null;
   }
 
-  const myProducts = products.filter(
-    (p) => p.sellerId === currentUser.id && p.status === 'active'
-  );
-  const soldCount = orders.filter(
-    (o) => o.sellerId === currentUser.id && o.status === 'completed'
-  ).length;
-  const rating = currentUser.rating ?? 4.8;
+  if (visitingOther && !otherOwner) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader title="Cửa hàng" showBack />
+        <View style={styles.loadingWrap}>
+          <MaterialIcons name="storefront" size={56} color={colors.outlineVariant} />
+          <Text style={styles.loadingText}>Đang tải thông tin cửa hàng...</Text>
+        </View>
+      </View>
+    );
+  }
 
-  const renderItem = ({ item }: { item: (typeof myProducts)[number] }) => (
+  const owner = visitingOther ? otherOwner! : currentUser;
+  const isOwnStore = owner.id === currentUser.id;
+
+  const openChat = async () => {
+    if (isOwnStore) return;
+    const threadId = await startChat(owner.id);
+    if (threadId) {
+      router.push(`/chat/${threadId}`);
+    }
+  };
+
+  const selling = products.filter((p) => p.sellerId === owner.id && p.status === 'active');
+  const soldCount = orders.filter(
+    (o) => o.sellerId === owner.id && o.status === 'completed'
+  ).length;
+  const rating = owner.rating ?? 4.8;
+
+  const renderItem = ({ item }: { item: (typeof selling)[number] }) => (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => router.push(`/product/${item.id}`)}
@@ -45,10 +82,14 @@ export default function SellerStoreTab() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand showBack={false} />
+      {isOwnStore ? (
+        <ScreenHeader brand showBack={false} />
+      ) : (
+        <ScreenHeader title="Cửa hàng" showBack />
+      )}
 
       <FlatList
-        data={myProducts}
+        data={selling}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
@@ -59,9 +100,9 @@ export default function SellerStoreTab() {
           <View>
             <View style={styles.shopHeader}>
               <View style={styles.shopTop}>
-                <Avatar uri={currentUser.avatar} name={currentUser.name} size={72} />
+                <Avatar uri={owner.avatar} name={owner.name} size={72} />
                 <View style={styles.shopInfo}>
-                  <Text style={styles.shopName}>{currentUser.name}</Text>
+                  <Text style={styles.shopName}>{owner.name}</Text>
                   <View style={styles.badgeRow}>
                     <View style={styles.verifiedBadge}>
                       <MaterialIcons name="check-circle" size={14} color={colors.onPrimary} />
@@ -74,18 +115,29 @@ export default function SellerStoreTab() {
                   </View>
                   <Text style={styles.campus}>
                     <MaterialIcons name="location-on" size={12} color={colors.onSurfaceVariant} />{' '}
-                    {currentUser.campus}
+                    {owner.campus}
                   </Text>
                 </View>
               </View>
               <Text style={styles.shopDesc}>
-                Chào mừng bạn đến với cửa hàng của mình. Cảm ơn vì đã ghé thăm!
+                {isOwnStore
+                  ? 'Chào mừng bạn đến với cửa hàng của mình. Cảm ơn vì đã ghé thăm!'
+                  : `Cửa hàng của ${owner.name} trên UniLoop. Nhắn tin để trao đổi trực tiếp.`}
               </Text>
             </View>
 
+            {isOwnStore ? null : (
+              <TouchableOpacity activeOpacity={0.9} onPress={openChat} style={styles.messageCta}>
+                <MaterialIcons name="forum" size={20} color={colors.onPrimary} />
+                <Text style={styles.messageCtaText}>
+                  Nhắn tin cho {owner.name.split(' ')[0]}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <View style={styles.stats}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{myProducts.length}</Text>
+                <Text style={styles.statValue}>{selling.length}</Text>
                 <Text style={styles.statLabel}>Sản phẩm</Text>
               </View>
               <View style={styles.statDivider} />
@@ -95,14 +147,14 @@ export default function SellerStoreTab() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{formatCurrency(4.8).slice(0, 4)}</Text>
+                <Text style={styles.statValue}>{rating.toFixed(1)}</Text>
                 <Text style={styles.statLabel}>Đánh giá</Text>
               </View>
             </View>
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Sản phẩm đang bán</Text>
-              <Text style={styles.sectionCount}>{myProducts.length} tin</Text>
+              <Text style={styles.sectionCount}>{selling.length} tin</Text>
             </View>
           </View>
         }
@@ -113,56 +165,64 @@ export default function SellerStoreTab() {
             </View>
             <Text style={styles.emptyTitle}>Chưa có sản phẩm nào</Text>
             <Text style={styles.emptyText}>
-              Hãy đăng sản phẩm đầu tiên để bắt đầu bán trên UniLoop.
+              {isOwnStore
+                ? 'Hãy đăng sản phẩm đầu tiên để bắt đầu bán trên UniLoop.'
+                : `Hiện tại chưa có sản phẩm nào đang bán.`}
             </Text>
-            <TouchableOpacity
-              activeOpacity={0.85}
-               onPress={() => router.push('/create')}
-              style={styles.emptyBtn}>
-              <Text style={styles.emptyBtnText}>Đăng sản phẩm</Text>
-            </TouchableOpacity>
+            {isOwnStore ? (
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => router.push('/create')}
+                style={styles.emptyBtn}>
+                <Text style={styles.emptyBtnText}>Đăng sản phẩm</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         }
         ListFooterComponent={
-          <View style={styles.logoutWrap}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push('/change-password' as any)}
-              style={styles.accountAction}>
-              <MaterialIcons name="lock" size={20} color={colors.primary} />
-              <Text style={styles.accountActionText}>Đổi mật khẩu</Text>
-              <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
-            </TouchableOpacity>
+          isOwnStore ? (
+            <View style={styles.logoutWrap}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/change-password' as any)}
+                style={styles.accountAction}>
+                <MaterialIcons name="lock" size={20} color={colors.primary} />
+                <Text style={styles.accountActionText}>Đổi mật khẩu</Text>
+                <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push('/delete-account' as any)}
-              style={styles.deleteAction}>
-              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-              <Text style={styles.deleteActionText}>Xóa tài khoản</Text>
-              <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
-            </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/delete-account' as any)}
+                style={styles.deleteAction}>
+                <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+                <Text style={styles.deleteActionText}>Xóa tài khoản</Text>
+                <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+              </TouchableOpacity>
 
-            <Button
-              title="Đăng xuất"
-              variant="outline"
-              danger
-              icon="logout"
-              onPress={() => setLogoutOpen(true)}
-              fullWidth
-            />
-          </View>
+              <Button
+                title="Đăng xuất"
+                variant="outline"
+                danger
+                icon="logout"
+                onPress={() => setLogoutOpen(true)}
+                fullWidth
+              />
+            </View>
+          ) : null
         }
       />
 
-      <LogoutModal
-        visible={logoutOpen}
-        onClose={() => setLogoutOpen(false)}
-        onConfirm={async () => {
-          setLogoutOpen(false);
-          await logout();
-        }}
-      />
+      {isOwnStore ? (
+        <LogoutModal
+          visible={logoutOpen}
+          onClose={() => setLogoutOpen(false)}
+          onConfirm={async () => {
+            setLogoutOpen(false);
+            await logout();
+          }}
+        />
+      ) : null}
     </View>
   );
 }
@@ -178,6 +238,15 @@ const styles = StyleSheet.create({
   },
   row: {
     gap: 16,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    gap: 12,
+    paddingTop: 80,
+  },
+  loadingText: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
   },
   shopHeader: {
     backgroundColor: colors.surfaceContainerLowest,
@@ -241,6 +310,21 @@ const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
     lineHeight: 22,
+  },
+  messageCta: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 12,
+    ...shadow.primary,
+  },
+  messageCtaText: {
+    ...typography.button,
+    color: colors.onPrimary,
   },
   stats: {
     alignItems: 'center',

@@ -9,6 +9,7 @@ type NotificationRow = {
   body: string;
   icon: string;
   read: boolean;
+  link: string | null;
   created_at: string;
 };
 
@@ -31,6 +32,7 @@ export async function listNotifications(userId: string): Promise<AppNotification
     createdAt: row.created_at,
     read: row.read,
     icon: row.icon,
+    link: row.link ?? undefined,
   }));
 }
 
@@ -40,6 +42,7 @@ export async function createNotification(input: {
   title: string;
   body: string;
   icon: string;
+  link?: string;
 }): Promise<AppNotification | null> {
   const { data, error } = await supabase
     .from('notifications')
@@ -50,6 +53,7 @@ export async function createNotification(input: {
       body: input.body,
       icon: input.icon,
       read: false,
+      link: input.link ?? null,
     })
     .select('*')
     .single();
@@ -66,6 +70,7 @@ export async function createNotification(input: {
     createdAt: data.created_at,
     read: data.read,
     icon: data.icon,
+    link: data.link ?? undefined,
   };
 }
 
