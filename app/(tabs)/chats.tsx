@@ -135,19 +135,21 @@ export default function ChatsScreen() {
         right={<IconButton name="search" onPress={() => router.push('/search')} />}
       />
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabsContent}>
-        {FILTERS.map((item) => (
-          <Chip
-            key={item.key}
-            label={item.label}
-            selected={filter === item.key}
-            onPress={() => setFilter(item.key)}
-          />
-        ))}
-      </ScrollView>
+      <View style={styles.tabsWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsContent}>
+          {FILTERS.map((item) => (
+            <Chip
+              key={item.key}
+              label={item.label}
+              selected={filter === item.key}
+              onPress={() => setFilter(item.key)}
+            />
+          ))}
+        </ScrollView>
+      </View>
 
       <FlatList
         data={list}
@@ -185,7 +187,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
+  tabsWrap: {
+    height: 64,
+  },
   tabsContent: {
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,

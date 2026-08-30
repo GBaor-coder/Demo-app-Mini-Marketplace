@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -16,9 +15,6 @@ import { Button, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product, ProductCategory } from '@/src/types';
-
-const BANNER_IMAGE =
-  'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=900';
 
 const HOME_CATEGORIES: {
   category: ProductCategory;
@@ -128,25 +124,6 @@ export default function HomeScreen() {
         }
         ListHeaderComponent={
           <View>
-            <View style={styles.banner}>
-              <Image source={{ uri: BANNER_IMAGE }} style={styles.bannerImage} contentFit="cover" />
-              <View style={styles.bannerScrim} />
-              <View style={styles.bannerContent}>
-                <View style={styles.bannerBadge}>
-                  <Text style={styles.bannerBadgeText}>Ưu đãi Sinh viên</Text>
-                </View>
-                <Text style={styles.bannerTitle}>Chào năm học mới! Giảm 50% giáo trình</Text>
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  onPress={() =>
-                    router.push({ pathname: '/search-results', params: { category: 'Giáo trình' } })
-                  }
-                  style={styles.bannerButton}>
-                  <Text style={styles.bannerButtonText}>Mua ngay</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Danh mục</Text>
               <TouchableOpacity onPress={() => router.push('/')}>
@@ -308,68 +285,6 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'space-between',
     marginBottom: 16,
-  },
-  banner: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    height: 200,
-    marginBottom: 24,
-    marginTop: 16,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  bannerImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  bannerScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(11,28,48,0.72)',
-  },
-  bannerContent: {
-    flex: 1,
-    gap: 8,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  bannerBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0,74,198,0.25)',
-    borderColor: 'rgba(0,74,198,0.35)',
-    borderRadius: radius.full,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  bannerBadgeText: {
-    color: colors.primaryFixedDim,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  bannerTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-    lineHeight: 24,
-    maxWidth: 260,
-  },
-  bannerButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    marginTop: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 4,
-  },
-  bannerButtonText: {
-    color: colors.onPrimary,
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 24,
   },
   sectionHeader: {
     alignItems: 'center',

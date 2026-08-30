@@ -37,7 +37,7 @@ export function Chip({
       {icon ? <MaterialIcons name={icon} size={size === 'sm' ? 16 : 18} color={selected ? color : colors.onSurfaceVariant} /> : null}
       <Text
         numberOfLines={1}
-        style={[styles.label, size === 'sm' && styles.labelSm, selected && { color, fontWeight: '600' }]}>
+        style={[styles.label, size === 'sm' && styles.labelSm, selected && { color }]}>
         {label}
       </Text>
     </Tag>

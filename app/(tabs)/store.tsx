@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Button, LogoutModal, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { formatCurrency } from '@/src/utils/format';
@@ -12,9 +12,8 @@ import { formatCurrency } from '@/src/utils/format';
 export default function SellerStoreTab() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId?: string }>();
-  const { currentUser, products, orders, logout, getUserById, ensureProfile, startChat } =
+  const { currentUser, products, orders, getUserById, ensureProfile, startChat } =
     useStore();
-  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const visitingOther = Boolean(userId && currentUser && userId !== currentUser.id);
 
@@ -179,50 +178,7 @@ export default function SellerStoreTab() {
             ) : null}
           </View>
         }
-        ListFooterComponent={
-          isOwnStore ? (
-            <View style={styles.logoutWrap}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => router.push('/change-password' as any)}
-                style={styles.accountAction}>
-                <MaterialIcons name="lock" size={20} color={colors.primary} />
-                <Text style={styles.accountActionText}>Đổi mật khẩu</Text>
-                <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => router.push('/delete-account' as any)}
-                style={styles.deleteAction}>
-                <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-                <Text style={styles.deleteActionText}>Xóa tài khoản</Text>
-                <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
-              </TouchableOpacity>
-
-              <Button
-                title="Đăng xuất"
-                variant="outline"
-                danger
-                icon="logout"
-                onPress={() => setLogoutOpen(true)}
-                fullWidth
-              />
-            </View>
-          ) : null
-        }
       />
-
-      {isOwnStore ? (
-        <LogoutModal
-          visible={logoutOpen}
-          onClose={() => setLogoutOpen(false)}
-          onConfirm={async () => {
-            setLogoutOpen(false);
-            await logout();
-          }}
-        />
-      ) : null}
     </View>
   );
 }
@@ -434,40 +390,5 @@ const styles = StyleSheet.create({
   emptyBtnText: {
     ...typography.button,
     color: colors.onPrimary,
-  },
-  logoutWrap: {
-    gap: 12,
-    marginTop: 24,
-  },
-  accountAction: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    ...shadow.level1,
-  },
-  accountActionText: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-    flex: 1,
-  },
-  deleteAction: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(186,26,26,0.05)',
-    borderColor: 'rgba(186,26,26,0.15)',
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  deleteActionText: {
-    ...typography.bodyMd,
-    color: colors.error,
-    flex: 1,
   },
 });
