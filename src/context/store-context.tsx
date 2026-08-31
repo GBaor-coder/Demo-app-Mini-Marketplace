@@ -108,7 +108,7 @@ type StoreContextValue = {
   createOrders: (
     location: LocationPoint,
     note: string,
-    deliveryMethod: DeliveryMethod,
+    deliveryMethods: Record<string, DeliveryMethod>,
     sellerIds?: string[]
   ) => Promise<number>;
   updateOrderStatus: (id: string, status: OrderStatus, reason?: string) => Promise<void>;
@@ -804,7 +804,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
     async (
       location: LocationPoint,
       note: string,
-      deliveryMethod: DeliveryMethod,
+      deliveryMethods: Record<string, DeliveryMethod>,
       sellerIds?: string[]
     ) => {
       if (!currentUser || cart.length === 0) {
@@ -839,6 +839,14 @@ export function StoreProvider({ children }: PropsWithChildren) {
       const newOrders: Order[] = [];
 
       for (const [sellerId, lines] of grouped.entries()) {
+        const method = deliveryMethods[sellerId] ?? 'meetup';
+        const methodAllowed = lines.every(({ product }) =>
+          method === 'meetup' ? product.allowsMeetup : product.allowsCod
+        );
+        if (!methodAllowed) {
+          continue;
+        }
+
         const items = lines.map(({ product, quantity }) => ({
           productId: product.id,
           title: product.title,
@@ -847,7 +855,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
           quantity,
           condition: product.condition,
         }));
-        const shippingFee = deliveryMethod === 'cod' ? 15000 : 0;
+        const shippingFee = method === 'cod' ? 15000 : 0;
         const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         const order = await repoCreateOrder({
@@ -858,7 +866,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
           shippingFee,
           platformFee: 0,
           total: subtotal + shippingFee,
-          deliveryMethod,
+          deliveryMethod: method,
           deliveryLocation: location,
           note: note.trim(),
         });

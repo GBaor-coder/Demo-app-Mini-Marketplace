@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,13 +11,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Chip, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
 import { formatCurrency } from '@/src/utils/format';
-
-type Tab = 'active' | 'transaction' | 'sold' | 'draft';
 
 function productImageUri(product: Product): string | null {
   if (Array.isArray(product.images)) {
@@ -38,63 +35,15 @@ function productImageUri(product: Product): string | null {
 export default function SellerProductsTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentUser, products, orders, deleteProduct } = useStore();
-  const [tab, setTab] = useState<Tab>('active');
+  const { currentUser, products, deleteProduct } = useStore();
   const [deleting, setDeleting] = useState<Product | null>(null);
-
-  const activeOrderProductIds = useMemo(() => {
-    if (!currentUser) return new Set<string>();
-    const set = new Set<string>();
-    orders
-      .filter(
-        (o) =>
-          o.sellerId === currentUser.id &&
-          (o.status === 'pending' || o.status === 'confirmed' || o.status === 'in_transaction')
-      )
-      .forEach((o) => o.items.forEach((item) => set.add(item.productId)));
-    return set;
-  }, [currentUser, orders]);
 
   const myProducts = useMemo(() => {
     if (!currentUser) return [];
-    const mine = products.filter((p) => p.sellerId === currentUser.id);
-    if (tab === 'transaction') {
-      return mine.filter((p) => p.status === 'active' && activeOrderProductIds.has(p.id));
-    }
-    if (tab === 'active') {
-      return mine.filter((p) => p.status === 'active' && !activeOrderProductIds.has(p.id));
-    }
-    if (tab === 'sold') return mine.filter((p) => p.status === 'sold');
-    return mine.filter((p) => p.status === 'draft');
-  }, [currentUser, products, tab, activeOrderProductIds]);
-
-  const stats = useMemo(() => {
-    const mine = products.filter((p) => p.sellerId === currentUser?.id);
-    const selling = mine.filter((p) => p.status === 'active');
-    return {
-      active: selling.filter((p) => !activeOrderProductIds.has(p.id)).length,
-      transaction: selling.filter((p) => activeOrderProductIds.has(p.id)).length,
-      sold: mine.filter((p) => p.status === 'sold').length,
-      draft: mine.filter((p) => p.status === 'draft').length,
-    };
-  }, [currentUser?.id, products, activeOrderProductIds]);
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'active', label: `Đang bán (${stats.active})` },
-    { key: 'transaction', label: `Chờ giao dịch (${stats.transaction})` },
-    { key: 'sold', label: `Đã bán (${stats.sold})` },
-    { key: 'draft', label: `Bản nháp (${stats.draft})` },
-  ];
-
-  const statusChip = (status: Product['status']) => {
-    if (status === 'active') {
-      return { bg: 'rgba(0,126,55,0.9)', fg: colors.onTertiaryContainer, dot: colors.tertiaryFixed, label: 'Đang bán' };
-    }
-    if (status === 'sold') {
-      return { bg: colors.surfaceContainerHigh, fg: colors.onSurfaceVariant, dot: colors.outline, label: 'Đã bán' };
-    }
-    return { bg: colors.surfaceContainer, fg: colors.onSurfaceVariant, dot: colors.outline, label: 'Nháp' };
-  };
+    return products.filter(
+      (p) => p.sellerId === currentUser.id && p.status !== 'draft'
+    );
+  }, [currentUser, products]);
 
   const openMenu = (item: Product) => {
     Alert.alert(item.title, undefined, [
@@ -105,7 +54,6 @@ export default function SellerProductsTab() {
   };
 
   const renderItem = ({ item }: { item: Product }) => {
-    const chip = statusChip(item.status);
     const imageUri = productImageUri(item);
     return (
       <TouchableOpacity
@@ -120,10 +68,6 @@ export default function SellerProductsTab() {
               <MaterialIcons name="image" size={40} color={colors.onSurfaceVariant} />
             </View>
           )}
-          <View style={[styles.statusChip, { backgroundColor: chip.bg }]}>
-            <View style={[styles.statusDot, { backgroundColor: chip.dot }]} />
-            <Text style={[styles.statusChipText, { color: chip.fg }]}>{chip.label}</Text>
-          </View>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => openMenu(item)}
@@ -164,25 +108,7 @@ export default function SellerProductsTab() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand showBack={false} />
-
-      <Text style={styles.pageTitle}>Sản phẩm</Text>
-
-      <View style={styles.tabs}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsContent}>
-          {tabs.map((item) => (
-            <Chip
-              key={item.key}
-              label={item.label}
-              selected={tab === item.key}
-              onPress={() => setTab(item.key)}
-            />
-          ))}
-        </ScrollView>
-      </View>
+      <ScreenHeader title="Quản lý sản phẩm" showBack={false} />
 
       <FlatList
         data={myProducts}
@@ -250,16 +176,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 20,
   },
-  tabs: {
-    borderBottomColor: 'rgba(195,198,215,0.3)',
-    borderBottomWidth: 1,
-    marginBottom: 20,
-  },
-  tabsContent: {
-    gap: 8,
-    paddingBottom: 8,
-    paddingHorizontal: 20,
-  },
   list: {
     gap: 16,
     padding: 20,
@@ -286,26 +202,6 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     width: '100%',
-  },
-  statusChip: {
-    alignItems: 'center',
-    borderRadius: radius.full,
-    flexDirection: 'row',
-    gap: 4,
-    left: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    position: 'absolute',
-    top: 12,
-    zIndex: 2,
-  },
-  statusDot: {
-    borderRadius: radius.full,
-    height: 8,
-    width: 8,
-  },
-  statusChipText: {
-    ...typography.labelMd,
   },
   menuBtn: {
     alignItems: 'center',

@@ -78,7 +78,7 @@ export default function OrderRateScreen() {
   if (!order || !item) {
     return (
       <View style={styles.screen}>
-        <ScreenHeader brand />
+        <ScreenHeader title="Đánh giá sản phẩm" />
         <EmptyState icon={toIconName('receipt_outline')} title="Không tìm thấy đơn hàng" description="Đơn hàng này có thể đã bị xóa." />
       </View>
     );
@@ -86,10 +86,9 @@ export default function OrderRateScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand />
+      <ScreenHeader title="Đánh giá sản phẩm" />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Đánh giá sản phẩm</Text>
 
         {item ? (
           <View style={styles.productCard}>

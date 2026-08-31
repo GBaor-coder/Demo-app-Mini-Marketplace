@@ -1,5 +1,5 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -15,15 +15,6 @@ import { Button, IconName, MaterialIcons, ScreenHeader, toIconName } from '@/src
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
-import { takeLocationDraft } from '@/src/utils/location-draft';
-
-const PROVINCES = ['Đồng Tháp'];
-const DISTRICTS: Record<string, string[]> = {
-  'Đồng Tháp': ['Thành phố Cao Lãnh'],
-};
-const WARDS: Record<string, string[]> = {
-  'Thành phố Cao Lãnh': ['Phường Cao Lãnh', 'Phường Mỹ Ngãi', 'Phường Mỹ Trà'],
-};
 
 const LABEL_OPTIONS: { label: string; icon: IconName }[] = [
   { label: 'Nhà', icon: toIconName('home') },
@@ -34,15 +25,15 @@ const LABEL_OPTIONS: { label: string; icon: IconName }[] = [
 
 export default function AddressFormScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; lat?: string; lng?: string; address?: string }>();
   const { addresses, addAddress, updateAddress } = useStore();
 
-  const editing = id ? addresses.find((a) => a.id === id) : undefined;
+  const editing = params.id ? addresses.find((a) => a.id === params.id) : undefined;
 
   const [label, setLabel] = useState(editing?.label ?? 'Nhà');
   const [recipient, setRecipient] = useState(editing?.recipient ?? '');
   const [phone, setPhone] = useState(editing?.phone ?? '');
-  const [province, setProvince] = useState(editing?.province ?? PROVINCES[0]);
+  const [province, setProvince] = useState(editing?.province ?? '');
   const [district, setDistrict] = useState(editing?.district ?? '');
   const [ward, setWard] = useState(editing?.ward ?? '');
   const [street, setStreet] = useState(editing?.street ?? '');
@@ -55,16 +46,16 @@ export default function AddressFormScreen() {
   );
   const [saving, setSaving] = useState(false);
 
-  const districtOptions = useMemo(() => DISTRICTS[province] ?? [], [province]);
-  const wardOptions = useMemo(() => WARDS[district] ?? [], [district]);
-
   useFocusEffect(
     useCallback(() => {
-      const draft = takeLocationDraft();
-      if (draft) {
-        setLocation(draft);
+      if (params.lat && params.lng) {
+        setLocation({
+          latitude: Number(params.lat),
+          longitude: Number(params.lng),
+          address: params.address ?? '',
+        });
       }
-    }, [])
+    }, [params.lat, params.lng, params.address])
   );
 
   const save = () => {
@@ -111,15 +102,7 @@ export default function AddressFormScreen() {
     }, 500);
   };
 
-  function locationDraftCheck() {
-    const draft = takeLocationDraft();
-    if (draft) {
-      setLocation(draft);
-    }
-  }
-
   const openMapPicker = () => {
-    locationDraftCheck();
     router.push('/location-select');
   };
 
@@ -151,69 +134,31 @@ export default function AddressFormScreen() {
         />
 
         <Text style={styles.fieldLabel}>TỈNH/THÀNH</Text>
-        <View style={styles.optionRow}>
-          {PROVINCES.map((item) => {
-            const selected = province === item;
-            return (
-              <TouchableOpacity
-                key={item}
-                activeOpacity={0.85}
-                onPress={() => {
-                  setProvince(item);
-                  setDistrict('');
-                  setWard('');
-                }}
-                style={[styles.optionChip, selected && styles.optionChipActive]}>
-                <Text style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <TextInput
+          value={province}
+          onChangeText={setProvince}
+          placeholder="VD: Đồng Tháp"
+          placeholderTextColor={colors.outline}
+          style={styles.input}
+        />
 
         <Text style={styles.fieldLabel}>QUẬN/HUYỆN</Text>
-        <View style={styles.optionRow}>
-          {districtOptions.map((item) => {
-            const selected = district === item;
-            return (
-              <TouchableOpacity
-                key={item}
-                activeOpacity={0.85}
-                onPress={() => {
-                  setDistrict(item);
-                  setWard('');
-                }}
-                style={[styles.optionChip, selected && styles.optionChipActive]}>
-                <Text style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <TextInput
+          value={district}
+          onChangeText={setDistrict}
+          placeholder="VD: Thành phố Cao Lãnh"
+          placeholderTextColor={colors.outline}
+          style={styles.input}
+        />
 
-        {district ? (
-          <>
-            <Text style={styles.fieldLabel}>PHƯỜNG/XÃ</Text>
-            <View style={styles.optionRow}>
-              {wardOptions.map((item) => {
-                const selected = ward === item;
-                return (
-                  <TouchableOpacity
-                    key={item}
-                    activeOpacity={0.85}
-                    onPress={() => setWard(item)}
-                    style={[styles.optionChip, selected && styles.optionChipActive]}>
-                    <Text style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
-                      {item}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        ) : null}
+        <Text style={styles.fieldLabel}>PHƯỜNG/XÃ</Text>
+        <TextInput
+          value={ward}
+          onChangeText={setWard}
+          placeholder="VD: Phường Mỹ Phú"
+          placeholderTextColor={colors.outline}
+          style={styles.input}
+        />
 
         <Text style={styles.fieldLabel}>ĐỊA CHỈ CỤ THỂ</Text>
         <TextInput
@@ -381,31 +326,6 @@ const styles = StyleSheet.create({
   textarea: {
     minHeight: 80,
     textAlignVertical: 'top',
-  },
-  optionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  optionChip: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  optionChipActive: {
-    backgroundColor: 'rgba(0,74,198,0.06)',
-    borderColor: colors.primaryContainer,
-  },
-  optionChipText: {
-    color: colors.onSurface,
-    fontSize: 13,
-  },
-  optionChipTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   inlineRow: {
     flexDirection: 'row',

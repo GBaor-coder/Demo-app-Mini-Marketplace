@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
+import { LocationPreview } from '@/src/components/location-preview';
 import { Button, EmptyState, IconName, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
@@ -276,8 +277,8 @@ export default function SellerOrderDetailScreen() {
               </Text>
             </View>
           </View>
-          <View style={styles.mapBox}>
-            <MaterialIcons name="map" size={44} color={colors.outlineVariant} />
+          <View style={styles.mapPreviewWrap}>
+            <LocationPreview location={order.deliveryLocation} />
           </View>
           {order.note ? (
             <View style={styles.deliveryRow}>
@@ -567,16 +568,8 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '500',
   },
-  mapBox: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceDim,
-    borderColor: 'rgba(195,198,215,0.1)',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    height: 128,
-    justifyContent: 'center',
+  mapPreviewWrap: {
     marginTop: 12,
-    overflow: 'hidden',
   },
   footer: {
     backgroundColor: colors.surfaceContainerLowest,

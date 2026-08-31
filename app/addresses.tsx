@@ -14,7 +14,6 @@ import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { SavedAddress } from '@/src/types';
-import { setAddressDraft } from '@/src/utils/address-draft';
 
 export default function AddressesScreen() {
   const router = useRouter();
@@ -29,8 +28,7 @@ export default function AddressesScreen() {
       onPress={() => {
         if (select === '1') {
           setSelectedId(item.id);
-          setAddressDraft(item.id);
-          router.back();
+          router.navigate({ pathname: '/checkout', params: { selectedId: item.id } });
         }
       }}
       style={[styles.card, item.isDefault && styles.cardDefault]}>

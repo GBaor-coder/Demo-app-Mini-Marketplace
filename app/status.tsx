@@ -41,7 +41,7 @@ export default function StatusScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand />
+      <ScreenHeader title="Trạng thái tài khoản" />
 
       <View style={styles.profileCard}>
         <Avatar uri={currentUser.avatar} name={currentUser.name} size={64} />

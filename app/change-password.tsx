@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Input, MaterialIcons } from '@/src/components/ui';
+import { Button, Input, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { supabase } from '@/src/lib/supabase';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 
@@ -86,7 +86,8 @@ export default function ChangePasswordScreen() {
 
   if (success) {
     return (
-      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={[styles.screen, { paddingBottom: insets.bottom }]}>
+        <ScreenHeader title="Đổi mật khẩu" />
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
@@ -117,14 +118,8 @@ export default function ChangePasswordScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.flex}>
-      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đổi mật khẩu</Text>
-          <View style={styles.headerBtn} />
-        </View>
+      <View style={[styles.screen, { paddingBottom: insets.bottom }]}>
+        <ScreenHeader title="Đổi mật khẩu" />
 
         <ScrollView
           contentContainerStyle={styles.scroll}

@@ -125,7 +125,7 @@ export default function ProfileScreen() {
           <View style={styles.statsCard}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{myProducts.length}</Text>
-              <Text style={styles.statLabel}>Sản phẩm đang bán</Text>
+              <Text style={styles.statLabel}>Sản phẩm</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>

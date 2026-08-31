@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Button, EmptyState, Input, MaterialIcons } from '@/src/components/ui';
+import { Button, EmptyState, Input, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { CAMPUSES, filterCampuses } from '@/src/data/campuses';
 import { deleteAvatarFile, uploadAvatar } from '@/src/lib/image-upload';
@@ -123,14 +123,8 @@ export default function EditProfileScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.flex}>
-      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-            <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chỉnh sửa hồ sơ</Text>
-          <View style={styles.headerBtn} />
-        </View>
+      <View style={[styles.screen, { paddingBottom: insets.bottom }]}>
+        <ScreenHeader title="Chỉnh sửa hồ sơ" />
 
         <ScrollView
           contentContainerStyle={styles.scroll}

@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
+import { LocationPreview } from '@/src/components/location-preview';
 import {
   Button,
   EmptyState,
@@ -184,6 +185,14 @@ export default function OrderDetailScreen() {
             </View>
           </View>
 
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Địa chỉ nhận hàng</Text>
+          <Text style={styles.deliveryAddressLine}>{order.deliveryLocation.address}</Text>
+          <View style={styles.deliveryMapWrap}>
+            <LocationPreview location={order.deliveryLocation} />
+          </View>
         </View>
 
         <View style={styles.card}>
@@ -372,6 +381,15 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     fontSize: 14,
     fontWeight: '600',
+  },
+  deliveryAddressLine: {
+    color: colors.onSurface,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  deliveryMapWrap: {
+    marginTop: 12,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

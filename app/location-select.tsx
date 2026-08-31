@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/src/components/ui';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
-import { setLocationDraft } from '@/src/utils/location-draft';
 
 const DEFAULT = { latitude: 10.762622, longitude: 106.660172, address: '' };
 
@@ -102,8 +101,14 @@ export default function LocationSelectScreen() {
 
   function confirm() {
     const finalAddress = point.address.trim() || `Vị trí ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`;
-    setLocationDraft({ ...point, address: finalAddress });
-    router.back();
+    router.navigate({
+      pathname: '/address-form',
+      params: {
+        lat: String(point.latitude),
+        lng: String(point.longitude),
+        address: finalAddress,
+      },
+    });
   }
 
   function applyManual() {

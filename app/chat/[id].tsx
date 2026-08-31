@@ -23,6 +23,7 @@ import { uploadChatImage } from '@/src/lib/image-upload';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { ChatMessage } from '@/src/types';
 import { formatClock, formatDateTime } from '@/src/utils/format';
+import { openMapLink } from '@/src/utils/maps';
 
 const EMOJIS = [
   '😀',
@@ -233,7 +234,12 @@ export default function ChatScreen() {
           {item.offerLocation ? (
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/map')}
+              onPress={() => {
+                void openMapLink(
+                  item.offerLocation!.latitude,
+                  item.offerLocation!.longitude
+                );
+              }}
               style={styles.offerCard}>
               <View style={styles.offerRow}>
                 <MaterialIcons name="place" size={20} color={colors.primary} />

@@ -204,7 +204,7 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand />
+      <ScreenHeader title="Đơn hàng của tôi" showBack={false} />
 
       <View style={styles.typeTabs}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.typeTabsContent}>

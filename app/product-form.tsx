@@ -208,20 +208,19 @@ export default function ProductFormScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand />
+      <ScreenHeader
+        title={editing ? 'Chỉnh sửa sản phẩm' : 'Đăng sản phẩm'}
+        subtitle={
+          editing
+            ? 'Cập nhật thông tin cho sản phẩm của bạn'
+            : 'Điền thông tin chi tiết để thu hút người mua trên UniLoop'
+        }
+      />
 
       <ScrollView
         contentContainerStyle={styles.body}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        <View style={styles.heading}>
-          <Text style={styles.pageTitle}>{editing ? 'Chỉnh sửa sản phẩm' : 'Đăng sản phẩm'}</Text>
-          <Text style={styles.pageSubtitle}>
-            {editing
-              ? 'Cập nhật thông tin cho sản phẩm của bạn.'
-              : 'Điền thông tin chi tiết để thu hút người mua trên UniLoop.'}
-          </Text>
-        </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Hình ảnh sản phẩm</Text>

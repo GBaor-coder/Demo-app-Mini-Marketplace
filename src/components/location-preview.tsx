@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
+import { openMapLink } from '@/src/utils/maps';
 
 export function LocationPreview({ location }: { location: LocationPoint }) {
   function openExternalMap() {
-    const url = `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
-    void Linking.openURL(url);
+    void openMapLink(location.latitude, location.longitude);
   }
 
   return (

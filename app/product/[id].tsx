@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
+import { LocationPreview } from '@/src/components/location-preview';
 import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
@@ -94,7 +95,15 @@ export default function ProductDetailScreen() {
           style={styles.headerButton}>
           <MaterialIcons name="arrow-back" size={22} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>UniLoop</Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>UniLoop</Text>
+          <View style={styles.headerAddressRow}>
+            <MaterialIcons name="location-on" size={12} color={colors.onSurfaceVariant} />
+            <Text numberOfLines={1} style={styles.headerAddress}>
+              {product.meetupPoint ?? product.location?.address ?? ''}
+            </Text>
+          </View>
+        </View>
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => router.push('/cart')} style={styles.headerButton}>
             <MaterialIcons name="shopping-cart" size={22} color={colors.primary} />
@@ -202,9 +211,7 @@ export default function ProductDetailScreen() {
                   )}`
                 : 'Giao dịch trực tiếp tại khu vực trường'}
             </Text>
-            <View style={styles.mapPlaceholder}>
-              <MaterialIcons name="map" size={40} color={colors.outlineVariant} />
-            </View>
+            {product.location ? <LocationPreview location={product.location} /> : null}
           </View>
 
           {product.allowsCod ? (
@@ -308,6 +315,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.headlineMdMobile,
     color: colors.primary,
+  },
+  headerCenter: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 2,
+  },
+  headerAddressRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 3,
+  },
+  headerAddress: {
+    color: colors.onSurfaceVariant,
+    fontSize: 12,
+    maxWidth: 180,
   },
   carousel: {
     backgroundColor: colors.surfaceVariant,
@@ -470,15 +492,6 @@ const styles = StyleSheet.create({
   distance: {
     color: colors.onSurfaceVariant,
     fontSize: 14,
-  },
-  mapPlaceholder: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceVariant,
-    borderColor: 'rgba(195,198,215,0.2)',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    height: 160,
-    justifyContent: 'center',
   },
   codCard: {
     alignItems: 'center',

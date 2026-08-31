@@ -116,18 +116,19 @@ export default function TabLayout() {
         options={{ title: 'Trang chủ', tabBarIcon: tabIcon('home', 'home') }}
       />
       <ExpoRouterTopTabs.Screen name="explore" options={{ href: null }} />
-      <ExpoRouterTopTabs.Screen
+      <ExpoRouterTopTabs.Screen name="chats" options={{ title: 'Tin nhắn', tabBarIcon: tabIcon('chat', 'chat') }} />
+            <ExpoRouterTopTabs.Screen
         name="create"
         options={{
           title: 'Đăng bán',
           tabBarIcon: createIcon,
         }}
       />
-      <ExpoRouterTopTabs.Screen name="chats" options={{ title: 'Tin nhắn', tabBarIcon: tabIcon('chat', 'chat') }} />
       <ExpoRouterTopTabs.Screen
         name="orders"
         options={{ title: 'Đơn hàng', tabBarIcon: tabIcon('receipt-long', 'receipt-long') }}
       />
+
       <ExpoRouterTopTabs.Screen
         name="profile"
         options={{ title: 'Cá nhân', tabBarIcon: tabIcon('person', 'person') }}

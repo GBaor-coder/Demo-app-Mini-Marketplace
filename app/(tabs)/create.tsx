@@ -218,16 +218,16 @@ export default function SellerCreateTab() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader brand showBack={false} />
+      <ScreenHeader
+        title="Đăng sản phẩm"
+        subtitle="Điền thông tin chi tiết để thu hút người mua trên UniLoop"
+        showBack={false}
+      />
 
       <ScrollView
         contentContainerStyle={styles.body}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Đăng sản phẩm</Text>
-        <Text style={styles.pageSubtitle}>
-          Điền thông tin chi tiết để thu hút người mua trên UniLoop.
-        </Text>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Hình ảnh sản phẩm</Text>
