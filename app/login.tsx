@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -86,7 +87,7 @@ export default function LoginScreen() {
           <View style={styles.card}>
             <View style={styles.header}>
               <View style={styles.logo}>
-                <MaterialIcons name="sync" size={32} color={colors.onPrimaryContainer} />
+                <Image source={require('../assets/images/uniloop-icon.png')} style={styles.logoImage} />
               </View>
               <Text style={styles.brand}>UniLoop</Text>
               <Text style={styles.subtitle}>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</Text>
@@ -206,17 +207,21 @@ const styles = StyleSheet.create({
   logo: {
     alignItems: 'center',
     alignSelf: 'center',
-    backgroundColor: colors.primaryContainer,
     borderRadius: radius.xl,
     height: 64,
     justifyContent: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
     width: 64,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 24,
     elevation: 5,
+  },
+  logoImage: {
+    height: 64,
+    width: 64,
   },
   brand: {
     ...typography.displayLgMobile,

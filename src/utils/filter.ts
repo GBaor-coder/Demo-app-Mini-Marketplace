@@ -110,6 +110,5 @@ export function countActiveFilters(filters: SearchFilters): number {
   if (filters.conditions.length > 0) count += 1;
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count += 1;
   if (filters.maxDistanceKm !== undefined) count += 1;
-  if (filters.sort !== 'newest') count += 1;
   return count;
 }

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -25,13 +25,6 @@ import {
   SearchFilters,
 } from '@/src/utils/filter';
 
-const SORT_OPTIONS: { key: SearchFilters['sort']; label: string }[] = [
-  { key: 'newest', label: 'Mới nhất' },
-  { key: 'price_asc', label: 'Giá thấp nhất' },
-  { key: 'price_desc', label: 'Giá cao nhất' },
-  { key: 'nearest', label: 'Gần nhất' },
-];
-
 const CONDITIONS: ProductCondition[] = ['Mới', 'Như mới', 'Đã sử dụng'];
 
 export default function SearchScreen() {
@@ -42,6 +35,10 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_FILTERS);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    setFilters((f) => ({ ...f, query: query.trim() }));
+  }, [query]);
 
   const results = useMemo(() => applyFilters(products, filters), [filters, products]);
   const activeCount = countActiveFilters(filters);
@@ -88,12 +85,6 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.chipRow}>
-        <Chip
-          label={filters.sort === 'newest' ? 'Sắp xếp' : `Sắp xếp: ${SORT_OPTIONS.find((s) => s.key === filters.sort)?.label}`}
-          selected={filters.sort !== 'newest'}
-          onPress={() => setSheetOpen(true)}
-          icon="expand-more"
-        />
         {filters.categories.length > 0 ? (
           <Chip label={`Danh mục (${filters.categories.length})`} selected onPress={() => setSheetOpen(true)} icon="expand-more" />
         ) : null}
@@ -137,7 +128,6 @@ export default function SearchScreen() {
         visible={sheetOpen}
         onClose={() => setSheetOpen(false)}
         initial={filters}
-        resultCount={results.length}
         onApply={applyDraft}
       />
     </View>
@@ -148,11 +138,10 @@ type FilterSheetProps = {
   visible: boolean;
   onClose: () => void;
   initial: SearchFilters;
-  resultCount: number;
   onApply: (filters: SearchFilters) => void;
 };
 
-function FilterSheet({ visible, onClose, initial, resultCount, onApply }: FilterSheetProps) {
+function FilterSheet({ visible, onClose, initial, onApply }: FilterSheetProps) {
   const insets = useSafeAreaInsets();
   const [draft, setDraft] = useState<SearchFilters>(initial);
   const [minPrice, setMinPrice] = useState(initial.minPrice?.toString() ?? '');
@@ -185,9 +174,9 @@ function FilterSheet({ visible, onClose, initial, resultCount, onApply }: Filter
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={() => onApply({ ...draft, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined, maxDistanceKm: distance })}>
       <View style={styles.modalRoot}>
-        <TouchableOpacity style={styles.scrim} activeOpacity={1} onPress={onClose} />
+        <TouchableOpacity style={styles.scrim} activeOpacity={1} onPress={() => onApply({ ...draft, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined, maxDistanceKm: distance })} />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 8 }]}>
           <View style={styles.handle} />
           <View style={styles.sheetHeader}>
@@ -273,40 +262,10 @@ function FilterSheet({ visible, onClose, initial, resultCount, onApply }: Filter
               <Text style={styles.sliderLabel}>20 km</Text>
             </View>
 
-            <Text style={styles.sheetSectionLabel}>SẮP XẾP</Text>
-            {SORT_OPTIONS.map((option) => {
-              const selected = draft.sort === option.key;
-              return (
-                <TouchableOpacity
-                  key={option.key}
-                  activeOpacity={0.8}
-                  onPress={() => setDraft((d) => ({ ...d, sort: option.key }))}
-                  style={styles.sortRow}>
-                  <Text style={[styles.sortText, selected && styles.sortTextActive]}>
-                    {option.label}
-                  </Text>
-                  <View style={[styles.radio, selected && styles.radioActive]}>
-                    {selected ? <View style={styles.radioDot} /> : null}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
           </ScrollView>
 
           <View style={styles.sheetFooter}>
             <Button title="Thiết lập lại" variant="outline" onPress={reset} style={styles.resetButton} />
-            <Button
-              title={`Áp dụng (${resultCount} kết quả)`}
-              onPress={() =>
-                onApply({
-                  ...draft,
-                  minPrice: minPrice ? Number(minPrice) : undefined,
-                  maxPrice: maxPrice ? Number(maxPrice) : undefined,
-                  maxDistanceKm: distance,
-                })
-              }
-              style={styles.applyButton}
-            />
           </View>
         </View>
       </View>
@@ -539,41 +498,6 @@ const styles = StyleSheet.create({
     color: colors.outline,
     fontSize: 12,
   },
-  sortRow: {
-    alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  sortText: {
-    color: colors.onSurface,
-    fontSize: 15,
-  },
-  sortTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  radio: {
-    alignItems: 'center',
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.full,
-    borderWidth: 2,
-    height: 20,
-    justifyContent: 'center',
-    width: 20,
-  },
-  radioActive: {
-    borderColor: colors.primaryContainer,
-  },
-  radioDot: {
-    backgroundColor: colors.primaryContainer,
-    borderRadius: radius.full,
-    height: 10,
-    width: 10,
-  },
   sheetFooter: {
     borderTopColor: colors.outlineVariant,
     borderTopWidth: 1,
@@ -583,8 +507,5 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     flex: 1,
-  },
-  applyButton: {
-    flex: 2,
   },
 });

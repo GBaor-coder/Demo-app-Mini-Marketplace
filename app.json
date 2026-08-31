@@ -19,7 +19,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/uniloop-icon.png"
+      "favicon": "./assets/image/uniloop-icon.png"
     },
     "plugins": [
       "expo-router",
@@ -43,9 +43,9 @@
           "image": "./assets/images/uniloop-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#F3FAF7",
+          "backgroundColor": "#FFFFFF",
           "dark": {
-            "backgroundColor": "#F3FAF7"
+            "backgroundColor": "#FFFFFF"
           }
         }
       ]

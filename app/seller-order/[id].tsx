@@ -454,8 +454,10 @@ const styles = StyleSheet.create({
   },
   chatIcon: {
     alignItems: 'center',
-    backgroundColor: 'rgba(33,112,228,0.1)',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.22)',
     borderRadius: radius.full,
+    borderWidth: 1,
     height: 40,
     justifyContent: 'center',
     width: 40,

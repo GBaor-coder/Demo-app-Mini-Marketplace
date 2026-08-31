@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
-import { LocationPreview } from '@/src/components/location-preview';
 import {
   Button,
   EmptyState,
@@ -155,32 +154,13 @@ export default function OrderDetailScreen() {
                 {seller?.name ?? 'Người bán'}
               </Text>
               <Text style={styles.sellerMeta} numberOfLines={1}>
-                {seller?.campus ?? 'Người bán'}
+                {seller?.campus ?? 'Trường'}
               </Text>
             </View>
             <TouchableOpacity onPress={openChat} style={styles.chatBtn}>
-              <MaterialIcons name="chat" size={20} color={colors.primary} />
+              <MaterialIcons name="chat" size={18} color={colors.primary} />
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.deliveryHeader}>
-            <MaterialIcons name={toIconName('handshake')} size={20} color={colors.primary} />
-            <Text style={styles.cardTitle}>Giao dịch: {deliveryLabel}</Text>
-          </View>
-          <LocationPreview location={order.deliveryLocation} />
-          {order.note ? (
-            <View style={styles.deliveryRow}>
-              <View style={styles.deliveryIcon}>
-                <MaterialIcons name="description" size={19} color={colors.primary} />
-              </View>
-              <View style={styles.deliveryInfo}>
-                <Text style={styles.deliveryLabel}>Ghi chú</Text>
-                <Text style={styles.deliveryValue}>{order.note}</Text>
-              </View>
-            </View>
-          ) : null}
           <View style={styles.deliveryRow}>
             <View style={styles.deliveryIcon}>
               <MaterialIcons name="schedule" size={19} color={colors.primary} />
@@ -190,6 +170,20 @@ export default function OrderDetailScreen() {
               <Text style={styles.deliveryValue}>{formatDateTime(order.createdAt)}</Text>
             </View>
           </View>
+          <View style={styles.deliveryRow}>
+            <View style={styles.deliveryIcon}>
+              <MaterialIcons
+                name={order.deliveryMethod === 'meetup' ? 'people' : 'local-shipping'}
+                size={19}
+                color={colors.primary}
+              />
+            </View>
+            <View style={styles.deliveryInfo}>
+              <Text style={styles.deliveryLabel}>Phương thức</Text>
+              <Text style={styles.deliveryValue}>{deliveryLabel}</Text>
+            </View>
+          </View>
+
         </View>
 
         <View style={styles.card}>
@@ -221,17 +215,17 @@ export default function OrderDetailScreen() {
           <Button title="Hủy đơn hàng" variant="outline" danger onPress={cancelOrder} style={styles.footerBtn} />
         ) : null}
         {canConfirm ? (
-          <Button title="Đã nhận được hàng" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
+          <Button title="Đã nhận được hàng" variant="primary" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
         ) : null}
         {canRate ? (
           <Button
             title="Đánh giá"
             icon="star"
-            variant="primaryContainer"
+            variant="primary"
             onPress={() => router.push(`/order-rate?id=${order.id}`)}
             style={styles.footerBtn}
           />
-          ) : null}
+        ) : null}
       </View>
     </View>
   );
@@ -245,37 +239,34 @@ const styles = StyleSheet.create({
   body: {
     gap: 16,
     padding: 20,
+    paddingBottom: 24,
   },
   statusCard: {
-    alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius.xl,
+    gap: 10,
     padding: 16,
     ...shadow.level1,
   },
   statusHeader: {
     alignItems: 'center',
-    alignSelf: 'stretch',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   cardTitle: {
     ...typography.headlineSm,
     color: colors.onSurface,
-    fontSize: 18,
   },
   statusHint: {
     color: colors.onSurfaceVariant,
-    fontSize: 13,
-    lineHeight: 19,
-    marginTop: 10,
-    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
   },
   trackLink: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 5,
-    marginTop: 12,
+    gap: 6,
+    marginTop: 4,
   },
   trackLinkText: {
     color: colors.primary,
@@ -289,18 +280,19 @@ const styles = StyleSheet.create({
     ...shadow.level1,
   },
   itemRow: {
-    alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   itemDivider: {
     borderTopColor: colors.outlineVariant,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: 1,
   },
   itemImage: {
-    backgroundColor: colors.surfaceContainerHighest,
+    borderColor: colors.outlineVariant,
     borderRadius: radius.md,
+    borderWidth: 1,
     height: 80,
     width: 80,
   },
@@ -310,26 +302,27 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     color: colors.onSurface,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    lineHeight: 22,
   },
   itemMeta: {
     color: colors.onSurfaceVariant,
     fontSize: 13,
-    lineHeight: 18,
   },
   itemPrice: {
     color: colors.primary,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
+    marginTop: 2,
   },
   sellerRow: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLow,
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
     flexDirection: 'row',
-    gap: 12,
-    padding: 16,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   sellerInfo: {
     flex: 1,
@@ -338,66 +331,58 @@ const styles = StyleSheet.create({
   sellerName: {
     color: colors.onSurface,
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   sellerMeta: {
     color: colors.onSurfaceVariant,
-    fontSize: 12,
+    fontSize: 13,
   },
   chatBtn: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.1)',
+    backgroundColor: colors.primaryContainer,
     borderRadius: radius.full,
-    height: 40,
+    height: 36,
     justifyContent: 'center',
-    width: 40,
-  },
-  card: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.xl,
-    gap: 4,
-    padding: 16,
-    ...shadow.level1,
-  },
-  deliveryHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
+    width: 36,
   },
   deliveryRow: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
     flexDirection: 'row',
     gap: 12,
-    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   deliveryIcon: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.08)',
-    borderRadius: radius.full,
-    height: 34,
+    height: 32,
     justifyContent: 'center',
-    width: 34,
+    width: 32,
   },
   deliveryInfo: {
     flex: 1,
     gap: 2,
   },
   deliveryLabel: {
+    color: colors.onSurfaceVariant,
+    fontSize: 13,
+  },
+  deliveryValue: {
     color: colors.onSurface,
     fontSize: 14,
     fontWeight: '600',
   },
-  deliveryValue: {
-    color: colors.onSurfaceVariant,
-    fontSize: 13,
-    lineHeight: 19,
+  card: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.xl,
+    gap: 10,
+    padding: 16,
+    ...shadow.level1,
   },
   feeRow: {
-    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 7,
   },
   feeLabel: {
     color: colors.onSurfaceVariant,
@@ -406,27 +391,26 @@ const styles = StyleSheet.create({
   feeValue: {
     color: colors.onSurface,
     fontSize: 14,
+    fontWeight: '500',
   },
   divider: {
-    backgroundColor: 'rgba(195,198,215,0.3)',
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 6,
+    backgroundColor: colors.outlineVariant,
+    height: 1,
+    marginVertical: 4,
   },
   totalRow: {
-    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 8,
   },
   totalLabel: {
-    ...typography.headlineSm,
     color: colors.onSurface,
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '700',
   },
   totalValue: {
-    ...typography.headlineSm,
     color: colors.primary,
     fontSize: 20,
+    fontWeight: '700',
   },
   footer: {
     backgroundColor: colors.surfaceContainerLowest,

@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   FlatList,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,13 +16,6 @@ import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
 import { applyFilters, countActiveFilters, SearchFilters } from '@/src/utils/filter';
 
-const SORT_OPTIONS: { key: SearchFilters['sort']; label: string }[] = [
-  { key: 'newest', label: 'Mới nhất' },
-  { key: 'price_asc', label: 'Giá thấp nhất' },
-  { key: 'price_desc', label: 'Giá cao nhất' },
-  { key: 'nearest', label: 'Gần nhất' },
-];
-
 export default function SearchResultsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -36,7 +28,6 @@ export default function SearchResultsScreen() {
     conditions: [],
     sort: 'newest',
   });
-  const [sortOpen, setSortOpen] = useState(false);
 
   const results = useMemo(() => applyFilters(products, filters), [filters, products]);
   const activeCount = countActiveFilters(filters);
@@ -80,7 +71,7 @@ export default function SearchResultsScreen() {
       <View style={styles.chipRow}>
         {filters.query ? (
           <Chip
-            label={`“${filters.query}”`}
+            label={`"${filters.query}"`}
             onPress={() => setFilters((f) => ({ ...f, query: '' }))}
           />
         ) : null}
@@ -92,13 +83,6 @@ export default function SearchResultsScreen() {
             <Text style={styles.resetText}>Xóa bộ lọc</Text>
           </TouchableOpacity>
         ) : null}
-        <View style={styles.spacer} />
-        <TouchableOpacity onPress={() => setSortOpen(true)} style={styles.sortBtn}>
-          <MaterialIcons name="swap-vert" size={16} color={colors.primaryContainer} />
-          <Text style={styles.sortLabel}>
-            {SORT_OPTIONS.find((s) => s.key === filters.sort)?.label}
-          </Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -124,33 +108,6 @@ export default function SearchResultsScreen() {
         }
       />
 
-      <Modal visible={sortOpen} transparent animationType="fade" onRequestClose={() => setSortOpen(false)}>
-        <TouchableOpacity
-          style={styles.scrim}
-          activeOpacity={1}
-          onPress={() => setSortOpen(false)}>
-          <View style={[styles.sortMenu, { top: insets.top + 116 }]}>
-            {SORT_OPTIONS.map((option, index) => {
-              const selected = filters.sort === option.key;
-              return (
-                <TouchableOpacity
-                  key={option.key}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setFilters((f) => ({ ...f, sort: option.key }));
-                    setSortOpen(false);
-                  }}
-                  style={[styles.sortItem, index === 0 && styles.sortItemFirst]}>
-                  <Text style={[styles.sortItemText, selected && styles.sortItemTextActive]}>
-                    {option.label}
-                  </Text>
-                  {selected ? <MaterialIcons name="check" size={18} color={colors.primary} /> : null}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }
@@ -218,19 +175,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  spacer: {
-    flex: 1,
-  },
-  sortBtn: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 4,
-  },
-  sortLabel: {
-    color: colors.primaryContainer,
-    fontSize: 13,
-    fontWeight: '600',
-  },
   resetText: {
     color: colors.primary,
     fontSize: 13,
@@ -250,41 +194,5 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginBottom: 14,
     marginTop: 4,
-  },
-  scrim: {
-    backgroundColor: 'rgba(33,49,69,0.35)',
-    flex: 1,
-  },
-  sortMenu: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    marginHorizontal: 24,
-    paddingVertical: 6,
-    position: 'absolute',
-    right: 16,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    width: 200,
-  },
-  sortItem: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  sortItemFirst: {
-    borderBottomColor: colors.outlineVariant,
-    borderBottomWidth: 1,
-  },
-  sortItemText: {
-    color: colors.onSurface,
-    fontSize: 14,
-  },
-  sortItemTextActive: {
-    color: colors.primary,
-    fontWeight: '700',
   },
 });

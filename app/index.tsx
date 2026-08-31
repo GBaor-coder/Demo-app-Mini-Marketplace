@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
-import { Image } from 'expo-image';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MaterialIcons } from '@/src/components/ui';
-import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { colors, radius, typography } from '@/src/theme/colors';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -16,28 +15,9 @@ export default function OnboardingScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         bounces={false}>
-        <View style={styles.hero}>
-          <Image
-            contentFit="cover"
-            source={{
-              uri: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=900',
-            }}
-            style={styles.heroImage}
-            transition={200}
-          />
-          <View style={[styles.badge, styles.badgeTop]}>
-            <MaterialIcons name="sell" size={14} color={colors.primary} />
-            <Text style={styles.badgeText}>Đồ cũ giá tốt</Text>
-          </View>
-          <View style={[styles.badge, styles.badgeBottom]}>
-            <MaterialIcons name="verified" size={14} color={colors.tertiary} />
-            <Text style={styles.badgeText}>An toàn</Text>
-          </View>
-        </View>
-
         <View style={styles.panel}>
           <View style={styles.logo}>
-            <MaterialIcons name="autorenew" size={32} color={colors.onPrimaryContainer} />
+            <Image source={require('../assets/images/uniloop-icon.png')} style={styles.logoImage} />
           </View>
           <Text style={styles.brand}>UniLoop</Text>
           <Text style={styles.tagline}>Chợ sinh viên nội bộ</Text>
@@ -78,45 +58,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: 24,
   },
-  hero: {
-    aspectRatio: 1,
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: radius['2xl'],
-    marginBottom: 32,
-    maxWidth: 448,
-    overflow: 'hidden',
-    position: 'relative',
-    width: '100%',
-    ...shadow.level2,
-  },
-  heroImage: {
-    height: '100%',
-    width: '100%',
-  },
-  badge: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: radius.full,
-    flexDirection: 'row',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    position: 'absolute',
-    ...shadow.level1,
-  },
-  badgeTop: {
-    left: 16,
-    top: 16,
-  },
-  badgeBottom: {
-    bottom: 16,
-    right: 16,
-  },
-  badgeText: {
-    color: colors.onSurface,
-    fontSize: 12,
-    fontWeight: '600',
-  },
   panel: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.8)',
@@ -126,17 +67,19 @@ const styles = StyleSheet.create({
     maxWidth: 448,
     padding: 32,
     width: '100%',
-    ...shadow.level3,
   },
   logo: {
     alignItems: 'center',
-    backgroundColor: colors.primaryContainer,
     borderRadius: radius.lg,
     height: 64,
     justifyContent: 'center',
     marginBottom: 24,
+    overflow: 'hidden',
     width: 64,
-    ...shadow.level1,
+  },
+  logoImage: {
+    height: 64,
+    width: 64,
   },
   brand: {
     ...typography.displayLgMobile,
@@ -168,7 +111,6 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 56,
     justifyContent: 'center',
-    ...shadow.primary,
     width: '100%',
   },
   primaryCtaText: {

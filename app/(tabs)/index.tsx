@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -26,43 +26,35 @@ const HOME_CATEGORIES: {
   background: string;
   color: string;
 }[] = [
-  {
-    category: 'Giáo trình',
-    label: 'Giáo trình',
-    icon: 'menu-book',
-    background: 'rgba(0,74,198,0.10)',
-    color: colors.primary,
-  },
-  {
-    category: 'Đồ điện tử',
-    label: 'Đồ điện tử',
-    icon: 'laptop-mac',
-    background: 'rgba(0,88,190,0.10)',
-    color: colors.secondary,
-  },
-  {
-    category: 'Đồ dùng học tập',
-    label: 'Đồ dùng\nhọc tập',
-    icon: 'edit',
-    background: 'rgba(0,98,41,0.10)',
-    color: colors.tertiary,
-  },
-  {
-    category: 'Đồ ký túc xá',
-    label: 'Đồ ký túc xá',
-    icon: 'checkroom',
-    background: 'rgba(186,26,26,0.10)',
-    color: colors.error,
-  },
-];
-
-const SEARCH_PLACEHOLDERS = [
-  'Tìm sản phẩm, giáo trình...',
-  'Tìm đồ điện tử, laptop...',
-  'Tìm đồ dùng học tập...',
-  'Tìm đồ dùng ký túc xá...',
-  'Bạn đang tìm sản phẩm gì?',
-];
+    {
+      category: 'Giáo trình',
+      label: 'Giáo trình',
+      icon: 'menu-book',
+      background: 'rgba(0,74,198,0.10)',
+      color: colors.primary,
+    },
+    {
+      category: 'Đồ điện tử',
+      label: 'Đồ điện tử',
+      icon: 'laptop-mac',
+      background: 'rgba(0,88,190,0.10)',
+      color: colors.secondary,
+    },
+    {
+      category: 'Đồ dùng học tập',
+      label: 'Đồ dùng\nhọc tập',
+      icon: 'edit',
+      background: 'rgba(0,98,41,0.10)',
+      color: colors.tertiary,
+    },
+    {
+      category: 'Đồ ký túc xá',
+      label: 'Đồ ký túc xá',
+      icon: 'checkroom',
+      background: 'rgba(186,26,26,0.10)',
+      color: colors.error,
+    },
+  ];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -72,43 +64,6 @@ export default function HomeScreen() {
   const { products, favoriteIds, toggleFavorite, cart, currentUser } = useStore();
   const [refreshing, setRefreshing] = useState(false);
   const searchScale = useRef(new Animated.Value(1)).current;
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const translateYAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateYAnim, {
-          toValue: -6,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setPlaceholderIndex((prev) => (prev + 1) % SEARCH_PLACEHOLDERS.length);
-        translateYAnim.setValue(6);
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 250,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateYAnim, {
-            toValue: 0,
-            duration: 250,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
-    }, 3000);
-
-    return () => clearInterval(timer);
-  }, [fadeAnim, translateYAnim]);
 
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -156,32 +111,22 @@ export default function HomeScreen() {
   return (
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.brand}>UniLoop</Text>
         <AnimatedPressable
+          accessibilityLabel="Tìm kiếm"
           onPressIn={handlePressSearchIn}
           onPressOut={handlePressSearchOut}
           onPress={() => router.push('/search')}
-          style={[styles.searchBtn, { transform: [{ scale: searchScale }] }]}>
-          <MaterialIcons name="search" size={18} color={colors.primary} />
-          <View style={styles.searchPlaceholderWrap}>
-            <Animated.Text
-              numberOfLines={1}
-              style={[
-                styles.searchBtnText,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: translateYAnim }],
-                },
-              ]}>
-              {SEARCH_PLACEHOLDERS[placeholderIndex]}
-            </Animated.Text>
-          </View>
+          style={[styles.searchIconButton, { transform: [{ scale: searchScale }] }]}>
+          <MaterialIcons name="search" size={20} color={colors.primary} />
         </AnimatedPressable>
+
+        <Text style={styles.brand}>UniLoop</Text>
+
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => router.push('/cart')}
           style={styles.cartBtn}>
-          <MaterialIcons name="shopping-cart" size={24} color={colors.onSurfaceVariant} />
+          <MaterialIcons name="shopping-cart" size={20} color={colors.primary} />
           {cartCount > 0 ? (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
@@ -290,13 +235,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(248,249,255,0.92)',
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
     paddingBottom: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     ...shadow.level1,
+  },
+  searchIconButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.22)',
+    borderRadius: radius.full,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  brand: {
+    ...typography.headlineMd,
+    color: colors.primary,
+    fontSize: 21,
+    textAlign: 'center',
+    flex: 1,
   },
   cartBtn: {
     alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.22)',
+    borderRadius: radius.full,
+    borderWidth: 1,
     height: 40,
     justifyContent: 'center',
     position: 'relative',
@@ -311,40 +277,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 1,
     position: 'absolute',
-    right: 2,
-    top: 2,
+    right: -2,
+    top: -2,
   },
   cartBadgeText: {
     color: colors.onError,
     fontSize: 10,
     fontWeight: '700',
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors.primary,
-    fontSize: 21,
-  },
-  searchBtn: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,74,198,0.08)',
-    borderColor: 'rgba(0,74,198,0.18)',
-    borderRadius: radius.full,
-    borderWidth: 1,
-    flex: 1,
-    flexDirection: 'row',
-    gap: 6,
-    minHeight: 42,
-    paddingHorizontal: 12,
-  },
-  searchPlaceholderWrap: {
-    flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-  searchBtnText: {
-    color: colors.primary,
-    fontSize: 13.5,
-    fontWeight: '500',
   },
   list: {
     paddingBottom: 24,
