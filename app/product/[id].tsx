@@ -49,6 +49,8 @@ export default function ProductDetailScreen() {
   const images = product.images?.length ? product.images : [product.image];
   const favorite = favoriteIds.includes(product.id);
   const sold = product.status === 'sold';
+  const isOutOfStock = product.stock <= 0 && product.status !== 'sold';
+  const isSold = product.status === 'sold';
 
   const handleBuyNow = () => {
     addToCart(product.id);
@@ -115,6 +117,12 @@ export default function ProductDetailScreen() {
         </View>
 
         <View style={styles.content}>
+          <View style={styles.stockInfo}>
+            <Text style={styles.stockText}>Tồn kho: {product.stock}</Text>
+            {product.stock <= 0 && (
+              <Text style={styles.stockOutOfText}>Hết hàng</Text>
+            )}
+          </View>
           <View style={styles.detailCard}>
             <Text style={styles.title}>{product.title}</Text>
             <Text style={styles.price}>{formatCurrency(product.price)}</Text>
@@ -190,9 +198,13 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-      {sold ? (
+{sold ? (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
           <Text style={styles.soldLabel}>Sản phẩm đã bán</Text>
+        </View>
+      ) : isOutOfStock ? (
+        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
+          <Text style={styles.soldLabel}>Hết hàng</Text>
         </View>
       ) : (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
@@ -526,5 +538,23 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     textAlign: 'center',
     width: '100%',
+  },
+  stockInfo: {
+    backgroundColor: 'rgba(248,249,255,0.9)',
+    borderRadius: radius.md,
+    padding: 12,
+    marginBottom: 16,
+    ...shadow.level1,
+  },
+  stockText: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    fontWeight: '700',
+  },
+  stockOutOfText: {
+    color: colors.error,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
 });

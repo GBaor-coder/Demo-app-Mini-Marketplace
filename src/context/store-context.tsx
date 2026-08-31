@@ -272,6 +272,57 @@ export function StoreProvider({ children }: PropsWithChildren) {
     void hydrateData();
   }, []);
 
+  useEffect(() => {
+    if (!currentUser) {
+      setProducts([]);
+      setCart([]);
+      setOrders([]);
+      setAddresses([]);
+      setNotifications([]);
+      setChats([]);
+      setReviews([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+      if (!currentUser) return;
+      const [prods, cartLines, addrs, notifs, chatThreads] = await Promise.all([
+        listProducts({ status: 'active' }),
+        listCartLines(currentUser.id),
+        listAddresses(currentUser.id),
+        listNotifications(currentUser.id),
+        listChatThreads(currentUser.id),
+      ]);
+
+      if (!cancelled) {
+        setProducts(prods);
+        void ensureProfiles(prods.map((p) => p.sellerId));
+        setCart(cartLines);
+        setAddresses(addrs);
+        setNotifications(notifs);
+        setChats(chatThreads);
+      }
+
+      const buyerOrders = await listOrdersForBuyer(currentUser.id);
+      const sellerOrders = await listOrdersForSeller(currentUser.id);
+      const merged = [...buyerOrders, ...sellerOrders];
+      const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
+      unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      if (!cancelled) {
+        setOrders(unique);
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    }
+  }, [currentUser]);
+
   const currentUser = useMemo(() => userProfile, [userProfile]);
 
   useEffect(() => {
@@ -826,8 +877,14 @@ export function StoreProvider({ children }: PropsWithChildren) {
           if (!purchased) {
             return product;
           }
-          const stock = Math.max(0, product.stock - purchased.quantity);
-          return { ...product, stock, status: stock === 0 ? 'sold' : 'active' };
+          const newStock = Math.max(0, product.stock - purchased.quantity);
+          void supabase
+            .from('products')
+            .update({ stock: newStock })
+            .eq('id', product.id)
+            .select()
+            .single();
+          return { ...product, stock: newStock, status: newStock === 0 ? 'sold' : 'active' };
         })
       );
 

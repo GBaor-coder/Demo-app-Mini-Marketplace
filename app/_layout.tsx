@@ -51,6 +51,7 @@ export default function RootLayout() {
       <StatusBar backgroundColor={colors.background} style="dark" />
       <Stack
         screenOptions={{
+          gestureEnabled: false,
           animation: 'slide_from_right',
           contentStyle: { backgroundColor: colors.background },
           headerShown: false,
