@@ -272,6 +272,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
     void hydrateData();
   }, []);
 
+  const currentUser = useMemo(() => userProfile, [userProfile]);
+
   useEffect(() => {
     if (!currentUser) {
       setProducts([]);
@@ -322,8 +324,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
       cancelled = true;
     }
   }, [currentUser]);
-
-  const currentUser = useMemo(() => userProfile, [userProfile]);
 
   useEffect(() => {
     setUsers((prev) => {

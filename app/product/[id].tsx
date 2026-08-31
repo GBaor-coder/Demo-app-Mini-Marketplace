@@ -91,12 +91,12 @@ export default function ProductDetailScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.headerButton}>
-          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
+          <MaterialIcons name="arrow-back" size={22} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>UniLoop</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => router.push('/cart')} style={styles.headerButton}>
-            <MaterialIcons name="shopping-cart" size={22} color={colors.onSurface} />
+            <MaterialIcons name="shopping-cart" size={22} color={colors.primary} />
             {cartCount > 0 ? (
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
@@ -242,17 +242,14 @@ export default function ProductDetailScreen() {
               color={favorite ? colors.error : colors.onSurface}
             />
           </TouchableOpacity>
-          <Button
-            title="Thêm giỏ"
-            icon="add-shopping-cart"
-            variant="tonal"
-            size="sm"
-            style={styles.addCartButton}
+          <TouchableOpacity
             onPress={() => {
               addToCart(product.id);
-              router.push('/cart');
+              Alert.alert('Đã thêm vào giỏ', 'Sản phẩm đã được thêm vào giỏ hàng của bạn.');
             }}
-          />
+            style={styles.addCartIconButton}>
+            <MaterialIcons name="add-shopping-cart" size={22} color={colors.primary} />
+          </TouchableOpacity>
           <Button
             title="Mua ngay"
             icon="arrow-forward"
@@ -294,10 +291,13 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.22)',
     borderRadius: radius.full,
+    borderWidth: 1,
     height: 40,
     justifyContent: 'center',
+    position: 'relative',
     width: 40,
   },
   headerTitle: {
@@ -548,11 +548,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 48,
   },
-  addCartButton: {
-    flex: 1,
+  addCartIconButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.2)',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
   },
   buyButton: {
-    flex: 1.5,
+    flex: 1,
+  },
+  cartBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
+    borderRadius: radius.full,
+    justifyContent: 'center',
+    minWidth: 16,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    position: 'absolute',
+    right: -2,
+    top: -2,
+  },
+  cartBadgeText: {
+    color: colors.onError,
+    fontSize: 10,
+    fontWeight: '700',
   },
   soldLabel: {
     color: colors.onSurfaceVariant,

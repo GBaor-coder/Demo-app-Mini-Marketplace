@@ -96,9 +96,7 @@ export default function CartScreen() {
           <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.title}>Giỏ hàng</Text>
-        <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerBtn}>
-          <MaterialIcons name="search" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
+        <View style={styles.headerBtn} />
       </View>
 
       <FlatList
@@ -112,7 +110,7 @@ export default function CartScreen() {
             title="Giỏ hàng của bạn còn trống"
             description="Thêm ngay những món đồ bạn thích vào giỏ để mua chúng nhé."
           >
-            <Button title="Tiếp tục khám phá" onPress={() => router.push('/')} />
+            <Button title="Tiếp tục khám phá" onPress={() => router.replace('/(tabs)')} />
           </EmptyState>
         }
         renderItem={({ item: group }) => {
@@ -157,10 +155,20 @@ export default function CartScreen() {
                         </Text>
                       </TouchableOpacity>
                       <View style={styles.bottomRow}>
-                        <Text style={styles.price}>{formatCurrency(product.price)}</Text>
+                        <View style={styles.priceCol}>
+                          <Text style={styles.price}>{formatCurrency(product.price)}</Text>
+                          <Text style={styles.stockText}>Còn {product.stock}</Text>
+                        </View>
                         <QuantityStepper
                           value={line.quantity}
-                          onChange={(next) => changeCartQuantity(line.productId, next - line.quantity)}
+                          max={product.stock}
+                          onChange={(next) => changeCartQuantity(line.productId, next)}
+                          onExceedMax={(max) =>
+                            Alert.alert(
+                              'Vượt quá số lượng tồn kho',
+                              `Sản phẩm này chỉ còn ${max - line.quantity} trong kho. Vui lòng chọn số lượng nhỏ hơn.`
+                            )
+                          }
                         />
                       </View>
                     </View>
@@ -346,6 +354,13 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 18,
     fontWeight: '600',
+  },
+  priceCol: {
+    gap: 2,
+  },
+  stockText: {
+    color: colors.onSurfaceVariant,
+    fontSize: 11,
   },
   deleteBtn: {
     padding: 2,

@@ -7,6 +7,7 @@ type QuantityStepperProps = {
   min?: number;
   max?: number;
   onChange: (value: number) => void;
+  onExceedMax?: (max: number) => void;
   size?: number;
 };
 
@@ -15,6 +16,7 @@ export function QuantityStepper({
   min = 1,
   max = 99,
   onChange,
+  onExceedMax,
   size = 28,
 }: QuantityStepperProps) {
   return (
@@ -31,9 +33,14 @@ export function QuantityStepper({
       </View>
       <TouchableOpacity
         activeOpacity={0.7}
-        disabled={value >= max}
-        onPress={() => onChange(Math.min(max, value + 1))}
-        style={[styles.button, { width: size, height: size }, value >= max && styles.disabled]}>
+        onPress={() => {
+          if (value >= max) {
+            onExceedMax?.(max);
+            return;
+          }
+          onChange(Math.min(max, value + 1));
+        }}
+        style={[styles.button, { width: size, height: size }]}>
         <Text style={styles.buttonText}>+</Text>
       </TouchableOpacity>
     </View>
