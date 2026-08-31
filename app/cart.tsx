@@ -163,11 +163,8 @@ export default function CartScreen() {
                           value={line.quantity}
                           max={product.stock}
                           onChange={(next) => changeCartQuantity(line.productId, next)}
-                          onExceedMax={(max) =>
-                            Alert.alert(
-                              'Vượt quá số lượng tồn kho',
-                              `Sản phẩm này chỉ còn ${max - line.quantity} trong kho. Vui lòng chọn số lượng nhỏ hơn.`
-                            )
+                          onExceedMax={() =>
+                            Alert.alert('Vượt quá số lượng tồn kho', 'Vượt quá số lượng tồn kho')
                           }
                         />
                       </View>

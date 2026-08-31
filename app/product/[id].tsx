@@ -60,6 +60,7 @@ export default function ProductDetailScreen() {
   const isOutOfStock = product.stock <= 0 && product.status !== 'sold';
   const isSold = product.status === 'sold';
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const isOwnProduct = currentUser?.id === product.sellerId;
 
   const handleBuyNow = () => {
     addToCart(product.id);
@@ -218,7 +219,11 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-{sold ? (
+{isOwnProduct ? (
+        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
+          <Text style={styles.soldLabel}>Sản phẩm của bạn</Text>
+        </View>
+      ) : sold ? (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
           <Text style={styles.soldLabel}>Sản phẩm đã bán</Text>
         </View>

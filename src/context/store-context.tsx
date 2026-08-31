@@ -817,6 +817,9 @@ export function StoreProvider({ children }: PropsWithChildren) {
         if (!product || product.status !== 'active' || product.stock <= 0) {
           return [];
         }
+        if (currentUser.id === product.sellerId) {
+          return [];
+        }
         return [{ product, quantity: Math.min(line.quantity, product.stock) }];
       });
 
