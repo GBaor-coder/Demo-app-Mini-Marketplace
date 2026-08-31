@@ -4,18 +4,16 @@ import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Keyboard,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import MapView, { Marker, MarkerDragStartEndEvent } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/src/components/ui';
-import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { Button, ScreenHeader } from '@/src/components/ui';
+import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
 
 const DEFAULT = { latitude: 10.762622, longitude: 106.660172, address: '' };
@@ -41,8 +39,6 @@ export default function LocationSelectScreen() {
     address: params.address ?? '',
   });
   const [gpsState, setGpsState] = useState<'idle' | 'locating' | 'denied' | 'off'>('idle');
-  const [manualOpen, setManualOpen] = useState(false);
-  const [manualAddress, setManualAddress] = useState('');
 
   useEffect(() => {
     if (!point.address) {
@@ -111,24 +107,9 @@ export default function LocationSelectScreen() {
     });
   }
 
-  function applyManual() {
-    const trimmed = manualAddress.trim();
-    if (!trimmed) return;
-    setPoint((p) => ({ ...p, address: trimmed }));
-    setManualOpen(false);
-    setManualAddress('');
-    Keyboard.dismiss();
-  }
-
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Chọn vị trí giao hàng</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <ScreenHeader title="Chọn vị trí giao hàng" />
 
       <MapView
         ref={mapRef}
@@ -164,18 +145,18 @@ export default function LocationSelectScreen() {
       </View>
 
       {gpsState === 'denied' ? (
-        <View style={[styles.notice, { top: insets.top + 116 }]}>
+        <View style={styles.notice}>
           <Ionicons name="location-outline" size={18} color={colors.error} />
           <Text style={styles.noticeText}>
-            Không có quyền truy cập vị trí. Bạn vẫn có thể chạm bản đồ hoặc nhập tay bên dưới.
+            Không có quyền truy cập vị trí. Bạn vẫn có thể kéo marker trên bản đồ.
           </Text>
         </View>
       ) : null}
       {gpsState === 'off' ? (
-        <View style={[styles.notice, { top: insets.top + 116 }]}>
+        <View style={styles.notice}>
           <Ionicons name="warning-outline" size={18} color={colors.error} />
           <Text style={styles.noticeText}>
-            GPS đang tắt. Bật GPS hoặc chọn vị trí bằng cách chạm bản đồ / nhập tay.
+            GPS đang tắt. Bật GPS hoặc kéo marker trên bản đồ để chọn vị trí.
           </Text>
         </View>
       ) : null}
@@ -190,25 +171,6 @@ export default function LocationSelectScreen() {
           </Text>
         </View>
 
-        {manualOpen ? (
-          <View style={styles.manualWrap}>
-            <TextInput
-              value={manualAddress}
-              onChangeText={setManualAddress}
-              placeholder="Nhập địa chỉ cụ thể, ví dụ: 268 Lý Thường Kiệt, P.14, Q.10"
-              placeholderTextColor={colors.outline}
-              style={styles.manualInput}
-              multiline
-            />
-            <Button title="Áp dụng" onPress={applyManual} style={styles.manualApply} />
-          </View>
-        ) : (
-          <TouchableOpacity activeOpacity={0.85} onPress={() => setManualOpen(true)} style={styles.manualToggle}>
-            <Ionicons name="create-outline" size={17} color={colors.primary} />
-            <Text style={styles.manualToggleText}>Nhập địa chỉ bằng tay</Text>
-          </TouchableOpacity>
-        )}
-
         <Button title="Xác nhận vị trí" onPress={confirm} style={styles.confirmBtn} />
       </View>
     </View>
@@ -220,46 +182,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface,
   },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.94)',
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingHorizontal: 12,
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    zIndex: 10,
-    ...shadow.level1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 36,
-  },
-  title: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    flex: 1,
-    textAlign: 'center',
-  },
   map: {
     flex: 1,
   },
   gpsWrap: {
     position: 'absolute',
     right: 16,
-    top: 96,
+    top: '6%',
   },
   gpsBtn: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius.full,
-    height: 46,
+    height: 45,
     justifyContent: 'center',
-    width: 46,
+    width: 45,
     ...shadow.level2,
   },
   notice: {
@@ -273,6 +210,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     position: 'absolute',
     right: 16,
+    top: 72,
     zIndex: 5,
   },
   noticeText: {
@@ -308,37 +246,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-  },
-  manualWrap: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 12,
-  },
-  manualInput: {
-    backgroundColor: colors.surfaceContainer,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    color: colors.onSurface,
-    flex: 1,
-    fontSize: 13,
-    minHeight: 44,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  manualApply: {
-    minWidth: 100,
-  },
-  manualToggle: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 12,
-  },
-  manualToggleText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
   },
   confirmBtn: {
     marginTop: 14,

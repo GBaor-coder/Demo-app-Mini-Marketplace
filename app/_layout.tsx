@@ -85,7 +85,7 @@ export default function RootLayout() {
           <Stack.Screen name="seller-order/[id]" />
           <Stack.Screen name="favorites" />
           <Stack.Screen name="addresses" />
-          <Stack.Screen name="address-form" options={{ presentation: 'formSheet' }} />
+          <Stack.Screen name="address-form" />
           <Stack.Screen name="chat/[id]" />
           <Stack.Screen name="seller-notifications" />
           <Stack.Screen name="report" />

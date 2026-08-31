@@ -71,10 +71,15 @@ export default function AddressFormScreen() {
       Alert.alert('Thiếu địa chỉ', 'Vui lòng nhập tên đường / địa chỉ cụ thể.');
       return;
     }
-    if (!location.address) {
-      Alert.alert('Thiếu vị trí', 'Vui lòng xác định vị trí trên bản đồ.');
-      return;
-    }
+
+    const finalLocation = location.address
+      ? location
+      : {
+          ...location,
+          address: [street.trim(), ward.trim(), district.trim(), province.trim()]
+            .filter(Boolean)
+            .join(', '),
+        };
 
     setSaving(true);
     setTimeout(() => {
@@ -88,7 +93,7 @@ export default function AddressFormScreen() {
         street: street.trim(),
         building: building.trim(),
         room: room.trim(),
-        location,
+        location: finalLocation,
         isDefault,
         notes: notes.trim(),
       };
