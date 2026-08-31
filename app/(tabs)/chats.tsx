@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { Avatar } from '@/src/components/Avatar';
-import { Chip, EmptyState, IconButton, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Chip, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { ChatThread } from '@/src/types';
@@ -129,11 +129,7 @@ export default function ChatsScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader
-        title="Tin nhắn"
-        showBack={false}
-        right={<IconButton name="search" onPress={() => router.push('/search')} />}
-      />
+      <ScreenHeader title="Tin nhắn" showBack={false} />
 
       <View style={styles.tabsWrap}>
         <ScrollView

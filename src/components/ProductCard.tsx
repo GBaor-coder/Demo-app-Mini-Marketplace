@@ -82,7 +82,7 @@ export function ProductCard({
           {product.title}
         </Text>
         {showLocation ? (
-          <Text numberOfLines={1} style={styles.location}>
+          <Text numberOfLines={2} style={styles.location}>
             {product.location?.address ?? '---'}
           </Text>
         ) : null}
@@ -227,8 +227,9 @@ const styles = StyleSheet.create({
   },
   location: {
     color: colors.onSurfaceVariant,
-    fontSize: 14,
-    marginTop: 6,
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 4,
   },
   price: {
     color: colors.primary,

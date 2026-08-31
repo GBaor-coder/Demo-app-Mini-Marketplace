@@ -204,14 +204,7 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader
-        brand
-        right={
-          <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerBtn}>
-            <MaterialIcons name="search" size={22} color={colors.primary} />
-          </TouchableOpacity>
-        }
-      />
+      <ScreenHeader brand />
 
       <View style={styles.typeTabs}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.typeTabsContent}>
@@ -283,12 +276,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: colors.surface,
     flex: 1,
-  },
-  headerBtn: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
   },
   typeTabs: {
     backgroundColor: colors.surface,

@@ -91,13 +91,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader
-        brand
-        showBack={false}
-        right={
-          <IconButton name="search" onPress={() => router.push('/search')} />
-        }
-      />
+      <ScreenHeader brand showBack={false} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.profileCard}>

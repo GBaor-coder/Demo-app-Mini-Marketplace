@@ -67,7 +67,7 @@ export default function RootLayout() {
         <Stack.Screen name="change-password" />
         <Stack.Screen name="delete-account" />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="search" options={{ presentation: 'formSheet' }} />
+        <Stack.Screen name="search" />
         <Stack.Screen name="search-results" />
         <Stack.Screen name="product/[id]" />
         <Stack.Screen name="product-form" options={{ presentation: 'formSheet' }} />

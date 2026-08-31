@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   ScrollView,
   StyleSheet,
   Text,
@@ -32,8 +33,15 @@ export default function ProductDetailScreen() {
     toggleFavorite,
     addToCart,
     startChat,
+    cart,
   } = useStore();
   const [imageIndex, setImageIndex] = useState(0);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerBgOpacity = scrollY.interpolate({
+    inputRange: [0, 90],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   const product = products.find((p) => p.id === id);
   const seller = product ? getUserById(product.sellerId) : undefined;
@@ -51,6 +59,7 @@ export default function ProductDetailScreen() {
   const sold = product.status === 'sold';
   const isOutOfStock = product.stock <= 0 && product.status !== 'sold';
   const isSold = product.status === 'sold';
+  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
   const handleBuyNow = () => {
     addToCart(product.id);
@@ -74,26 +83,37 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.screen}>
+      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.headerBackdrop, { opacity: headerBgOpacity }]}
+        />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.headerButton}>
+          <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>UniLoop</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => router.push('/cart')} style={styles.headerButton}>
+            <MaterialIcons name="shopping-cart" size={22} color={colors.onSurface} />
+            {cartCount > 0 ? (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+              </View>
+            ) : null}
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
         contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
-        <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.headerButton}>
-            <MaterialIcons name="arrow-back" size={22} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>UniLoop</Text>
-          <View style={styles.headerActions}>
-            <TouchableOpacity onPress={() => router.push('/search')} style={styles.headerButton}>
-              <MaterialIcons name="search" size={22} color={colors.onSurface} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => Alert.alert('Chia sẻ', 'Tính năng chia sẻ đang được phát triển.')} style={styles.headerButton}>
-              <MaterialIcons name="share" size={22} color={colors.onSurface} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <View style={styles.carousel}>
           <ScrollView
             horizontal
@@ -253,7 +273,6 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    backgroundColor: 'rgba(248,249,255,0.92)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingBottom: 10,
@@ -262,6 +281,10 @@ const styles = StyleSheet.create({
     top: 0,
     width: '100%',
     zIndex: 20,
+  },
+  headerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(248,249,255,0.95)',
     ...shadow.level1,
   },
   headerActions: {
