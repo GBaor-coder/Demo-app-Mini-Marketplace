@@ -67,6 +67,21 @@ export default function ChangePasswordScreen() {
 
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        setError('Không thể xác minh tài khoản. Vui lòng thử lại.');
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (verifyError) {
+        setError('Mật khẩu hiện tại không đúng. Vui lòng kiểm tra lại.');
+        return;
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -103,9 +118,10 @@ export default function ChangePasswordScreen() {
             <Button
               title="Quay lại đăng nhập"
               variant="primaryContainer"
-              onPress={() => {
-                supabase.auth.signOut();
-                router.replace('/login');
+              onPress={async () => {
+                await supabase.auth.signOut().catch(() => {});
+                router.dismissAll();
+                router.push('/login');
               }}
             />
           </View>
@@ -263,6 +279,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius.xl,
+    gap: 20,
     maxWidth: 480,
     overflow: 'hidden',
     padding: 28,

@@ -32,6 +32,10 @@ export default function ForgotPasswordScreen() {
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: email.trim(),
+        options: {
+          emailRedirectTo: 'uniloop://reset-password',
+          shouldCreateUser: false,
+        },
       });
       if (otpError) {
         const msg = otpError.message.toLowerCase();

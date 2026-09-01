@@ -80,7 +80,7 @@ export default function RootLayout() {
           <Stack.Screen name="order-success" />
           <Stack.Screen name="order/[id]" />
           <Stack.Screen name="order-tracking" />
-          <Stack.Screen name="order-cancel" options={{ presentation: 'formSheet' }} />
+          <Stack.Screen name="order-cancel" options={{ animation: 'fade' }} />
           <Stack.Screen name="order-rate" options={{ presentation: 'formSheet' }} />
           <Stack.Screen name="seller-order/[id]" />
           <Stack.Screen name="favorites" />

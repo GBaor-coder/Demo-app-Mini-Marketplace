@@ -44,28 +44,28 @@ export default function OrderCancelScreen() {
   const isSellerFlow = seller === '1';
   const reasons = isSellerFlow ? SELLER_REASONS : REASONS;
 
-  const confirm = () => {
+  const confirm = async () => {
     if (!reason) {
       Alert.alert('Chọn lý do', 'Vui lòng chọn một lý do hủy đơn hàng.');
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
+    try {
       const finalReason = reason === OTHER_LABEL && note.trim() ? note.trim() : reason;
       if (isSellerFlow) {
-        updateOrderStatus(id, 'rejected', finalReason);
-        setSubmitting(false);
+        await updateOrderStatus(id, 'rejected', finalReason);
         Alert.alert('Đã từ chối đơn hàng', 'Người mua sẽ được thông báo về việc từ chối đơn này.', [
           { text: 'Đóng', onPress: () => router.back() },
         ]);
         return;
       }
-      updateOrderStatus(id, 'cancelled', finalReason);
-      setSubmitting(false);
+      await updateOrderStatus(id, 'cancelled', finalReason);
       Alert.alert('Đã hủy đơn hàng', 'Đơn hàng đã được hủy. Tiền sẽ được hoàn vào ví UniLoop.', [
         { text: 'Đóng', onPress: () => router.back() },
       ]);
-    }, 500);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

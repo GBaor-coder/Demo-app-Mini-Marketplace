@@ -73,6 +73,10 @@ export default function OtpScreen() {
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: email!,
+        options: {
+          emailRedirectTo: 'uniloop://reset-password',
+          shouldCreateUser: false,
+        },
       });
       if (otpError) {
         const msg = otpError.message.toLowerCase();
@@ -102,13 +106,13 @@ export default function OtpScreen() {
       const { error: verifyError } = await supabase.auth.verifyOtp({
         email: email!,
         token: code,
-        type: 'email',
+        type: 'recovery',
       });
       if (verifyError) {
         setError('Mã xác thực không đúng hoặc đã hết hạn. Vui lòng thử lại.');
         return;
       }
-      router.push('/reset-password');
+      router.replace('/reset-password');
     } catch {
       setError('Lỗi kết nối. Vui lòng thử lại sau.');
     } finally {

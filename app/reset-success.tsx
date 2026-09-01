@@ -36,7 +36,10 @@ export default function ResetSuccessScreen() {
             <Button
               title="Quay lại đăng nhập"
               variant="primaryContainer"
-              onPress={() => router.replace('/login')}
+              onPress={() => {
+                router.dismissAll();
+                router.push('/login');
+              }}
             />
 
             <View style={styles.footer}>

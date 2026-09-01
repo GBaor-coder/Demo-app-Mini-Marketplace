@@ -58,6 +58,7 @@ export default function ResetPasswordScreen() {
         setError('Không thể cập nhật mật khẩu. Vui lòng thử lại sau.');
         return;
       }
+      await supabase.auth.signOut().catch(() => {});
       router.replace('/reset-success');
     } catch {
       setError('Lỗi kết nối. Vui lòng thử lại sau.');

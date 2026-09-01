@@ -117,7 +117,7 @@ export default function TabLayout() {
       />
       <ExpoRouterTopTabs.Screen name="explore" options={{ href: null }} />
       <ExpoRouterTopTabs.Screen name="chats" options={{ title: 'Tin nhắn', tabBarIcon: tabIcon('chat', 'chat') }} />
-            <ExpoRouterTopTabs.Screen
+      <ExpoRouterTopTabs.Screen
         name="create"
         options={{
           title: 'Đăng bán',

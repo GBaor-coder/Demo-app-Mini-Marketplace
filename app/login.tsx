@@ -62,9 +62,6 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      if (currentUser) {
-        router.replace('/(tabs)');
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
