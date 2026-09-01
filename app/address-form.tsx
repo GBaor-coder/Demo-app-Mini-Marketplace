@@ -15,6 +15,8 @@ import { Button, IconName, MaterialIcons, ScreenHeader, toIconName } from '@/src
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
+import { consumeLocationSelectionResult } from '@/src/utils/location-selection-result';
+import { validateAddressLocation } from '@/src/utils/maps';
 
 const LABEL_OPTIONS: { label: string; icon: IconName }[] = [
   { label: 'Nhà', icon: toIconName('home') },
@@ -25,7 +27,7 @@ const LABEL_OPTIONS: { label: string; icon: IconName }[] = [
 
 export default function AddressFormScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id?: string; lat?: string; lng?: string; address?: string }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const { addresses, addAddress, updateAddress } = useStore();
 
   const editing = params.id ? addresses.find((a) => a.id === params.id) : undefined;
@@ -41,24 +43,19 @@ export default function AddressFormScreen() {
   const [room, setRoom] = useState(editing?.room ?? '');
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [isDefault, setIsDefault] = useState(editing?.isDefault ?? false);
-  const [location, setLocation] = useState<LocationPoint>(
-    editing?.location ?? { latitude: 10.762622, longitude: 106.660172, address: '' }
-  );
+  const [location, setLocation] = useState<LocationPoint | null>(editing?.location ?? null);
   const [saving, setSaving] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      if (params.lat && params.lng) {
-        setLocation({
-          latitude: Number(params.lat),
-          longitude: Number(params.lng),
-          address: params.address ?? '',
-        });
+      const selectedLocation = consumeLocationSelectionResult();
+      if (selectedLocation) {
+        setLocation(selectedLocation);
       }
-    }, [params.lat, params.lng, params.address])
+    }, [])
   );
 
-  const save = () => {
+  const save = async () => {
     if (recipient.trim().length < 2) {
       Alert.alert('Thiếu tên người nhận', 'Vui lòng nhập tên người nhận.');
       return;
@@ -67,47 +64,83 @@ export default function AddressFormScreen() {
       Alert.alert('Số điện thoại không hợp lệ', 'Vui lòng nhập số điện thoại đúng định dạng.');
       return;
     }
-    if (!street.trim()) {
-      Alert.alert('Thiếu địa chỉ', 'Vui lòng nhập tên đường / địa chỉ cụ thể.');
+    const requiredAddressFields = [
+      { label: 'tỉnh/thành', value: province },
+      { label: 'quận/huyện', value: district },
+      { label: 'phường/xã', value: ward },
+      { label: 'địa chỉ cụ thể', value: street },
+    ];
+    const missingField = requiredAddressFields.find((field) => !field.value.trim());
+    if (missingField) {
+      Alert.alert('Thiếu địa chỉ', `Vui lòng nhập ${missingField.label}.`);
+      return;
+    }
+    if (!location) {
+      Alert.alert(
+        'Chưa chọn vị trí',
+        'Vui lòng mở bản đồ và xác nhận vị trí chính xác của địa chỉ.'
+      );
       return;
     }
 
-    const finalLocation = location.address
-      ? location
-      : {
-          ...location,
-          address: [street.trim(), ward.trim(), district.trim(), province.trim()]
-            .filter(Boolean)
-            .join(', '),
-        };
-
+    const typedAddress = [street.trim(), ward.trim(), district.trim(), province.trim()].join(', ');
     setSaving(true);
-    setTimeout(() => {
+    try {
+      const validation = await validateAddressLocation(typedAddress, location);
+      if (!validation.valid) {
+        Alert.alert('Địa chỉ chưa khớp vị trí', validation.message);
+        return;
+      }
+
       const data = {
         label: label.trim() || 'Nhà',
         recipient: recipient.trim(),
         phone: phone.trim(),
-        province,
-        district,
-        ward,
+        province: province.trim(),
+        district: district.trim(),
+        ward: ward.trim(),
         street: street.trim(),
         building: building.trim(),
         room: room.trim(),
-        location: finalLocation,
+        location,
         isDefault,
         notes: notes.trim(),
       };
       if (editing) {
-        updateAddress(editing.id, data);
+        await updateAddress(editing.id, data);
       } else {
-        addAddress(data);
+        await addAddress(data);
       }
+
+      Alert.alert(
+        editing ? 'Đã cập nhật địa chỉ' : 'Đã lưu địa chỉ',
+        editing
+          ? 'Thông tin địa chỉ đã được cập nhật thành công.'
+          : 'Địa chỉ mới đã được lưu thành công.',
+        [{ text: 'OK', onPress: () => router.replace('/addresses') }]
+      );
+    } catch {
+      Alert.alert(
+        'Không thể lưu địa chỉ',
+        'Đã xảy ra lỗi khi kiểm tra hoặc lưu địa chỉ. Vui lòng kiểm tra kết nối và thử lại.'
+      );
+    } finally {
       setSaving(false);
-      router.back();
-    }, 500);
+    }
   };
 
   const openMapPicker = () => {
+    if (location) {
+      router.push({
+        pathname: '/location-select',
+        params: {
+          lat: String(location.latitude),
+          lng: String(location.longitude),
+          address: location.address,
+        },
+      });
+      return;
+    }
     router.push('/location-select');
   };
 
@@ -204,13 +237,13 @@ export default function AddressFormScreen() {
           <View style={styles.mapToggleInfo}>
             <Text style={styles.mapToggleTitle}>Chọn vị trí trên bản đồ</Text>
             <Text style={styles.mapToggleSub} numberOfLines={1}>
-              {location.address || 'Xác định vị trí chính xác để giao hàng'}
+              {location?.address || 'Xác định vị trí chính xác để giao hàng'}
             </Text>
           </View>
           <MaterialIcons name="chevron-right" size={20} color={colors.outline} />
         </TouchableOpacity>
 
-        {location.address ? <LocationPicker onChange={setLocation} value={location} /> : null}
+        {location?.address ? <LocationPicker onChange={setLocation} value={location} /> : null}
 
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>LOẠI ĐỊA CHỈ</Text>

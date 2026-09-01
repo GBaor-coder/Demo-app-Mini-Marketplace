@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -58,6 +58,15 @@ export default function OrdersScreen() {
     setLoading(true);
     loadingTimer.current = setTimeout(() => setLoading(false), 500);
   }, []);
+
+  useEffect(() => {
+    startLoading();
+    return () => {
+      if (loadingTimer.current) {
+        clearTimeout(loadingTimer.current);
+      }
+    };
+  }, [startLoading]);
 
   const switchTab = (newTab: TabFilter) => {
     setTab(newTab);

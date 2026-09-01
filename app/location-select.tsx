@@ -9,12 +9,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, MarkerDragStartEndEvent } from 'react-native-maps';
+import MapView, { MapPressEvent, Marker, MarkerDragStartEndEvent } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, ScreenHeader } from '@/src/components/ui';
 import { colors, radius, shadow } from '@/src/theme/colors';
 import { LocationPoint } from '@/src/types';
+import { setLocationSelectionResult } from '@/src/utils/location-selection-result';
 
 const DEFAULT = { latitude: 10.762622, longitude: 106.660172, address: '' };
 
@@ -32,53 +33,79 @@ export default function LocationSelectScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ lat?: string; lng?: string; address?: string }>();
   const mapRef = useRef<MapView>(null);
+  const reverseGeocodeRequest = useRef(0);
+
+  const parsedLatitude = Number(params.lat);
+  const parsedLongitude = Number(params.lng);
+  const hasInitialPoint =
+    params.lat !== undefined &&
+    params.lng !== undefined &&
+    Number.isFinite(parsedLatitude) &&
+    Number.isFinite(parsedLongitude);
 
   const [point, setPoint] = useState<LocationPoint>({
-    latitude: params.lat ? Number(params.lat) : DEFAULT.latitude,
-    longitude: params.lng ? Number(params.lng) : DEFAULT.longitude,
+    latitude: hasInitialPoint ? parsedLatitude : DEFAULT.latitude,
+    longitude: hasInitialPoint ? parsedLongitude : DEFAULT.longitude,
     address: params.address ?? '',
   });
   const [gpsState, setGpsState] = useState<'idle' | 'locating' | 'denied' | 'off'>('idle');
+  const [geocoding, setGeocoding] = useState(false);
+  const [locationReady, setLocationReady] = useState(hasInitialPoint);
 
   useEffect(() => {
-    if (!point.address) {
-      reverseGeocode(point.latitude, point.longitude);
+    if (hasInitialPoint) {
+      if (!params.address) {
+        void reverseGeocode(parsedLatitude, parsedLongitude);
+      }
+    } else {
+      void locateCurrentPosition();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function reverseGeocode(latitude: number, longitude: number) {
+    const requestId = ++reverseGeocodeRequest.current;
+    setGeocoding(true);
     try {
       const result = await Location.reverseGeocodeAsync({ latitude, longitude });
       const address = formatAddress(result[0]);
-      if (address) {
+      if (requestId === reverseGeocodeRequest.current && address) {
         setPoint((p) => ({ ...p, address }));
       }
     } catch {
-      // giữ nguyên địa chỉ tọa độ
+      // Tọa độ vẫn có thể được xác nhận khi dịch vụ địa chỉ tạm thời không phản hồi.
+    } finally {
+      if (requestId === reverseGeocodeRequest.current) {
+        setGeocoding(false);
+      }
     }
   }
 
-  async function moveTo(latitude: number, longitude: number) {
-    setPoint((p) => ({ ...p, latitude, longitude }));
-    mapRef.current?.animateToRegion(
-      { latitude, longitude, latitudeDelta: 0.006, longitudeDelta: 0.006 },
-      500
-    );
+  async function moveTo(latitude: number, longitude: number, animate = true) {
+    setPoint({ latitude, longitude, address: '' });
+    setLocationReady(true);
+    if (animate) {
+      mapRef.current?.animateToRegion(
+        { latitude, longitude, latitudeDelta: 0.006, longitudeDelta: 0.006 },
+        500
+      );
+    }
     await reverseGeocode(latitude, longitude);
   }
 
-  async function useCurrentLocation() {
+  async function locateCurrentPosition() {
     setGpsState('locating');
     try {
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         setGpsState('off');
+        setLocationReady(true);
         return;
       }
       const permission = await Location.requestForegroundPermissionsAsync();
       if (permission.status !== 'granted') {
         setGpsState('denied');
+        setLocationReady(true);
         return;
       }
       const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
@@ -86,25 +113,28 @@ export default function LocationSelectScreen() {
       await moveTo(current.coords.latitude, current.coords.longitude);
     } catch {
       setGpsState('off');
+      setLocationReady(true);
     }
   }
 
   function handleDragEnd(event: MarkerDragStartEndEvent) {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    setPoint((p) => ({ ...p, latitude, longitude }));
-    void reverseGeocode(latitude, longitude);
+    void moveTo(latitude, longitude, false);
+  }
+
+  function handleMapPress(event: MapPressEvent) {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    void moveTo(latitude, longitude, false);
   }
 
   function confirm() {
     const finalAddress = point.address.trim() || `Vị trí ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`;
-    router.navigate({
-      pathname: '/address-form',
-      params: {
-        lat: String(point.latitude),
-        lng: String(point.longitude),
-        address: finalAddress,
-      },
+    setLocationSelectionResult({
+      latitude: point.latitude,
+      longitude: point.longitude,
+      address: finalAddress,
     });
+    router.back();
   }
 
   return (
@@ -120,6 +150,7 @@ export default function LocationSelectScreen() {
           latitudeDelta: 0.009,
           longitudeDelta: 0.009,
         }}
+        onPress={handleMapPress}
         showsCompass={false}
         showsMyLocationButton={false}
         showsUserLocation>
@@ -131,9 +162,16 @@ export default function LocationSelectScreen() {
         />
       </MapView>
 
+      {!locationReady ? (
+        <View style={styles.locatingOverlay}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <Text style={styles.locatingText}>Đang lấy vị trí hiện tại...</Text>
+        </View>
+      ) : null}
+
       <View style={styles.gpsWrap}>
         <TouchableOpacity
-          onPress={useCurrentLocation}
+          onPress={locateCurrentPosition}
           disabled={gpsState === 'locating'}
           style={styles.gpsBtn}>
           {gpsState === 'locating' ? (
@@ -167,11 +205,17 @@ export default function LocationSelectScreen() {
             <Ionicons name="location" size={20} color={colors.primary} />
           </View>
           <Text style={styles.address} numberOfLines={3}>
-            {point.address || `Đang xác định địa chỉ tại ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`}
+            {point.address ||
+              `Đang xác định địa chỉ tại ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`}
           </Text>
         </View>
 
-        <Button title="Xác nhận vị trí" onPress={confirm} style={styles.confirmBtn} />
+        <Button
+          title="Xác nhận vị trí"
+          loading={geocoding || gpsState === 'locating'}
+          onPress={confirm}
+          style={styles.confirmBtn}
+        />
       </View>
     </View>
   );
@@ -184,6 +228,22 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  locatingOverlay: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    bottom: 0,
+    gap: 12,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  locatingText: {
+    color: colors.onSurfaceVariant,
+    fontSize: 14,
+    fontWeight: '600',
   },
   gpsWrap: {
     position: 'absolute',
