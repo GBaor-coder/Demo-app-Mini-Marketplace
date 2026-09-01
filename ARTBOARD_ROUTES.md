@@ -36,7 +36,6 @@ Dự án Stitch: `projects/2327205381384374553` (Remix of UniLoop Student Market
 | 25 | 7a2ef2c2 | Chi tiết đơn mua | `app/order/[id].tsx` |
 | 26 | 152bb519 | Theo dõi đơn hàng | `app/order-tracking.tsx` |
 | 27 | 860fb6a7 | Hủy đơn | `app/order-cancel.tsx` |
-| 28 | 69d79aea | Đánh giá giao dịch | `app/order-rate.tsx` |
 | 29 | 57bb58b7 | Thông báo | `app/(tabs)/(buyer)/notifications.tsx` |
 | 30 | c420f535 | Danh sách trò chuyện (buyer) | `app/chats.tsx` |
 | 31 | 00e1ebf3 | Cá nhân | `app/(tabs)/(buyer)/profile.tsx` |

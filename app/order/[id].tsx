@@ -56,7 +56,6 @@ export default function OrderDetailScreen() {
   const canCancel = ['pending', 'confirmed'].includes(order.status);
   const canConfirm = order.status === 'in_transaction';
   const canTrack = ['in_transaction', 'completed'].includes(order.status);
-  const canRate = order.status === 'completed';
 
   const confirmReceipt = () => {
     Alert.alert(
@@ -225,15 +224,6 @@ export default function OrderDetailScreen() {
         ) : null}
         {canConfirm ? (
           <Button title="Đã nhận được hàng" variant="primary" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
-        ) : null}
-        {canRate ? (
-          <Button
-            title="Đánh giá"
-            icon="star"
-            variant="primary"
-            onPress={() => router.push(`/order-rate?id=${order.id}`)}
-            style={styles.footerBtn}
-          />
         ) : null}
       </View>
     </View>
