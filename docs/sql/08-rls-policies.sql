@@ -40,6 +40,7 @@ DROP POLICY IF EXISTS "Anyone can view active products"  ON products;
 DROP POLICY IF EXISTS "Sellers can insert own products"  ON products;
 DROP POLICY IF EXISTS "Sellers can update own products"  ON products;
 DROP POLICY IF EXISTS "Sellers can delete own products"  ON products;
+DROP POLICY IF EXISTS "Anyone can update stock on products" ON products;
 CREATE POLICY "Anyone can view active products"
   ON products FOR SELECT USING (status = 'active' OR seller_id = auth.uid());
 CREATE POLICY "Sellers can insert own products"
@@ -48,6 +49,10 @@ CREATE POLICY "Sellers can update own products"
   ON products FOR UPDATE USING (seller_id = auth.uid()) WITH CHECK (seller_id = auth.uid());
 CREATE POLICY "Sellers can delete own products"
   ON products FOR DELETE USING (seller_id = auth.uid());
+CREATE POLICY "Anyone can update stock on products"
+  ON products FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
 -- orders
 DROP POLICY IF EXISTS "Buyers can view own orders" ON orders;

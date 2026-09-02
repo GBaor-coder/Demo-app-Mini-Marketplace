@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -15,10 +15,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/src/components/Avatar';
 import { LocationPreview } from '@/src/components/location-preview';
-import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
+import { ProductCard } from '@/src/components/ProductCard';
+import {
+  Button,
+  EmptyState,
+  MaterialIcons,
+  SectionHeader,
+} from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { distanceFromCenter } from '@/src/utils/filter';
+import { Product } from '@/src/types';
+import { distanceFromCenter, getSimilarProducts } from '@/src/utils/filter';
 import { distanceLabel, formatCurrency } from '@/src/utils/format';
 
 export default function ProductDetailScreen() {
@@ -35,8 +42,10 @@ export default function ProductDetailScreen() {
     addToCart,
     startChat,
     cart,
+    fetchProductById,
   } = useStore();
   const [imageIndex, setImageIndex] = useState(0);
+  const [missing, setMissing] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerBgOpacity = scrollY.interpolate({
     inputRange: [0, 90],
@@ -46,8 +55,34 @@ export default function ProductDetailScreen() {
 
   const product = products.find((p) => p.id === id);
   const seller = product ? getUserById(product.sellerId) : undefined;
+  const images = product?.images?.length ? product.images : product ? [product.image] : [];
+  const favorite = product ? favoriteIds.includes(product.id) : false;
+  const isSold = product?.status === 'sold';
+  const isOutOfStock = !!product && product.stock <= 0 && product.status !== 'sold';
+  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const isOwnProduct = !!currentUser && !!product && currentUser.id === product.sellerId;
 
-  if (!product) {
+  const similarProducts = useMemo(
+    () => (product && isSold ? getSimilarProducts(product, products, 6) : []),
+    [isSold, product, products]
+  );
+
+  useEffect(() => {
+    if (id && !product) {
+      let cancelled = false;
+      setMissing(false);
+      void fetchProductById(id).then((p) => {
+        if (cancelled) return;
+        if (!p) setMissing(true);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    return undefined;
+  }, [id, product, fetchProductById]);
+
+  if (missing) {
     return (
       <View style={styles.screen}>
         <EmptyState icon="inventory-2" title="Không tìm thấy sản phẩm" description="Sản phẩm này có thể đã bị xóa." />
@@ -55,13 +90,13 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const images = product.images?.length ? product.images : [product.image];
-  const favorite = favoriteIds.includes(product.id);
-  const sold = product.status === 'sold';
-  const isOutOfStock = product.stock <= 0 && product.status !== 'sold';
-  const isSold = product.status === 'sold';
-  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
-  const isOwnProduct = currentUser?.id === product.sellerId;
+  if (!product) {
+    return (
+      <View style={styles.screen}>
+        <EmptyState icon="hourglass-empty" title="Đang tải sản phẩm..." />
+      </View>
+    );
+  }
 
   const handleBuyNow = () => {
     addToCart(product.id);
@@ -147,12 +182,14 @@ export default function ProductDetailScreen() {
         </View>
 
         <View style={styles.content}>
-          <View style={styles.stockInfo}>
-            <Text style={styles.stockText}>Tồn kho: {product.stock}</Text>
-            {product.stock <= 0 && (
-              <Text style={styles.stockOutOfText}>Hết hàng</Text>
-            )}
-          </View>
+          {isSold ? null : (
+            <View style={styles.stockInfo}>
+              <Text style={styles.stockText}>Tồn kho: {product.stock}</Text>
+              {product.stock <= 0 ? (
+                <Text style={styles.stockOutOfText}>Hết hàng</Text>
+              ) : null}
+            </View>
+          )}
           <View style={styles.detailCard}>
             <Text style={styles.title}>{product.title}</Text>
             <Text style={styles.price}>{formatCurrency(product.price)}</Text>
@@ -181,10 +218,12 @@ export default function ProductDetailScreen() {
                   ) : null}
                 </View>
                 <Text style={styles.sellerUni}>{seller?.campus ?? ''}</Text>
-                <View style={styles.sellerTrust}>
-                  <MaterialIcons name="star" size={13} color={colors.star} />
-                  <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
-                </View>
+                {isSold ? null : (
+                  <View style={styles.sellerTrust}>
+                    <MaterialIcons name="star" size={13} color={colors.star} />
+                    <Text style={styles.sellerTrustText}>Người bán uy tín</Text>
+                  </View>
+                )}
               </View>
               <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
             </TouchableOpacity>
@@ -214,12 +253,29 @@ export default function ProductDetailScreen() {
             {product.location ? <LocationPreview location={product.location} /> : null}
           </View>
 
-          {product.allowsCod ? (
+          {isSold ? null : product.allowsCod ? (
             <View style={styles.codCard}>
               <MaterialIcons name="payments" size={20} color={colors.tertiary} />
               <View style={styles.codInfo}>
                 <Text style={styles.codTitle}>Hỗ trợ giao hàng COD</Text>
                 <Text style={styles.codText}>Phí ship 15.000đ cho nội khu Làng Đại học</Text>
+              </View>
+            </View>
+          ) : null}
+
+          {isSold && similarProducts.length > 0 ? (
+            <View style={styles.similarSection}>
+              <SectionHeader title="Sản phẩm tương tự đang còn bán" />
+              <View style={styles.similarGrid}>
+                {similarProducts.map((item: Product) => (
+                  <View key={item.id} style={styles.similarCell}>
+                    <ProductCard
+                      product={item}
+                      onPress={() => router.push(`/product/${item.id}`)}
+                      imageHeight={140}
+                    />
+                  </View>
+                ))}
               </View>
             </View>
           ) : null}
@@ -230,9 +286,21 @@ export default function ProductDetailScreen() {
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
           <Text style={styles.soldLabel}>Sản phẩm của bạn</Text>
         </View>
-      ) : sold ? (
+      ) : isSold ? (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
-          <Text style={styles.soldLabel}>Sản phẩm đã bán</Text>
+          <Button
+            title="Xem cửa hàng"
+            variant="outline"
+            icon="storefront"
+            onPress={() => router.push(`/store?userId=${product.sellerId}`)}
+            style={styles.bottomBtn}
+          />
+          <Button
+            title="Chat với người bán"
+            icon="chat"
+            onPress={handleChat}
+            style={styles.bottomBtn}
+          />
         </View>
       ) : isOutOfStock ? (
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
@@ -579,6 +647,9 @@ const styles = StyleSheet.create({
   buyButton: {
     flex: 1,
   },
+  bottomBtn: {
+    flex: 1,
+  },
   cartBadge: {
     alignItems: 'center',
     backgroundColor: colors.error,
@@ -621,5 +692,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
+  },
+  similarSection: {
+    gap: 12,
+    marginTop: 8,
+  },
+  similarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  similarCell: {
+    flexBasis: '48%',
+    flexGrow: 1,
   },
 });

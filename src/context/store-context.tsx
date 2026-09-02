@@ -17,6 +17,8 @@ import {
   updateProduct as repoUpdateProduct,
   deleteProduct as repoDeleteProduct,
   markProductSold as repoMarkProductSold,
+  getProductById as repoGetProductById,
+  syncProductStock as repoSyncProductStock,
 } from '@/src/lib/repo/products';
 import {
   listOrdersForBuyer,
@@ -59,8 +61,9 @@ import {
   LocationPoint,
   Order,
   OrderStatus,
-Product,
+  Product,
   ProductInput,
+  ProductStatus,
   ProfileUpdateInput,
   Review,
   SavedAddress,
@@ -127,6 +130,9 @@ type StoreContextValue = {
   startChat: (otherId: string, productId?: string | null) => Promise<string>;
   addReview: (review: Omit<Review, 'id' | 'createdAt'>) => Promise<void>;
   refreshProducts: () => Promise<void>;
+  loadMyProducts: () => Promise<void>;
+  fetchProductById: (id: string) => Promise<Product | null>;
+  reconcileSoldProducts: (orders: Order[]) => void;
   refreshOrders: () => Promise<void>;
   refreshCart: () => Promise<void>;
   refreshAddresses: () => Promise<void>;
@@ -140,6 +146,21 @@ function sortThreads(threads: ChatThread[]): ChatThread[] {
   return threads.sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
+}
+
+function applyStockChange(
+  product: Product,
+  newStock: number
+): Product {
+  const safe = Math.max(0, Math.floor(newStock));
+  if (safe > 0) {
+    if (product.status === 'sold') return { ...product, stock: safe };
+    return { ...product, stock: safe, status: 'active' };
+  }
+  if (product.status === 'sold') {
+    return { ...product, stock: 0 };
+  }
+  return { ...product, stock: 0, status: 'active' };
 }
 
 function mapProfileToUser(profile: Record<string, unknown>): User {
@@ -290,17 +311,26 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
     async function load() {
       if (!currentUser) return;
-      const [prods, cartLines, addrs, notifs, chatThreads] = await Promise.all([
-        listProducts({ status: 'active' }),
-        listCartLines(currentUser.id),
-        listAddresses(currentUser.id),
-        listNotifications(currentUser.id),
-        listChatThreads(currentUser.id),
-      ]);
+      const [activeProducts, myProducts, cartLines, addrs, notifs, chatThreads] =
+        await Promise.all([
+          listProducts({ status: 'active' }),
+          listProducts({ sellerId: currentUser.id }),
+          listCartLines(currentUser.id),
+          listAddresses(currentUser.id),
+          listNotifications(currentUser.id),
+          listChatThreads(currentUser.id),
+        ]);
 
       if (!cancelled) {
-        setProducts(prods);
-        void ensureProfiles(prods.map((p) => p.sellerId));
+        const map = new Map<string, Product>();
+        activeProducts.forEach((p) => map.set(p.id, p));
+        myProducts.forEach((p) => map.set(p.id, p));
+        const merged = Array.from(map.values()).sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setProducts(merged);
+        void ensureProfiles(merged.map((p) => p.sellerId));
         setCart(cartLines);
         setAddresses(addrs);
         setNotifications(notifs);
@@ -315,6 +345,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
       if (!cancelled) {
         setOrders(unique);
+        reconcileSoldProducts(unique);
       }
     }
 
@@ -323,6 +354,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
     return () => {
       cancelled = true;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   useEffect(() => {
@@ -372,9 +404,71 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const refreshProducts = useCallback(async () => {
     const items = await listProducts({ status: 'active' });
-    setProducts(items);
+    setProducts((current) => {
+      const map = new Map<string, Product>();
+      items.forEach((p) => map.set(p.id, p));
+      current.forEach((p) => {
+        if (p.status === 'sold' || p.status === 'draft') {
+          map.set(p.id, p);
+        }
+      });
+      return Array.from(map.values());
+    });
     void ensureProfiles(items.map((p) => p.sellerId));
   }, [ensureProfiles]);
+
+  const reconcileSoldProducts = useCallback((orders: Order[]) => {
+    if (!orders || orders.length === 0) return;
+    const completedItems = orders
+      .filter((o) => o.status === 'completed')
+      .flatMap((o) => o.items.map((it) => it.productId));
+    if (completedItems.length === 0) return;
+
+    setProducts((current) => {
+      const ids = new Set(completedItems);
+      let mutated = false;
+      const next = current.map((p) => {
+        if (!ids.has(p.id)) return p;
+        if (p.status === 'sold') return p;
+        mutated = true;
+        void repoMarkProductSold(p.id);
+        return { ...p, stock: 0, status: 'sold' as const };
+      });
+      return mutated ? next : current;
+    });
+  }, []);
+
+  const loadMyProducts = useCallback(async () => {
+    if (!currentUser) return;
+    const mine = await listProducts({ sellerId: currentUser.id });
+    setProducts((current) => {
+      const map = new Map<string, Product>();
+      current.forEach((p) => map.set(p.id, p));
+      mine.forEach((p) => map.set(p.id, p));
+      return Array.from(map.values()).sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    });
+    void ensureProfiles(mine.map((p) => p.sellerId));
+  }, [currentUser?.id, ensureProfiles]);
+
+  const fetchProductById = useCallback(
+    async (id: string): Promise<Product | null> => {
+      const cached = products.find((p) => p.id === id);
+      if (cached) return cached;
+      const fetched = await repoGetProductById(id);
+      if (fetched) {
+        setProducts((current) => {
+          if (current.some((p) => p.id === fetched.id)) return current;
+          return [fetched, ...current];
+        });
+        void ensureProfiles([fetched.sellerId]);
+      }
+      return fetched;
+    },
+    [products, ensureProfiles]
+  );
 
   const refreshOrders = useCallback(async () => {
     if (!currentUser) return;
@@ -384,12 +478,13 @@ export function StoreProvider({ children }: PropsWithChildren) {
     const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
     unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     setOrders(unique);
+    reconcileSoldProducts(unique);
     const ids: string[] = [];
     for (const o of unique) {
       ids.push(o.buyerId, o.sellerId);
     }
     void ensureProfiles(ids);
-  }, [currentUser, ensureProfiles]);
+  }, [currentUser, ensureProfiles, reconcileSoldProducts]);
 
   const refreshCart = useCallback(async () => {
     if (!currentUser) return;
@@ -496,56 +591,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
     return () => {
       supabase.removeChannel(channel);
-    };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) {
-      setProducts([]);
-      setCart([]);
-      setOrders([]);
-      setAddresses([]);
-      setNotifications([]);
-      setChats([]);
-      setReviews([]);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function load() {
-      if (!currentUser) return;
-      const [prods, cartLines, addrs, notifs, chatThreads] = await Promise.all([
-        listProducts({ status: 'active' }),
-        listCartLines(currentUser.id),
-        listAddresses(currentUser.id),
-        listNotifications(currentUser.id),
-        listChatThreads(currentUser.id),
-      ]);
-
-      if (!cancelled) {
-        setProducts(prods);
-        setCart(cartLines);
-        setAddresses(addrs);
-        setNotifications(notifs);
-        setChats(chatThreads);
-      }
-
-      const buyerOrders = await listOrdersForBuyer(currentUser.id);
-      const sellerOrders = await listOrdersForSeller(currentUser.id);
-      const merged = [...buyerOrders, ...sellerOrders];
-      const unique = Array.from(new Map(merged.map((o) => [o.id, o])).values());
-      unique.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      if (!cancelled) {
-        setOrders(unique);
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
     };
   }, [currentUser]);
 
@@ -730,8 +775,13 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const removeFromCart = useCallback(async (productId: string) => {
     if (!currentUser) return;
-    await deleteCartLine(currentUser.id, productId);
-    await refreshCart();
+    setCart((current) => current.filter((item) => item.productId !== productId));
+    try {
+      await deleteCartLine(currentUser.id, productId);
+    } catch (error) {
+      console.warn('[removeFromCart] Lỗi xóa sản phẩm khỏi giỏ:', error);
+      await refreshCart();
+    }
   }, [currentUser, refreshCart]);
 
   const toggleFavorite = useCallback(async (productId: string) => {
@@ -771,11 +821,25 @@ export function StoreProvider({ children }: PropsWithChildren) {
         return false;
       }
 
-      const updated = await repoUpdateProduct(id, input);
+      const nextStatus: ProductStatus =
+        product.status === 'sold' && input.stock > 0
+          ? 'active'
+          : (product.status as ProductStatus);
+
+      const updated = await repoUpdateProduct(id, {
+        ...input,
+        status: nextStatus,
+      });
       if (!updated) return false;
 
+      const normalized: Product = {
+        ...updated,
+        stock: input.stock,
+        status: nextStatus,
+      };
+
       setProducts((current) =>
-        current.map((item) => (item.id === id ? updated : item))
+        current.map((item) => (item.id === id ? normalized : item))
       );
       return true;
     },
@@ -793,7 +857,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
     setProducts((current) =>
       current.map((item) =>
         item.id === id && item.sellerId === currentUser?.id
-          ? { ...item, stock: 0, status: 'sold' }
+          ? applyStockChange(item, 0)
           : item
       )
     );
@@ -827,8 +891,31 @@ export function StoreProvider({ children }: PropsWithChildren) {
         ? validLines.filter((line) => sellerIds.includes(line.product.sellerId))
         : validLines;
 
-      const grouped = new Map<string, typeof filtered>();
-      filtered.forEach((line) => {
+      const stockSyncResults = await Promise.all(
+        filtered.map(async (line) => {
+          const newStock = Math.max(0, line.product.stock - line.quantity);
+          const result = await repoSyncProductStock(line.product.id, newStock);
+          return { line, newStock, result };
+        })
+      );
+
+      const successfulSync = stockSyncResults.filter((r) => r.result);
+      stockSyncResults
+        .filter((r) => !r.result)
+        .forEach((f) =>
+          console.warn(
+            '[createOrders] bỏ qua product lỗi sync stock:',
+            f.line.product.id
+          )
+        );
+
+      const syncable = successfulSync.map((r) => r.line);
+      if (syncable.length === 0) {
+        return 0;
+      }
+
+      const grouped = new Map<string, typeof syncable>();
+      syncable.forEach((line) => {
         grouped.set(line.product.sellerId, [
           ...(grouped.get(line.product.sellerId) ?? []),
           line,
@@ -884,25 +971,16 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
       setProducts((current) =>
         current.map((product) => {
-          const purchased = filtered.find((line) => line.product.id === product.id);
-          if (!purchased) {
-            return product;
-          }
-          const newStock = Math.max(0, product.stock - purchased.quantity);
-          void supabase
-            .from('products')
-            .update({ stock: newStock })
-            .eq('id', product.id)
-            .select()
-            .single();
-          return { ...product, stock: newStock, status: newStock === 0 ? 'sold' : 'active' };
+          const sync = successfulSync.find((r) => r.line.product.id === product.id);
+          if (!sync) return product;
+          return applyStockChange(product, sync.newStock);
         })
       );
 
       setOrders((current) => [...newOrders, ...current]);
 
       if (currentUser) {
-        const purchasedIds = filtered.map((f) => f.product.id);
+        const purchasedIds = syncable.map((f) => f.product.id);
         setCart((current) =>
           current.filter(
             (line) =>
@@ -925,6 +1003,22 @@ export function StoreProvider({ children }: PropsWithChildren) {
           current.map((order) => (order.id === id ? updated : order))
         );
 
+        if (status === 'completed') {
+          for (const item of updated.items) {
+            const existing = products.find((p) => p.id === item.productId);
+            if (!existing) continue;
+            if (existing.sellerId !== updated.sellerId) continue;
+            if (existing.status === 'sold') continue;
+            void repoMarkProductSold(item.productId);
+            setProducts((current) =>
+              current.map((p) =>
+                p.id === item.productId
+                  ? { ...p, stock: 0, status: 'sold' }
+                  : p
+              )
+            );
+          }
+        }
         const actorIsSeller =
           status === 'confirmed' || status === 'in_transaction' || status === 'rejected';
         const recipientId = actorIsSeller ? updated.buyerId : updated.sellerId;
@@ -968,7 +1062,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
         }
       }
     },
-    []
+    [products]
   );
 
   const addAddress = useCallback(async (address: Omit<SavedAddress, 'id'>) => {
@@ -1164,6 +1258,9 @@ export function StoreProvider({ children }: PropsWithChildren) {
       startChat,
       addReview,
       refreshProducts,
+      loadMyProducts,
+      fetchProductById,
+      reconcileSoldProducts,
       refreshOrders,
       refreshCart,
       refreshAddresses,
@@ -1211,6 +1308,9 @@ export function StoreProvider({ children }: PropsWithChildren) {
       startChat,
       addReview,
       refreshProducts,
+      loadMyProducts,
+      fetchProductById,
+      reconcileSoldProducts,
       refreshOrders,
       refreshCart,
       refreshAddresses,

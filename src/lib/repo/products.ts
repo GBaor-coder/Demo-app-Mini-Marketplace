@@ -240,6 +240,39 @@ export async function markProductSold(id: string): Promise<void> {
   }
 }
 
+export async function syncProductStock(
+  id: string,
+  newStock: number
+): Promise<{ stock: number; status: ProductStatus } | null> {
+  const safeStock = Math.max(0, Math.floor(newStock));
+  const patch: { stock: number; status?: ProductStatus } = { stock: safeStock };
+  if (safeStock <= 0) {
+    patch.status = 'sold';
+  }
+  const { data, error } = await supabase
+    .from('products')
+    .update(patch)
+    .eq('id', id)
+    .select('stock, status')
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[syncProductStock] DB error:', id, error.message);
+    return null;
+  }
+
+  if (!data) {
+    console.warn('[syncProductStock] No row updated for id:', id);
+    return null;
+  }
+
+  const row = data as { stock: number; status: string };
+  return {
+    stock: row.stock,
+    status: row.status as ProductStatus,
+  };
+}
+
 async function createLocationForProduct(location: {
   latitude: number;
   longitude: number;

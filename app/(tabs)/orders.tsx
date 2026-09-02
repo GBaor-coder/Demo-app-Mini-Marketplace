@@ -46,7 +46,7 @@ const SELLER_STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
 
 export default function OrdersScreen() {
   const router = useRouter();
-  const { currentUser, orders, getUserById, updateOrderStatus } = useStore();
+  const { currentUser, orders, products, getUserById, updateOrderStatus } = useStore();
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<TabFilter>('buyer');
   const [statusTab, setStatusTab] = useState<OrderStatus | 'all'>('all');
@@ -201,6 +201,18 @@ export default function OrdersScreen() {
             <Button
               title="Xác nhận"
               onPress={() => confirmOrder(item)}
+              style={styles.actionBtn}
+            />
+          </View>
+        ) : null}
+        {item.status === 'completed' && firstItem && products.some((p) => p.id === firstItem.productId) ? (
+          <View style={styles.actions}>
+            <Button
+              title="Đăng lại sản phẩm"
+              variant="outline"
+              size="sm"
+              icon="refresh"
+              onPress={() => router.push(`/product-form?republish=${firstItem.productId}`)}
               style={styles.actionBtn}
             />
           </View>

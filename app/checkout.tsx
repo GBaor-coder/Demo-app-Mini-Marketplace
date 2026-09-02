@@ -106,10 +106,14 @@ export default function CheckoutScreen() {
   );
   const total = subtotal + shippingFee + PLATFORM_FEE;
 
+  const allMeetup =
+    groups.length > 0 && groups.every((g) => methodFor(g.sellerId) === 'meetup');
+  const hasCodSelected = groups.some((g) => methodFor(g.sellerId) === 'cod');
+  const needsAddress = hasCodSelected && !selectedAddress;
+
   const placeOrder = async () => {
     if (lines.length === 0) return;
-    const needsAddress = groups.some((g) => methodFor(g.sellerId) === 'cod');
-    if (needsAddress && !selectedAddress) {
+    if (needsAddress) {
       Alert.alert('Chưa chọn địa chỉ', 'Vui lòng chọn địa chỉ nhận hàng trước khi đặt hàng.');
       return;
     }
@@ -153,32 +157,51 @@ export default function CheckoutScreen() {
         emptyState
       ) : (
         <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => router.push('/addresses?select=1')}
-            style={styles.addressCard}>
-            <MaterialIcons name="location-on" size={22} color={colors.primary} style={styles.addressIcon} />
-            <View style={styles.addressInfo}>
-              <Text style={styles.addressLabel}>Địa chỉ nhận hàng</Text>
-              {selectedAddress ? (
-                <>
-                  <Text style={styles.addressLine1}>
-                    {selectedAddress.recipient} | {selectedAddress.phone}
+          {allMeetup ? null : (
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push('/addresses?select=1')}
+              style={[styles.addressCard, needsAddress && styles.addressCardError]}>
+              <MaterialIcons
+                name="location-on"
+                size={22}
+                color={needsAddress ? colors.error : colors.primary}
+                style={styles.addressIcon}
+              />
+              <View style={styles.addressInfo}>
+                <Text style={styles.addressLabel}>
+                  Địa chỉ nhận hàng{needsAddress ? ' (Bắt buộc)' : ''}
+                </Text>
+                {selectedAddress ? (
+                  <>
+                    <Text style={styles.addressLine1}>
+                      {selectedAddress.recipient} | {selectedAddress.phone}
+                    </Text>
+                    <Text style={styles.addressLine2} numberOfLines={2}>
+                      {selectedAddress.street}, {selectedAddress.ward}, {selectedAddress.district},{' '}
+                      {selectedAddress.province}
+                    </Text>
+                    <View style={styles.addressMapWrap}>
+                      <LocationPreview location={selectedAddress.location} />
+                    </View>
+                  </>
+                ) : (
+                  <Text
+                    style={[
+                      styles.addressEmpty,
+                      needsAddress && styles.addressEmptyError,
+                    ]}>
+                    Chọn địa chỉ nhận hàng
                   </Text>
-                  <Text style={styles.addressLine2} numberOfLines={2}>
-                    {selectedAddress.street}, {selectedAddress.ward}, {selectedAddress.district},{' '}
-                    {selectedAddress.province}
-                  </Text>
-                  <View style={styles.addressMapWrap}>
-                    <LocationPreview location={selectedAddress.location} />
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.addressEmpty}>Chọn địa chỉ nhận hàng</Text>
-              )}
-            </View>
-            <MaterialIcons name="chevron-right" size={20} color={colors.outline} />
-          </TouchableOpacity>
+                )}
+              </View>
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={needsAddress ? colors.error : colors.outline}
+              />
+            </TouchableOpacity>
+          )}
 
           {groups.map((group, groupIndex) => {
             const groupTotal =
@@ -266,6 +289,9 @@ export default function CheckoutScreen() {
                       <Text style={styles.meetupAddress} numberOfLines={2}>
                         {group.items[0].product.location.address}
                       </Text>
+                      <View style={styles.meetupMapWrap}>
+                        <LocationPreview location={group.items[0].product.location} />
+                      </View>
                       <View style={styles.meetupMetaRow}>
                         <Text style={styles.meetupDistance}>
                           Cách bạn khoảng{' '}
@@ -284,7 +310,7 @@ export default function CheckoutScreen() {
                           }}
                           style={styles.meetupMapBtn}>
                           <MaterialIcons name="map" size={15} color={colors.primary} />
-                          <Text style={styles.meetupMapBtnText}>Xem bản đồ</Text>
+                          <Text style={styles.meetupMapBtnText}>Mở bản đồ</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -392,6 +418,10 @@ const styles = StyleSheet.create({
     padding: 16,
     ...shadow.level1,
   },
+  addressCardError: {
+    borderColor: colors.error,
+    borderWidth: 1.5,
+  },
   addressIcon: {
     marginTop: 1,
   },
@@ -421,6 +451,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginTop: 4,
+  },
+  addressEmptyError: {
+    color: colors.error,
   },
   addressMapWrap: {
     marginTop: 12,
@@ -540,6 +573,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6,
+  },
+  meetupMapWrap: {
+    marginTop: 10,
   },
   meetupMetaRow: {
     alignItems: 'center',

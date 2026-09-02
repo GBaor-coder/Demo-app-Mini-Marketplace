@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,11 +12,18 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { Button, Chip, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { Product } from '@/src/types';
-import { formatCurrency } from '@/src/utils/format';
+import { formatCurrency, getProductStatusLabel } from '@/src/utils/format';
+
+type FilterTab = 'active' | 'out';
+
+const FILTER_TABS: { key: FilterTab; label: string }[] = [
+  { key: 'active', label: 'Đang bán' },
+  { key: 'out', label: 'Hết hàng' },
+];
 
 function productImageUri(product: Product): string | null {
   if (Array.isArray(product.images)) {
@@ -32,11 +40,28 @@ function productImageUri(product: Product): string | null {
   return null;
 }
 
+function badgeStyle(label: string) {
+  if (label === 'ĐÃ BÁN') {
+    return { backgroundColor: 'rgba(11,28,48,0.85)' };
+  }
+  if (label === 'HẾT HÀNG') {
+    return { backgroundColor: colors.error };
+  }
+  return { backgroundColor: colors.tertiary };
+}
+
 export default function SellerProductsTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentUser, products, deleteProduct } = useStore();
+  const { currentUser, products, deleteProduct, loadMyProducts } = useStore();
   const [deleting, setDeleting] = useState<Product | null>(null);
+  const [filterTab, setFilterTab] = useState<FilterTab>('active');
+
+  useEffect(() => {
+    if (currentUser) {
+      void loadMyProducts();
+    }
+  }, [currentUser?.id]);
 
   const myProducts = useMemo(() => {
     if (!currentUser) return [];
@@ -44,6 +69,32 @@ export default function SellerProductsTab() {
       (p) => p.sellerId === currentUser.id && p.status !== 'draft'
     );
   }, [currentUser, products]);
+
+  const counts = useMemo(() => {
+    return {
+      active: myProducts.filter((p) => p.status === 'active' && p.stock > 0).length,
+      out: myProducts.filter(
+        (p) => p.status === 'sold' || (p.status === 'active' && p.stock <= 0)
+      ).length,
+    };
+  }, [myProducts]);
+
+  const filtered = useMemo(() => {
+    if (filterTab === 'out') {
+      return myProducts.filter(
+        (p) => p.status === 'sold' || (p.status === 'active' && p.stock <= 0)
+      );
+    }
+    return myProducts.filter((p) => p.status === 'active' && p.stock > 0);
+  }, [myProducts, filterTab]);
+
+  const totalInventoryValue = useMemo(
+    () =>
+      myProducts
+        .filter((p) => p.status === 'active' && p.stock > 0)
+        .reduce((sum, p) => sum + p.price * p.stock, 0),
+    [myProducts]
+  );
 
   const openMenu = (item: Product) => {
     Alert.alert(item.title, undefined, [
@@ -55,6 +106,7 @@ export default function SellerProductsTab() {
 
   const renderItem = ({ item }: { item: Product }) => {
     const imageUri = productImageUri(item);
+    const label = getProductStatusLabel(item);
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -68,6 +120,9 @@ export default function SellerProductsTab() {
               <MaterialIcons name="image" size={40} color={colors.onSurfaceVariant} />
             </View>
           )}
+          <View style={[styles.statusBadge, badgeStyle(label)]}>
+            <Text style={styles.statusBadgeText}>{label}</Text>
+          </View>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => openMenu(item)}
@@ -93,6 +148,15 @@ export default function SellerProductsTab() {
                 style={styles.actionBtn}>
                 <MaterialIcons name="edit" size={18} color={colors.secondary} />
               </TouchableOpacity>
+              {item.stock <= 0 ? (
+                <TouchableOpacity
+                  onPress={() => router.push(`/product-form?republish=${item.id}`)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.actionBtn}
+                  accessibilityLabel="Đăng lại sản phẩm">
+                  <MaterialIcons name="refresh" size={18} color={colors.primary} />
+                </TouchableOpacity>
+              ) : null}
               <TouchableOpacity
                 onPress={() => setDeleting(item)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -110,19 +174,62 @@ export default function SellerProductsTab() {
     <View style={styles.screen}>
       <ScreenHeader title="Quản lý sản phẩm" showBack={false} />
 
+      <View style={styles.filterWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}>
+          {FILTER_TABS.map((item) => {
+            const count = counts[item.key];
+            const selected = filterTab === item.key;
+            return (
+              <View key={item.key} style={styles.chipWrap}>
+                <Chip
+                  label={`${item.label} (${count})`}
+                  selected={selected}
+                  onPress={() => setFilterTab(item.key)}
+                />
+              </View>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {filterTab === 'active' && counts.active > 0 ? (
+        <View style={styles.statsCard}>
+          <Text style={styles.statsTitle}>Tổng quan</Text>
+          <Text style={styles.statsValue}>
+            {counts.active} đang bán · {formatCurrency(totalInventoryValue)} giá trị tồn
+          </Text>
+          <Text style={styles.statsHint}>
+            Sản phẩm đã bán xem tại mục Đơn hàng.
+          </Text>
+        </View>
+      ) : null}
+
       <FlatList
-        data={myProducts}
+        data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 96 }]}
         showsVerticalScrollIndicator={false}
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
             icon="sell"
-            title="Chưa có sản phẩm"
-            description="Đăng tin bán sản phẩm đầu tiên của bạn để bắt đầu."
+            title={
+              filterTab === 'out'
+                ? 'Không có sản phẩm hết hàng hoặc đã bán'
+                : 'Chưa có sản phẩm'
+            }
+            description={
+              filterTab === 'active'
+                ? 'Đăng tin bán sản phẩm đầu tiên của bạn để bắt đầu.'
+                : 'Sản phẩm sẽ xuất hiện ở đây khi tạm hết hàng hoặc đã hoàn tất giao dịch.'
+            }
           >
-            <Button title="Đăng sản phẩm" icon="add" onPress={() => router.push('/product-form')} />
+            {filterTab === 'active' ? (
+              <Button title="Đăng sản phẩm" icon="add" onPress={() => router.push('/product-form')} />
+            ) : null}
           </EmptyState>
         }
       />
@@ -168,17 +275,46 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flex: 1,
   },
-  pageTitle: {
-    ...typography.displayLgMobile,
-    color: colors.onSurface,
-    fontSize: 24,
-    marginBottom: 20,
+  filterWrap: {
+    height: 64,
+  },
+  filterRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 20,
+  },
+  chipWrap: {
+    marginRight: 4,
+  },
+  statsCard: {
+    backgroundColor: 'rgba(0,74,198,0.08)',
+    borderColor: 'rgba(0,74,198,0.18)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: 4,
     marginHorizontal: 20,
-    marginTop: 20,
+    marginBottom: 8,
+    padding: 14,
+  },
+  statsTitle: {
+    ...typography.labelMd,
+    color: colors.primary,
+  },
+  statsValue: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  statsHint: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   list: {
     gap: 16,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
@@ -202,6 +338,21 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     width: '100%',
+  },
+  statusBadge: {
+    borderRadius: radius.full,
+    left: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    position: 'absolute',
+    top: 12,
+    zIndex: 2,
+  },
+  statusBadgeText: {
+    color: colors.onPrimary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   menuBtn: {
     alignItems: 'center',

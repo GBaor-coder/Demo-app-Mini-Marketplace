@@ -17,13 +17,13 @@ import { Avatar } from '@/src/components/Avatar';
 import { Button, EmptyState, MaterialIcons, ScreenHeader } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
-import { formatCurrencyFull, formatRelativeTime } from '@/src/utils/format';
+import { formatCurrencyFull, formatDate, formatRelativeTime } from '@/src/utils/format';
 
 export default function ProductPreviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { products, currentUser, getUserById, deleteProduct, markProductSold } = useStore();
+  const { products, orders, currentUser, getUserById, deleteProduct, markProductSold } = useStore();
   const { width } = useWindowDimensions();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -31,6 +31,14 @@ export default function ProductPreviewScreen() {
 
   const product = products.find((p) => p.id === id);
   const seller = product ? getUserById(product.sellerId) : undefined;
+  const completedOrder = product
+    ? orders.find(
+        (o) =>
+          o.sellerId === currentUser?.id &&
+          o.status === 'completed' &&
+          o.items.some((item) => item.productId === product.id)
+      )
+    : undefined;
 
   if (!product || product.sellerId !== currentUser?.id) {
     return (
@@ -103,7 +111,11 @@ export default function ProductPreviewScreen() {
             <View style={styles.conditionChip}>
               <Text style={styles.conditionChipText}>{product.condition}</Text>
             </View>
-            <Text style={styles.postedTime}>Đăng {formatRelativeTime(product.createdAt)}</Text>
+            <Text style={styles.postedTime}>
+              {completedOrder
+                ? `Đã bán ${formatDate(completedOrder.completedAt ?? completedOrder.createdAt)}`
+                : `Đăng ${formatRelativeTime(product.createdAt)}`}
+            </Text>
           </View>
 
           <Text style={styles.productTitle}>{product.title}</Text>
@@ -152,7 +164,15 @@ export default function ProductPreviewScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-        {product.status === 'active' ? (
+        {isSold ? (
+          <Button
+            title="Đăng lại"
+            variant="outline"
+            icon="refresh"
+            onPress={() => router.push(`/product-form?republish=${product.id}`)}
+            style={[styles.footerBtn, { flex: 1 }]}
+          />
+        ) : (
           <Button
             title="Đánh dấu đã bán"
             variant="outline"
@@ -165,7 +185,7 @@ export default function ProductPreviewScreen() {
             }
             style={[styles.footerBtn, { flex: 1 }]}
           />
-        ) : null}
+        )}
         <Button
           title="Xóa"
           variant="outline"
@@ -178,7 +198,7 @@ export default function ProductPreviewScreen() {
           title="Sửa tin"
           icon="edit"
           onPress={() => router.push(`/product-form?id=${product.id}`)}
-          style={[styles.footerBtn, { flex: product.status === 'active' ? 1.4 : 2 }]}
+          style={[styles.footerBtn, { flex: 1.4 }]}
         />
       </View>
 

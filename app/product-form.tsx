@@ -27,25 +27,35 @@ const CONDITIONS: ProductCondition[] = ['Mới', 'Như mới', 'Đã sử dụng
 export default function ProductFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, republish } = useLocalSearchParams<{ id?: string; republish?: string }>();
   const { currentUser, products, addProduct, updateProduct } = useStore();
 
-  const editing = id ? products.find((p) => p.id === id) : undefined;
+  const editing = id
+    ? products.find((p) => p.id === id)
+    : republish
+      ? products.find((p) => p.id === republish)
+      : undefined;
+  const sourceProduct = editing;
 
-  const [title, setTitle] = useState(editing?.title ?? '');
-  const [description, setDescription] = useState(editing?.description ?? '');
-  const [price, setPrice] = useState(editing ? String(editing.price) : '');
-  const [stock, setStock] = useState(editing ? String(editing.stock) : '1');
-  const [category, setCategory] = useState(editing?.category ?? CATEGORIES[0]);
-  const [condition, setCondition] = useState<ProductCondition>(editing?.condition ?? 'Mới');
-  const [meetupPoint, setMeetupPoint] = useState(editing?.meetupPoint ?? '');
-  const [allowsMeetup, setAllowsMeetup] = useState(editing?.allowsMeetup ?? true);
-  const [allowsCod, setAllowsCod] = useState(editing?.allowsCod ?? true);
+  const isRepublish = !!republish && !id;
+  const initialProduct = editing;
+
+  const [title, setTitle] = useState(initialProduct?.title ?? '');
+  const [description, setDescription] = useState(initialProduct?.description ?? '');
+  const [price, setPrice] = useState(initialProduct ? String(initialProduct.price) : '');
+  const [stock, setStock] = useState(
+    isRepublish ? '1' : initialProduct ? String(initialProduct.stock) : '1'
+  );
+  const [category, setCategory] = useState(initialProduct?.category ?? CATEGORIES[0]);
+  const [condition, setCondition] = useState<ProductCondition>(initialProduct?.condition ?? 'Mới');
+  const [meetupPoint, setMeetupPoint] = useState(initialProduct?.meetupPoint ?? '');
+  const [allowsMeetup, setAllowsMeetup] = useState(initialProduct?.allowsMeetup ?? true);
+  const [allowsCod, setAllowsCod] = useState(initialProduct?.allowsCod ?? true);
   const [location, setLocation] = useState(
-    editing?.location ?? DEFAULT_LOCATION
+    initialProduct?.location ?? DEFAULT_LOCATION
   );
   const [uploads, setUploads] = useState<UploadProgressItem[]>(
-    editing?.images.map((uri, i) => ({
+    initialProduct?.images.map((uri, i) => ({
       id: `existing-${i}`,
       uri,
       name: `Ảnh ${i + 1}`,
@@ -69,6 +79,8 @@ export default function ProductFormScreen() {
       allowsMultipleSelection: true,
       selectionLimit: 6,
       quality: 0.82,
+      preferredAssetRepresentationMode:
+        ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
     });
     if (result.canceled) return;
 
@@ -173,9 +185,14 @@ export default function ProductFormScreen() {
       if (editing) {
         const ok = await updateProduct(editing.id, input);
         if (ok) {
-          Alert.alert('Đã lưu thay đổi', 'Thông tin sản phẩm đã được cập nhật.', [
-            { text: 'Xong', onPress: () => router.back() },
-          ]);
+          const isRepublishAction = isRepublish;
+          Alert.alert(
+            isRepublishAction ? 'Đăng lại thành công' : 'Đã lưu thay đổi',
+            isRepublishAction
+              ? 'Sản phẩm đã được đưa về trạng thái đang bán.'
+              : 'Thông tin sản phẩm đã được cập nhật.',
+            [{ text: 'Xong', onPress: () => router.replace('/products') }]
+          );
         } else {
           Alert.alert('Lỗi', 'Không thể cập nhật sản phẩm.');
         }
@@ -206,14 +223,30 @@ export default function ProductFormScreen() {
     );
   }
 
+  if (isRepublish && !sourceProduct) {
+    return (
+      <View style={styles.screen}>
+        <EmptyState
+          icon="error-outline"
+          title="Sản phẩm gốc đã bị xoá"
+          description="Không thể đăng lại sản phẩm này vì nó không còn tồn tại."
+        >
+          <Button title="Về quản lý sản phẩm" onPress={() => router.replace('/products')} />
+        </EmptyState>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screen}>
       <ScreenHeader
-        title={editing ? 'Chỉnh sửa sản phẩm' : 'Đăng sản phẩm'}
+        title={editing && !isRepublish ? 'Chỉnh sửa sản phẩm' : isRepublish ? 'Đăng lại sản phẩm' : 'Đăng sản phẩm'}
         subtitle={
-          editing
-            ? 'Cập nhật thông tin cho sản phẩm của bạn'
-            : 'Điền thông tin chi tiết để thu hút người mua trên UniLoop'
+          isRepublish
+            ? 'Khôi phục sản phẩm cũ về trạng thái đang bán. Có thể chỉnh sửa thông tin trước khi lưu.'
+            : editing
+              ? 'Cập nhật thông tin cho sản phẩm của bạn'
+              : 'Điền thông tin chi tiết để thu hút người mua trên UniLoop'
         }
       />
 
@@ -420,7 +453,7 @@ export default function ProductFormScreen() {
           />
         ) : null}
         <Button
-          title={editing ? 'Lưu thay đổi' : 'Đăng sản phẩm'}
+          title={editing ? 'Lưu thay đổi' : isRepublish ? 'Đăng lại' : 'Đăng sản phẩm'}
           icon="publish"
           loading={submitting}
           onPress={handleSubmit}

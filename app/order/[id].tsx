@@ -23,17 +23,21 @@ import {
 } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
+import { LocationPoint } from '@/src/types';
+import { distanceFromCenter } from '@/src/utils/filter';
 import {
   formatCurrency,
   formatDateTime,
   ORDER_STATUS_LABELS,
+  distanceLabel,
 } from '@/src/utils/format';
+import { openMapLink } from '@/src/utils/maps';
 
 export default function OrderDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, products, getUserById, updateOrderStatus, startChat } = useStore();
+  const { orders, products, getUserById, updateOrderStatus, startChat, refreshProducts } = useStore();
   const [updating, setUpdating] = useState(false);
 
   const order = useMemo(() => orders.find((o) => o.id === id), [orders, id]);
@@ -55,7 +59,19 @@ export default function OrderDetailScreen() {
   const product = products.find((p) => p.id === order.items[0]?.productId);
   const canCancel = ['pending', 'confirmed'].includes(order.status);
   const canConfirm = order.status === 'in_transaction';
-  const canTrack = ['in_transaction', 'completed'].includes(order.status);
+  const canTrack = order.status === 'in_transaction';
+  const canReturnHome = order.status === 'completed';
+
+  const isMeetup = order.deliveryMethod === 'meetup';
+  const displayLocation: LocationPoint | null = isMeetup
+    ? product?.location ?? null
+    : order.deliveryLocation;
+  const displayCardTitle = isMeetup
+    ? 'Điểm giao dịch của người bán'
+    : 'Địa chỉ nhận hàng';
+  const displayAddressText = isMeetup
+    ? product?.meetupPoint || product?.location?.address || '---'
+    : order.deliveryLocation.address;
 
   const confirmReceipt = () => {
     Alert.alert(
@@ -65,12 +81,11 @@ export default function OrderDetailScreen() {
         { text: 'Để sau', style: 'cancel' },
         {
           text: 'Xác nhận',
-          onPress: () => {
+          onPress: async () => {
             setUpdating(true);
-            setTimeout(() => {
-              updateOrderStatus(order.id, 'completed');
-              setUpdating(false);
-            }, 400);
+            await updateOrderStatus(order.id, 'completed');
+            await refreshProducts();
+            setUpdating(false);
           },
         },
       ]
@@ -110,7 +125,7 @@ export default function OrderDetailScreen() {
                 : order.status === 'in_transaction'
                   ? 'Người bán đang bàn giao. Đã nhận đủ hàng chưa? Chạm "Đã nhận được hàng" để hoàn tất.'
                   : order.status === 'completed'
-                    ? 'Đơn hàng hoàn tất. Cảm ơn bạn!'
+                    ? 'Giao dịch đã hoàn tất. Trạng thái đơn hàng đã được cập nhật thành công.'
                     : `Đơn hàng ${ORDER_STATUS_LABELS[order.status].toLowerCase()}.`}
           </Text>
           {canTrack ? (
@@ -186,13 +201,42 @@ export default function OrderDetailScreen() {
 
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Địa chỉ nhận hàng</Text>
-          <Text style={styles.deliveryAddressLine}>{order.deliveryLocation.address}</Text>
-          <View style={styles.deliveryMapWrap}>
-            <LocationPreview location={order.deliveryLocation} />
+        {displayLocation ? (
+          <View style={styles.card}>
+            <View style={styles.cardHeadingRow}>
+              <MaterialIcons
+                name={isMeetup ? 'storefront' : 'location-on'}
+                size={20}
+                color={isMeetup ? colors.primary : colors.tertiary}
+              />
+              <Text style={styles.cardTitle}>{displayCardTitle}</Text>
+            </View>
+            <Text style={styles.deliveryAddressLine}>{displayAddressText}</Text>
+            <View style={styles.deliveryMapWrap}>
+              <LocationPreview location={displayLocation} />
+            </View>
+            <View style={styles.mapFooterRow}>
+              <Text style={styles.mapDistanceText}>
+                Cách bạn khoảng{' '}
+                {distanceLabel(
+                  distanceFromCenter(
+                    displayLocation.latitude,
+                    displayLocation.longitude
+                  )
+                )}
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() =>
+                  openMapLink(displayLocation.latitude, displayLocation.longitude)
+                }
+                style={styles.mapOpenBtn}>
+                <MaterialIcons name="map" size={15} color={colors.primary} />
+                <Text style={styles.mapOpenBtnText}>Mở bản đồ</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Tổng kết thanh toán</Text>
@@ -224,6 +268,22 @@ export default function OrderDetailScreen() {
         ) : null}
         {canConfirm ? (
           <Button title="Đã nhận được hàng" variant="primary" loading={updating} onPress={confirmReceipt} style={styles.footerBtn} />
+        ) : null}
+        {canReturnHome ? (
+          <>
+            <Button
+              title="Về đơn mua"
+              variant="outline"
+              onPress={() => router.replace('/(tabs)/orders')}
+              style={styles.footerBtn}
+            />
+            <Button
+              title="Khám phá thêm"
+              icon="storefront"
+              onPress={() => router.replace('/(tabs)')}
+              style={styles.footerBtn}
+            />
+          </>
         ) : null}
       </View>
     </View>
@@ -380,6 +440,32 @@ const styles = StyleSheet.create({
   },
   deliveryMapWrap: {
     marginTop: 12,
+  },
+  cardHeadingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  mapFooterRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  mapDistanceText: {
+    color: colors.onSurfaceVariant,
+    flex: 1,
+    fontSize: 13,
+  },
+  mapOpenBtn: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  mapOpenBtnText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

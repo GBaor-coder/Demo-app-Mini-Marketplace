@@ -112,3 +112,25 @@ export function countActiveFilters(filters: SearchFilters): number {
   if (filters.maxDistanceKm !== undefined) count += 1;
   return count;
 }
+
+export function getSimilarProducts(
+  current: Product,
+  all: Product[],
+  limit = 6
+): Product[] {
+  const candidates = all.filter(
+    (p) =>
+      p.id !== current.id &&
+      p.status === 'active' &&
+      p.category === current.category
+  );
+  const score = (p: Product): number => {
+    let s = 0;
+    if (p.sellerId !== current.sellerId) s += 10;
+    if (p.condition === current.condition) s += 1;
+    return s;
+  };
+  return [...candidates]
+    .sort((a, b) => score(b) - score(a))
+    .slice(0, limit);
+}

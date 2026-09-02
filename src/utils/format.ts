@@ -1,4 +1,4 @@
-import { OrderStatus } from '@/src/types';
+import { OrderStatus, Product } from '@/src/types';
 
 export function formatCurrency(value: number) {
   return `${Math.max(0, Math.round(value)).toLocaleString('vi-VN')}đ`;
@@ -88,3 +88,11 @@ export const ORDER_STATUS_ICONS: Record<OrderStatus, string> = {
   cancelled: 'cancel',
   rejected: 'do_not_disturb_on',
 };
+
+export function getProductStatusLabel(
+  product: Product
+): 'ĐANG BÁN' | 'ĐÃ BÁN' | 'HẾT HÀNG' {
+  if (product.status === 'sold') return 'ĐÃ BÁN';
+  if (product.stock <= 0) return 'HẾT HÀNG';
+  return 'ĐANG BÁN';
+}
