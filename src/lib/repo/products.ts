@@ -230,12 +230,26 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 export async function markProductSold(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('products')
-    .update({ stock: 0, status: 'sold' })
-    .eq('id', id);
+  const { error } = await supabase.rpc('mark_product_sold', {
+    p_product_id: id,
+  });
 
   if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function restoreProductStock(
+  id: string,
+  quantity: number
+): Promise<void> {
+  const { error } = await supabase.rpc('restore_product_stock', {
+    p_product_id: id,
+    p_qty: quantity,
+  });
+
+  if (error) {
+    console.warn('[restoreProductStock] DB error:', id, error.message);
     throw new Error(error.message);
   }
 }
@@ -245,15 +259,8 @@ export async function syncProductStock(
   newStock: number
 ): Promise<{ stock: number; status: ProductStatus } | null> {
   const safeStock = Math.max(0, Math.floor(newStock));
-  const patch: { stock: number; status?: ProductStatus } = { stock: safeStock };
-  if (safeStock <= 0) {
-    patch.status = 'sold';
-  }
   const { data, error } = await supabase
-    .from('products')
-    .update(patch)
-    .eq('id', id)
-    .select('stock, status')
+    .rpc('sync_product_stock', { p_product_id: id, p_stock: safeStock })
     .maybeSingle();
 
   if (error) {
@@ -266,10 +273,10 @@ export async function syncProductStock(
     return null;
   }
 
-  const row = data as { stock: number; status: string };
+  const row = data as { o_stock: number; o_status: string };
   return {
-    stock: row.stock,
-    status: row.status as ProductStatus,
+    stock: row.o_stock,
+    status: row.o_status as ProductStatus,
   };
 }
 

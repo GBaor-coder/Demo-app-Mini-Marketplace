@@ -251,6 +251,10 @@ CREATE POLICY "Sellers can insert own products"
   ON products FOR INSERT TO authenticated WITH CHECK (seller_id = auth.uid());
 CREATE POLICY "Sellers can update own products"
   ON products FOR UPDATE USING (seller_id = auth.uid()) WITH CHECK (seller_id = auth.uid());
+CREATE POLICY "Anyone can update stock on products"
+  ON products FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 CREATE POLICY "Sellers can delete own products"
   ON products FOR DELETE USING (seller_id = auth.uid());
 

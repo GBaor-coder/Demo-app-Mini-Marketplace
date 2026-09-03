@@ -59,7 +59,7 @@ export default function ProductDetailScreen() {
   const favorite = product ? favoriteIds.includes(product.id) : false;
   const isSold = product?.status === 'sold';
   const isOutOfStock = !!product && product.stock <= 0 && product.status !== 'sold';
-  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const cartCount = cart.length;
   const isOwnProduct = !!currentUser && !!product && currentUser.id === product.sellerId;
 
   const similarProducts = useMemo(

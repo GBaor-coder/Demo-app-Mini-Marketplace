@@ -63,15 +63,9 @@ export default function OrderDetailScreen() {
   const canReturnHome = order.status === 'completed';
 
   const isMeetup = order.deliveryMethod === 'meetup';
-  const displayLocation: LocationPoint | null = isMeetup
-    ? product?.location ?? null
-    : order.deliveryLocation;
-  const displayCardTitle = isMeetup
-    ? 'Điểm giao dịch của người bán'
-    : 'Địa chỉ nhận hàng';
-  const displayAddressText = isMeetup
-    ? product?.meetupPoint || product?.location?.address || '---'
-    : order.deliveryLocation.address;
+  const displayLocation: LocationPoint = order.deliveryLocation;
+  const displayCardTitle = isMeetup ? 'Điểm giao dịch của người bán' : 'Địa chỉ nhận hàng';
+  const displayAddressText = order.deliveryLocation.address;
 
   const confirmReceipt = () => {
     Alert.alert(

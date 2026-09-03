@@ -13,8 +13,34 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Input, MaterialIcons, ScreenHeader } from '@/src/components/ui';
+import { deleteAccountStorageFiles } from '@/src/lib/image-upload';
 import { supabase } from '@/src/lib/supabase';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
+
+async function collectAndDeleteStorageFiles(userId: string): Promise<void> {
+  const urls: (string | null | undefined)[] = [];
+
+  const profile = await supabase
+    .from('profiles')
+    .select('avatar')
+    .eq('id', userId)
+    .maybeSingle();
+  urls.push(profile.data?.avatar);
+
+  const products = await supabase
+    .from('products')
+    .select('images')
+    .eq('seller_id', userId);
+  products.data?.forEach((p) => urls.push(...(p.images ?? [])));
+
+  const reviews = await supabase
+    .from('reviews')
+    .select('images')
+    .eq('author_id', userId);
+  reviews.data?.forEach((r) => urls.push(...(r.images ?? [])));
+
+  await deleteAccountStorageFiles(urls);
+}
 
 export default function DeleteAccountScreen() {
   const router = useRouter();
@@ -44,17 +70,17 @@ export default function DeleteAccountScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              const { data: userData } = await supabase.auth.getUser();
-              if (!userData.user?.email) {
-                setError('Không thể xác định tài khoản. Vui lòng thử lại.');
-                setLoading(false);
-                return;
-              }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user?.email) {
+              setError('Không thể xác định tài khoản. Vui lòng thử lại.');
+              setLoading(false);
+              return;
+            }
 
-              const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: userData.user.email,
-                password,
-              });
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: session.user.email,
+              password,
+            });
 
               if (signInError) {
                 setError('Mật khẩu không đúng. Vui lòng nhập lại.');
@@ -62,11 +88,22 @@ export default function DeleteAccountScreen() {
                 return;
               }
 
+              try {
+                await collectAndDeleteStorageFiles(session.user.id);
+              } catch {
+                console.warn('Không thể xóa một số file trong storage.');
+              }
+
               const { error: deleteError } = await supabase.rpc('delete_current_user');
 
               if (deleteError) {
-                await supabase.auth.signOut();
-                setError('Không thể xóa tài khoản. Vui lòng liên hệ hỗ trợ.');
+                const message =
+                  deleteError.message && deleteError.message.length > 0
+                    ? deleteError.message
+                    : 'Không thể xóa tài khoản.';
+                setError(
+                  `Không thể xóa tài khoản: ${message}. Vui lòng liên hệ hỗ trợ nếu tình trạng vẫn tiếp diễn.`
+                );
                 setLoading(false);
                 return;
               }

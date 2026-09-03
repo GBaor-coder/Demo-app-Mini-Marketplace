@@ -19,6 +19,7 @@ import {
   markProductSold as repoMarkProductSold,
   getProductById as repoGetProductById,
   syncProductStock as repoSyncProductStock,
+  restoreProductStock as repoRestoreProductStock,
 } from '@/src/lib/repo/products';
 import {
   listOrdersForBuyer,
@@ -109,7 +110,7 @@ type StoreContextValue = {
   deleteProduct: (id: string) => Promise<void>;
   markProductSold: (id: string) => Promise<void>;
   createOrders: (
-    location: LocationPoint,
+    locationsBySeller: Record<string, LocationPoint>,
     note: string,
     deliveryMethods: Record<string, DeliveryMethod>,
     sellerIds?: string[]
@@ -430,6 +431,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
       const next = current.map((p) => {
         if (!ids.has(p.id)) return p;
         if (p.status === 'sold') return p;
+        const stock = p.stock ?? 0;
+        if (stock > 0) return p;
         mutated = true;
         void repoMarkProductSold(p.id);
         return { ...p, stock: 0, status: 'sold' as const };
@@ -866,7 +869,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const createOrders = useCallback(
     async (
-      location: LocationPoint,
+      locationsBySeller: Record<string, LocationPoint>,
       note: string,
       deliveryMethods: Record<string, DeliveryMethod>,
       sellerIds?: string[]
@@ -954,7 +957,12 @@ export function StoreProvider({ children }: PropsWithChildren) {
           platformFee: 0,
           total: subtotal + shippingFee,
           deliveryMethod: method,
-          deliveryLocation: location,
+          deliveryLocation:
+            locationsBySeller[sellerId] ?? lines[0]?.product?.location ?? {
+              latitude: 0,
+              longitude: 0,
+              address: '',
+            },
           note: note.trim(),
         });
 
@@ -988,6 +996,11 @@ export function StoreProvider({ children }: PropsWithChildren) {
               !purchasedIds.includes(line.productId)
           )
         );
+        await Promise.all(
+          purchasedIds.map((productId) =>
+            deleteCartLine(currentUser.id, productId).catch(() => {})
+          )
+        );
       }
 
       return newOrders.length;
@@ -1003,17 +1016,20 @@ export function StoreProvider({ children }: PropsWithChildren) {
           current.map((order) => (order.id === id ? updated : order))
         );
 
-        if (status === 'completed') {
+        if (status === 'cancelled' || status === 'rejected') {
           for (const item of updated.items) {
             const existing = products.find((p) => p.id === item.productId);
             if (!existing) continue;
-            if (existing.sellerId !== updated.sellerId) continue;
-            if (existing.status === 'sold') continue;
-            void repoMarkProductSold(item.productId);
+            void repoRestoreProductStock(item.productId, item.quantity).catch(() => {});
             setProducts((current) =>
               current.map((p) =>
                 p.id === item.productId
-                  ? { ...p, stock: 0, status: 'sold' }
+                  ? {
+                      ...p,
+                      stock: Math.max(0, (p.stock ?? 0) + item.quantity),
+                      status:
+                        (p.stock ?? 0) + item.quantity > 0 ? 'active' : p.status,
+                    }
                   : p
               )
             );

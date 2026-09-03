@@ -43,7 +43,7 @@ export default function ExploreScreen() {
   const [loading, setLoading] = useState(true);
   const loadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const cartCount = cart.length;
 
   const activeProducts = selectedCategory
     ? products.filter((p) => p.status === 'active' && p.category === selectedCategory)

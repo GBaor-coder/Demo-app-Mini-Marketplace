@@ -86,13 +86,8 @@ export async function deleteAvatarFile(url: string): Promise<void> {
 
 async function deleteStoredFile(url: string, bucket: 'products' | 'avatars'): Promise<void> {
   try {
-    const urlObj = new URL(url);
-    const pathname = urlObj.pathname;
-    const token = `/${bucket}/`;
-    const bucketIndex = pathname.indexOf(token);
-    if (bucketIndex === -1) return;
-
-    const filePath = pathname.slice(bucketIndex + token.length);
+    const filePath = extractStoragePath(url, bucket);
+    if (!filePath) return;
 
     const { error } = await supabase.storage.from(bucket).remove([filePath]);
 
@@ -102,4 +97,47 @@ async function deleteStoredFile(url: string, bucket: 'products' | 'avatars'): Pr
   } catch {
     console.warn('Không thể parse URL ảnh để xóa.');
   }
+}
+
+function extractStoragePath(url: string, bucket: string): string | null {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    const token = `/${bucket}/`;
+    const bucketIndex = pathname.indexOf(token);
+    if (bucketIndex === -1) return null;
+    return pathname.slice(bucketIndex + token.length);
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteAccountStorageFiles(urls: (string | null | undefined)[]): Promise<void> {
+  const groups = new Map<string, string[]>();
+
+  const collect = (url: string | null | undefined) => {
+    if (!url || url.length === 0) return;
+    for (const bucket of ['avatars', 'products', 'reviews', 'chat-images']) {
+      const path = extractStoragePath(url, bucket);
+      if (path) {
+        if (!groups.has(bucket)) groups.set(bucket, []);
+        groups.get(bucket)!.push(path);
+        return;
+      }
+    }
+  };
+
+  for (const url of urls) collect(url);
+
+  await Promise.all(
+    Array.from(groups.entries()).map(async ([bucket, paths]) => {
+      const uniquePaths = Array.from(new Set(paths));
+      const { error } = await supabase.storage
+        .from(bucket)
+        .remove(uniquePaths);
+      if (error) {
+        console.warn(`Không thể xóa file trong bucket ${bucket}:`, error.message);
+      }
+    })
+  );
 }

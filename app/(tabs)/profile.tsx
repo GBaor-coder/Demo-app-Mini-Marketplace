@@ -144,7 +144,7 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {myProducts.length > 0 && renderGroup(sellerGroup)}
+        {renderGroup(sellerGroup)}
         {renderGroup(group1)}
         {renderGroup(group2)}
 

@@ -120,12 +120,19 @@ export default function CheckoutScreen() {
     setPlacing(true);
     try {
       const methods = Object.fromEntries(groups.map((g) => [g.sellerId, methodFor(g.sellerId)]));
+      const locationsBySeller = Object.fromEntries(
+        groups.map((g) => {
+          const method = methodFor(g.sellerId);
+          const buyerLoc = selectedAddress?.location ?? { latitude: 0, longitude: 0, address: '' };
+          const loc =
+            method === 'meetup'
+              ? g.items[0]?.product?.location ?? buyerLoc
+              : buyerLoc;
+          return [g.sellerId, loc];
+        })
+      );
       const count = await createOrders(
-        {
-          latitude: selectedAddress?.location.latitude ?? 0,
-          longitude: selectedAddress?.location.longitude ?? 0,
-          address: selectedAddress?.location.address ?? '',
-        },
+        locationsBySeller,
         note,
         methods
       );

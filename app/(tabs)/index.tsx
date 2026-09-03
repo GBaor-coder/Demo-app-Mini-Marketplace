@@ -54,6 +54,27 @@ const HOME_CATEGORIES: {
       background: 'rgba(186,26,26,0.10)',
       color: colors.error,
     },
+    {
+      category: 'Thời trang',
+      label: 'Thời trang',
+      icon: 'style',
+      background: 'rgba(156,39,176,0.10)',
+      color: '#9C27B0',
+    },
+    {
+      category: 'Handmade',
+      label: 'Handmade',
+      icon: 'brush',
+      background: 'rgba(194,24,91,0.10)',
+      color: '#C2185B',
+    },
+    {
+      category: 'Khác',
+      label: 'Khác',
+      icon: 'apps',
+      background: 'rgba(84,110,122,0.10)',
+      color: '#546E7A',
+    },
   ];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -65,7 +86,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const searchScale = useRef(new Animated.Value(1)).current;
 
-  const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const cartCount = cart.length;
 
   const handlePressSearchIn = () => {
     Animated.spring(searchScale, {
@@ -148,7 +169,7 @@ export default function HomeScreen() {
           <View>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Danh mục</Text>
-              <TouchableOpacity onPress={() => router.push('/')}>
+              <TouchableOpacity onPress={() => router.push('/search-results')}>
                 <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
@@ -178,7 +199,7 @@ export default function HomeScreen() {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Gợi ý hôm nay</Text>
-              <TouchableOpacity onPress={() => router.push('/')}>
+              <TouchableOpacity onPress={() => router.push('/search-results')}>
                 <Text style={styles.sectionLink}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
