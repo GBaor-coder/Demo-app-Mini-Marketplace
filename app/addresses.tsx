@@ -14,13 +14,17 @@ import { Button, EmptyState, MaterialIcons } from '@/src/components/ui';
 import { useStore } from '@/src/context/store-context';
 import { colors, radius, shadow, typography } from '@/src/theme/colors';
 import { SavedAddress } from '@/src/types';
+import { setAddressSelectionResult } from '@/src/utils/address-selection-result';
 
 export default function AddressesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { select } = useLocalSearchParams<{ select?: string }>();
+  const { select, selectedId: initialSelectedId } = useLocalSearchParams<{
+    select?: string;
+    selectedId?: string;
+  }>();
   const { addresses, deleteAddress } = useStore();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
 
   const renderItem = ({ item }: { item: SavedAddress }) => (
     <TouchableOpacity
@@ -28,7 +32,8 @@ export default function AddressesScreen() {
       onPress={() => {
         if (select === '1') {
           setSelectedId(item.id);
-          router.navigate({ pathname: '/checkout', params: { selectedId: item.id } });
+          setAddressSelectionResult(item.id);
+          router.back();
         }
       }}
       style={[styles.card, item.isDefault && styles.cardDefault]}>

@@ -144,6 +144,17 @@ export default function SellerOrderDetailScreen() {
     ]);
   };
 
+  const confirmDelivery = () => {
+    Alert.alert(
+      'Xác nhận bàn giao',
+      'Xác nhận bạn đã bàn giao đơn hàng cho người mua? Sau thao tác này, đơn sẽ chuyển sang chờ người mua xác nhận.',
+      [
+        { text: 'Quay lại', style: 'cancel' },
+        { text: 'Đã bàn giao', onPress: () => runUpdate('in_transaction', 'Đang giao dịch') },
+      ]
+    );
+  };
+
   const rejectOrder = () => {
     Alert.alert(
       'Từ chối đơn hàng',
@@ -317,7 +328,7 @@ export default function SellerOrderDetailScreen() {
           <Button
             title="Bàn giao cho người mua"
             loading={updating === 'in_transaction'}
-            onPress={() => runUpdate('in_transaction', 'Đang giao dịch')}
+            onPress={confirmDelivery}
             style={styles.footerBtn}
           />
         ) : null}

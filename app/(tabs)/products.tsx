@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -61,7 +62,7 @@ export default function SellerProductsTab() {
     if (currentUser) {
       void loadMyProducts();
     }
-  }, [currentUser?.id]);
+  }, [currentUser, loadMyProducts]);
 
   const myProducts = useMemo(() => {
     if (!currentUser) return [];
@@ -244,27 +245,34 @@ export default function SellerProductsTab() {
       </View>
 
       {deleting ? (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Xác nhận xóa sản phẩm?</Text>
-            <Text style={styles.modalBody}>
-              Hành động này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setDeleting(null)} style={styles.modalCancel}>
-                <Text style={styles.modalCancelText}>Hủy</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  deleteProduct(deleting.id);
-                  setDeleting(null);
-                }}
-                style={styles.modalConfirm}>
-                <Text style={styles.modalConfirmText}>Xác nhận</Text>
-              </TouchableOpacity>
+        <Modal
+          animationType="fade"
+          onRequestClose={() => setDeleting(null)}
+          statusBarTranslucent
+          transparent
+          visible>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>Xác nhận xóa sản phẩm?</Text>
+              <Text style={styles.modalBody}>
+                Hành động này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?
+              </Text>
+              <View style={styles.modalActions}>
+                <TouchableOpacity onPress={() => setDeleting(null)} style={styles.modalCancel}>
+                  <Text style={styles.modalCancelText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    deleteProduct(deleting.id);
+                    setDeleting(null);
+                  }}
+                  style={styles.modalConfirm}>
+                  <Text style={styles.modalConfirmText}>Xác nhận</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+        </Modal>
       ) : null}
     </View>
   );
@@ -424,14 +432,9 @@ const styles = StyleSheet.create({
   modalOverlay: {
     alignItems: 'center',
     backgroundColor: 'rgba(11,28,48,0.4)',
-    bottom: 0,
+    flex: 1,
     justifyContent: 'center',
-    left: 0,
     padding: 20,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    zIndex: 100,
   },
   modal: {
     backgroundColor: colors.surfaceContainerLowest,

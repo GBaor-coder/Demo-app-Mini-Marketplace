@@ -58,7 +58,7 @@ function WishlistCard({
 export default function FavoritesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { products, favoriteIds, toggleFavorite, currentUser, hydrated } = useStore();
+  const { products, favoriteIds, toggleFavorite } = useStore();
   const [category, setCategory] = useState('Tất cả');
 
   const favorites = useMemo(

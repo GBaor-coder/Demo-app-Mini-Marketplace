@@ -41,6 +41,22 @@ export async function upsertCartLine(
   }
 }
 
+export async function updateCartLineSelected(
+  userId: string,
+  productId: string,
+  selected: boolean
+): Promise<void> {
+  const { error } = await supabase
+    .from('cart_lines')
+    .update({ selected, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('product_id', productId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function deleteCartLine(userId: string, productId: string): Promise<void> {
   const { error } = await supabase
     .from('cart_lines')

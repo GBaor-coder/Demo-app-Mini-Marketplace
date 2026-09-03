@@ -33,9 +33,6 @@ export default function ProfileScreen() {
   }
 
   const myProducts = products.filter((p) => p.sellerId === currentUser.id);
-  const activeProductsCount = myProducts.filter(
-    (p) => p.status === 'active' && p.stock > 0
-  ).length;
   const totalProductsCount = myProducts.filter((p) => p.status !== 'draft').length;
   const myOrdersCount = orders.filter((o) => o.buyerId === currentUser.id).length;
   const sellerOrdersCount = orders.filter((o) => o.sellerId === currentUser.id).length;

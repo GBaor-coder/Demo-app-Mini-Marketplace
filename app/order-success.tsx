@@ -29,7 +29,9 @@ export default function OrderSuccessScreen() {
             <View style={styles.panel}>
               <View style={styles.panelRow}>
                 <Text style={styles.panelLabel}>Mã đơn hàng</Text>
-                <Text style={styles.panelValuePrimary}>{latest.id}</Text>
+                <Text selectable style={styles.panelValuePrimary}>
+                  {latest.id}
+                </Text>
               </View>
               <View style={styles.panelRow}>
                 <Text style={styles.panelLabel}>Trạng thái</Text>
@@ -114,22 +116,32 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   panelRow: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   panelLabel: {
     ...typography.labelMd,
     color: colors.onSurfaceVariant,
+    flexShrink: 0,
+    marginRight: 12,
   },
   panelValue: {
     ...typography.button,
     color: colors.onSurface,
+    flex: 1,
+    minWidth: 0,
+    textAlign: 'right',
   },
   panelValuePrimary: {
-    ...typography.button,
     color: colors.primary,
+    flex: 1,
+    flexShrink: 1,
+    fontSize: 14,
     fontWeight: '600',
+    lineHeight: 20,
+    minWidth: 0,
+    textAlign: 'right',
   },
   actions: {
     gap: 8,

@@ -77,7 +77,7 @@ export default function RootLayout() {
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="location-select" />
-          <Stack.Screen name="order-success" />
+          <Stack.Screen name="order-success" options={{ animation: 'fade' }} />
           <Stack.Screen name="order/[id]" />
           <Stack.Screen name="order-tracking" />
           <Stack.Screen name="order-cancel" options={{ animation: 'fade' }} />

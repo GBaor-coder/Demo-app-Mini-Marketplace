@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -12,7 +13,14 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, EmptyState, MaterialIcons, ScreenHeader, toIconName } from '@/src/components/ui';
+import {
+  Button,
+  ConfirmationModal,
+  EmptyState,
+  MaterialIcons,
+  ScreenHeader,
+  toIconName,
+} from '@/src/components/ui';
 import { LocationPreview } from '@/src/components/location-preview';
 import { useStore } from '@/src/context/store-context';
 import { COD_FEE, PLATFORM_FEE } from '@/src/data/seed';
@@ -21,6 +29,7 @@ import { CartLine, DeliveryMethod, Product } from '@/src/types';
 import { distanceFromCenter } from '@/src/utils/filter';
 import { distanceLabel, formatCurrency } from '@/src/utils/format';
 import { openMapLink } from '@/src/utils/maps';
+import { consumeAddressSelectionResult } from '@/src/utils/address-selection-result';
 
 type SellerGroup = {
   sellerId: string;
@@ -30,7 +39,6 @@ type SellerGroup = {
 export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ selectedId?: string }>();
   const { cart, products, addresses, getUserById, createOrders } = useStore();
 
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -39,17 +47,24 @@ export default function CheckoutScreen() {
   const [deliveryMethods, setDeliveryMethods] = useState<Record<string, DeliveryMethod>>({});
   const [note, setNote] = useState('');
   const [placing, setPlacing] = useState(false);
+  const [showPlaceOrderConfirm, setShowPlaceOrderConfirm] = useState(false);
+  const placingRef = useRef(false);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
   useFocusEffect(
     useCallback(() => {
-      const selectedId = params.selectedId;
-      if (selectedId && addresses.some((a) => a.id === selectedId)) {
-        setSelectedAddressId(selectedId);
-      }
-    }, [addresses, params.selectedId])
-
+      const returnedAddressId = consumeAddressSelectionResult();
+      setSelectedAddressId((currentAddressId) => {
+        if (returnedAddressId && addresses.some((address) => address.id === returnedAddressId)) {
+          return returnedAddressId;
+        }
+        if (currentAddressId && addresses.some((address) => address.id === currentAddressId)) {
+          return currentAddressId;
+        }
+        return addresses.find((address) => address.isDefault)?.id ?? addresses[0]?.id ?? null;
+      });
+    }, [addresses])
   );
 
   const groups = useMemo<SellerGroup[]>(() => {
@@ -105,19 +120,28 @@ export default function CheckoutScreen() {
     0
   );
   const total = subtotal + shippingFee + PLATFORM_FEE;
+  const itemCount = lines.reduce((sum, { line }) => sum + line.quantity, 0);
 
   const allMeetup =
     groups.length > 0 && groups.every((g) => methodFor(g.sellerId) === 'meetup');
   const hasCodSelected = groups.some((g) => methodFor(g.sellerId) === 'cod');
   const needsAddress = hasCodSelected && !selectedAddress;
 
-  const placeOrder = async () => {
+  const requestPlaceOrder = () => {
     if (lines.length === 0) return;
     if (needsAddress) {
       Alert.alert('Chưa chọn địa chỉ', 'Vui lòng chọn địa chỉ nhận hàng trước khi đặt hàng.');
       return;
     }
+    setShowPlaceOrderConfirm(true);
+  };
+
+  const placeOrder = async () => {
+    if (placingRef.current) return;
+    placingRef.current = true;
+    setShowPlaceOrderConfirm(false);
     setPlacing(true);
+    let completed = false;
     try {
       const methods = Object.fromEntries(groups.map((g) => [g.sellerId, methodFor(g.sellerId)]));
       const locationsBySeller = Object.fromEntries(
@@ -137,12 +161,19 @@ export default function CheckoutScreen() {
         methods
       );
       if (count > 0) {
+        completed = true;
         router.replace('/order-success');
       } else {
         Alert.alert('Không thể đặt hàng', 'Có lỗi xảy ra, vui lòng thử lại.');
       }
+    } catch (error) {
+      console.warn('[placeOrder] Không thể tạo đơn hàng:', error);
+      Alert.alert('Không thể đặt hàng', 'Kết nối đang gặp sự cố. Vui lòng thử lại.');
     } finally {
-      setPlacing(false);
+      if (!completed) {
+        placingRef.current = false;
+        setPlacing(false);
+      }
     }
   };
 
@@ -167,7 +198,15 @@ export default function CheckoutScreen() {
           {allMeetup ? null : (
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/addresses?select=1')}
+              onPress={() =>
+                router.push({
+                  pathname: '/addresses',
+                  params: {
+                    select: '1',
+                    selectedId: selectedAddressId ?? '',
+                  },
+                })
+              }
               style={[styles.addressCard, needsAddress && styles.addressCardError]}>
               <MaterialIcons
                 name="location-on"
@@ -397,9 +436,31 @@ export default function CheckoutScreen() {
           <Button
             title={placing ? 'Đang đặt hàng...' : 'Đặt hàng'}
             loading={placing}
-            onPress={placeOrder}
+            onPress={requestPlaceOrder}
             style={styles.placeBtn}
           />
+        </View>
+      ) : null}
+
+      <ConfirmationModal
+        confirmText="Xác nhận đặt hàng"
+        icon="shopping-cart"
+        message={`Bạn xác nhận đặt ${itemCount} sản phẩm với tổng thanh toán ${formatCurrency(total)}? Đơn hàng sẽ được gửi đến người bán ngay sau khi xác nhận.`}
+        onClose={() => setShowPlaceOrderConfirm(false)}
+        onConfirm={() => void placeOrder()}
+        title="Xác nhận đơn hàng"
+        visible={showPlaceOrderConfirm}
+      />
+
+      {placing ? (
+        <View accessibilityRole="progressbar" style={styles.processingOverlay}>
+          <View style={styles.processingContent}>
+            <ActivityIndicator color={colors.primaryContainer} size="large" />
+            <Text style={styles.processingTitle}>Đang xác nhận đơn hàng</Text>
+            <Text style={styles.processingMessage}>
+              Vui lòng chờ trong giây lát, đơn hàng của bạn đang được tạo.
+            </Text>
+          </View>
         </View>
       ) : null}
     </View>
@@ -758,5 +819,35 @@ const styles = StyleSheet.create({
   },
   placeBtn: {
     minWidth: 130,
+  },
+  processingOverlay: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    padding: 24,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 200,
+  },
+  processingContent: {
+    alignItems: 'center',
+    maxWidth: 320,
+  },
+  processingTitle: {
+    color: colors.onSurface,
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  processingMessage: {
+    color: colors.onSurfaceVariant,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

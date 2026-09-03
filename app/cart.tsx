@@ -29,7 +29,10 @@ function Checkbox({
 }) {
   return (
     <TouchableOpacity
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
       activeOpacity={0.8}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
       onPress={onPress}
       style={[styles.checkboxRow, label && styles.checkboxRowLabeled]}>
       <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
@@ -48,6 +51,7 @@ export default function CartScreen() {
     products,
     getUserById,
     selectAllCart,
+    setCartItemsSelected,
     toggleCartSelected,
     changeCartQuantity,
     removeFromCart,
@@ -78,8 +82,9 @@ export default function CartScreen() {
 
   const selectedLines = groups.flatMap((g) => g.items.filter(({ line }) => line.selected));
   const selectedCount = selectedLines.length;
+  const visibleLineCount = groups.reduce((sum, group) => sum + group.items.length, 0);
   const total = selectedLines.reduce((sum, { line, product }) => sum + line.quantity * product.price, 0);
-  const allSelected = selectedLines.length > 0 && selectedLines.length === cart.length;
+  const allSelected = selectedLines.length > 0 && selectedLines.length === visibleLineCount;
 
   const checkout = () => {
     if (selectedCount === 0) {
@@ -121,9 +126,10 @@ export default function CartScreen() {
                   <Checkbox
                     checked={groupAll}
                     onPress={() =>
-                      group.items.forEach(({ line }) => {
-                        if (groupAll !== line.selected) toggleCartSelected(line.productId);
-                      })
+                      void setCartItemsSelected(
+                        group.items.map(({ line }) => line.productId),
+                        !groupAll
+                      )
                     }
                   />
                   <MaterialIcons name="school" size={20} color={colors.outline} />
@@ -137,7 +143,7 @@ export default function CartScreen() {
                     style={[styles.item, idx > 0 && styles.itemDivider]}>
                     <Checkbox
                       checked={line.selected}
-                      onPress={() => toggleCartSelected(line.productId)}
+                      onPress={() => void toggleCartSelected(line.productId)}
                     />
                     <TouchableOpacity
                       activeOpacity={0.85}
@@ -188,7 +194,11 @@ export default function CartScreen() {
       />
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
-        <Checkbox checked={allSelected} onPress={() => selectAllCart(!allSelected)} label="Tất cả" />
+        <Checkbox
+          checked={allSelected}
+          label="Tất cả"
+          onPress={() => void selectAllCart(!allSelected)}
+        />
         <View style={styles.footerTotal}>
           <Text style={styles.footerTotalLabel}>Tạm tính</Text>
           <Text style={styles.footerTotalValue}>{formatCurrency(total)}</Text>

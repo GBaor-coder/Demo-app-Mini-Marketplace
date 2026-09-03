@@ -31,6 +31,15 @@ export default function ReportScreen() {
   const [toast, setToast] = useState(false);
 
   const submit = () => {
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      setToast(true);
+      setTimeout(() => router.back(), 2000);
+    }, 600);
+  };
+
+  const confirmSubmit = () => {
     if (!reason) {
       Alert.alert('Chọn lý do', 'Vui lòng chọn lý do báo cáo.');
       return;
@@ -39,12 +48,14 @@ export default function ReportScreen() {
       Alert.alert('Mô tả quá ngắn', 'Hãy mô tả chi tiết hơn, tối thiểu 10 ký tự.');
       return;
     }
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      setToast(true);
-      setTimeout(() => router.back(), 2000);
-    }, 600);
+    Alert.alert(
+      'Xác nhận gửi báo cáo',
+      'Bạn xác nhận gửi báo cáo này để hệ thống xem xét?',
+      [
+        { text: 'Kiểm tra lại', style: 'cancel' },
+        { text: 'Gửi báo cáo', style: 'destructive', onPress: submit },
+      ]
+    );
   };
 
   return (
@@ -94,7 +105,7 @@ export default function ReportScreen() {
           variant="danger"
           icon="flag"
           loading={submitting}
-          onPress={submit}
+          onPress={confirmSubmit}
           fullWidth
           style={styles.submitBtn}
         />

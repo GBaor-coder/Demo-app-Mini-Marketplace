@@ -27,7 +27,12 @@ import {
   createOrder as repoCreateOrder,
   updateOrderStatus as repoUpdateOrderStatus,
 } from '@/src/lib/repo/orders';
-import { listCartLines, upsertCartLine, deleteCartLine } from '@/src/lib/repo/cart';
+import {
+  deleteCartLine,
+  listCartLines,
+  updateCartLineSelected,
+  upsertCartLine,
+} from '@/src/lib/repo/cart';
 import { toggleFavorite as repoToggleFavorite } from '@/src/lib/repo/favorites';
 import {
   listAddresses,
@@ -77,6 +82,13 @@ type PersistedState = {
   favoriteIds: string[];
 };
 
+type CartSelectionSync = {
+  desired: boolean;
+  persisted: boolean;
+  promise?: Promise<void>;
+  userId: string;
+};
+
 type StoreContextValue = {
   hydrated: boolean;
   currentUser: User | null;
@@ -102,6 +114,7 @@ type StoreContextValue = {
   addToCart: (productId: string) => Promise<boolean>;
   changeCartQuantity: (productId: string, quantity: number) => Promise<void>;
   toggleCartSelected: (productId: string, selected?: boolean) => Promise<void>;
+  setCartItemsSelected: (productIds: string[], selected: boolean) => Promise<void>;
   selectAllCart: (selected: boolean) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   toggleFavorite: (productId: string) => Promise<void>;
@@ -198,6 +211,12 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const [users, setUsers] = useState<Record<string, User>>({});
 
   const mountedRef = useRef(true);
+  const cartRef = useRef<CartLine[]>([]);
+  const cartSelectionSyncsRef = useRef<Map<string, CartSelectionSync>>(new Map());
+
+  useEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
 
   const fetchUserProfile = useCallback(async (userId: string, retries = 2) => {
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -295,6 +314,10 @@ export function StoreProvider({ children }: PropsWithChildren) {
   }, []);
 
   const currentUser = useMemo(() => userProfile, [userProfile]);
+
+  useEffect(() => {
+    cartSelectionSyncsRef.current.clear();
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -454,7 +477,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       );
     });
     void ensureProfiles(mine.map((p) => p.sellerId));
-  }, [currentUser?.id, ensureProfiles]);
+  }, [currentUser, ensureProfiles]);
 
   const fetchProductById = useCallback(
     async (id: string): Promise<Product | null> => {
@@ -757,24 +780,103 @@ export function StoreProvider({ children }: PropsWithChildren) {
     [currentUser, products, refreshCart]
   );
 
-  const toggleCartSelected = useCallback(async (productId: string, selected?: boolean) => {
-    if (!currentUser) return;
-    const line = cart.find((item) => item.productId === productId);
-    if (!line) return;
+  const persistCartSelection = useCallback(
+    (userId: string, line: CartLine, selected: boolean): Promise<void> => {
+      const syncs = cartSelectionSyncsRef.current;
+      let sync = syncs.get(line.productId);
 
-    await upsertCartLine(currentUser.id, productId, line.quantity, selected ?? !line.selected);
-    await refreshCart();
-  }, [cart, currentUser, refreshCart]);
+      if (!sync || sync.userId !== userId) {
+        sync = {
+          desired: selected,
+          persisted: line.selected,
+          userId,
+        };
+        syncs.set(line.productId, sync);
+      } else {
+        sync.desired = selected;
+      }
 
-  const selectAllCart = useCallback(async (selected: boolean) => {
-    if (!currentUser) return;
-    await Promise.all(
-      cart.map((line) =>
-        upsertCartLine(currentUser.id, line.productId, line.quantity, selected)
-      )
-    );
-    await refreshCart();
-  }, [cart, currentUser, refreshCart]);
+      if (!sync.promise) {
+        const activeSync = sync;
+        activeSync.promise = (async () => {
+          while (true) {
+            const target = activeSync.desired;
+            try {
+              await updateCartLineSelected(activeSync.userId, line.productId, target);
+              if (syncs.get(line.productId) !== activeSync) return;
+              activeSync.persisted = target;
+            } catch (error) {
+              console.warn('[persistCartSelection] Lỗi đồng bộ lựa chọn giỏ hàng:', error);
+              if (syncs.get(line.productId) !== activeSync) return;
+              if (activeSync.desired === target) {
+                const rollback = cartRef.current.map((item) =>
+                  item.productId === line.productId
+                    ? { ...item, selected: activeSync.persisted }
+                    : item
+                );
+                cartRef.current = rollback;
+                setCart(rollback);
+                return;
+              }
+            }
+
+            if (activeSync.desired === target) return;
+          }
+        })().finally(() => {
+          if (syncs.get(line.productId) === activeSync) {
+            syncs.delete(line.productId);
+          }
+        });
+      }
+
+      return sync.promise!;
+    },
+    []
+  );
+
+  const setCartItemsSelected = useCallback(
+    async (productIds: string[], selected: boolean) => {
+      if (!currentUser || productIds.length === 0) return;
+
+      const productIdSet = new Set(productIds);
+      const affectedLines = cartRef.current.filter(
+        (line) => productIdSet.has(line.productId) && line.selected !== selected
+      );
+      if (affectedLines.length === 0) return;
+
+      const optimisticCart = cartRef.current.map((line) =>
+        productIdSet.has(line.productId) ? { ...line, selected } : line
+      );
+      cartRef.current = optimisticCart;
+      setCart(optimisticCart);
+
+      await Promise.all(
+        affectedLines.map((line) => persistCartSelection(currentUser.id, line, selected))
+      );
+    },
+    [currentUser, persistCartSelection]
+  );
+
+  const toggleCartSelected = useCallback(
+    async (productId: string, selected?: boolean) => {
+      const line = cartRef.current.find((item) => item.productId === productId);
+      if (!currentUser || !line) return;
+
+      const nextSelected = selected ?? !line.selected;
+      await setCartItemsSelected([productId], nextSelected);
+    },
+    [currentUser, setCartItemsSelected]
+  );
+
+  const selectAllCart = useCallback(
+    async (selected: boolean) => {
+      await setCartItemsSelected(
+        cartRef.current.map((line) => line.productId),
+        selected
+      );
+    },
+    [setCartItemsSelected]
+  );
 
   const removeFromCart = useCallback(async (productId: string) => {
     if (!currentUser) return;
@@ -1254,6 +1356,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       addToCart,
       changeCartQuantity,
       toggleCartSelected,
+      setCartItemsSelected,
       selectAllCart,
       removeFromCart,
       toggleFavorite,
@@ -1304,6 +1407,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       addToCart,
       changeCartQuantity,
       toggleCartSelected,
+      setCartItemsSelected,
       selectAllCart,
       removeFromCart,
       toggleFavorite,
