@@ -7,11 +7,8 @@
 
 | Vai trò | Email | Mật khẩu |
 | --- | --- | --- |
-| Người mua | `buyer@uniloop.vn` | `buyer123` |
-| Người đăng bán | `seller@uniloop.vn` | `seller123` |
-
-Màn hình đăng nhập có nút chọn vai trò và tự điền tài khoản tương ứng, kèm
-nút **Dùng thử** để vào ngay bằng tài khoản demo.
+| user | `giabao.bt123456@gmail.com` | `Giabao123` |
+| user | `dangngocthaibao.thd@gmail.com` | `Thaibao123` |
 
 ## Chạy dự án
 
